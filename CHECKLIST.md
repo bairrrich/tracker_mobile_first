@@ -1,6 +1,6 @@
 # Development Checklist
 
-## ✅ Completed (Phases 1-6)
+## ✅ Completed (Phases 1-7)
 
 ### Phase 1: Foundation
 - [x] Next.js 16+ setup
@@ -64,7 +64,7 @@
 - [x] Grid/List views
 - [x] Empty states
 
-### Phase 6: Forms & Validation ✅ NEW
+### Phase 6: Forms & Validation ✅
 - [x] Zod schemas created
   - [x] collection.schema.ts
   - [x] item.schema.ts (Item, Metric, History)
@@ -89,34 +89,52 @@
 - [x] Error handling components
   - [x] FormError, FormDescription, FormMessage
 
+### Phase 7: Sync Engine ✅ NEW
+- [x] API routes implementation
+  - [x] POST /api/sync - Sync endpoint
+  - [x] GET /api/sync - Status endpoint
+  - [x] GET /api/collections - Get collections
+  - [x] POST /api/collections - Create collection
+  - [x] GET /api/collections/[id] - Get collection by ID
+  - [x] PUT /api/collections/[id] - Update collection
+  - [x] DELETE /api/collections/[id] - Delete collection
+  - [x] GET /api/items - Get items
+  - [x] POST /api/items - Create item
+- [x] Sync logic
+  - [x] pushChanges() - Push local changes
+  - [x] pullChanges() - Pull remote changes
+  - [x] performSync() - Full sync (push + pull)
+  - [x] applyRemoteChange() - Apply remote changes
+- [x] Conflict resolution (last-write-wins)
+- [x] Background sync integration
+- [x] Sync status improvements
+  - [x] Updated sync-store.ts
+  - [x] getUnsyncedCount()
+
 ---
 
-## 🔄 Next Up (Phase 7)
+## 🔄 Next Up (Phase 8)
 
-### Phase 7: Sync Engine
-- [ ] API routes implementation
-  - [ ] POST /api/sync - Sync endpoint
-  - [ ] GET /api/collections - Get collections
-  - [ ] POST /api/collections - Create collection
-  - [ ] GET /api/items - Get items
-  - [ ] POST /api/items - Create item
-- [ ] Sync logic
-  - [ ] Push local changes
-  - [ ] Pull remote changes
-  - [ ] Conflict resolution (last-write-wins)
-- [ ] Background sync integration
-- [ ] Sync status improvements
+### Phase 8: Backend
+- [ ] SQLite setup
+  - [ ] Install better-sqlite3
+  - [ ] Configure Drizzle ORM
+  - [ ] Create database schema
+- [ ] API endpoints
+  - [ ] GET /api/backend/collections
+  - [ ] POST /api/backend/collections
+  - [ ] GET /api/backend/items
+  - [ ] POST /api/backend/items
+- [ ] Authentication (optional)
+  - [ ] Supabase Auth integration
+  - [ ] Session management
+- [ ] Database migrations
+  - [ ] Create migration files
+  - [ ] Migration scripts
 
 ---
 
 ## 🔮 Future Phases
-
-### Phase 8: Backend
-- [ ] SQLite setup
-- [ ] Drizzle ORM configuration
-- [ ] API endpoints
-- [ ] Authentication (optional)
-- [ ] Database migrations
 
 ### Phase 9: Testing
 - [ ] Unit tests setup
@@ -177,28 +195,28 @@
 | Phase 4 | ✅ Complete | 100% |
 | Phase 5 | ✅ Complete | 100% |
 | Phase 6 | ✅ Complete | 100% |
-| Phase 7 | ⏳ Pending | 0% |
+| Phase 7 | ✅ Complete | 100% |
 | Phase 8 | ⏳ Pending | 0% |
 | Phase 9 | ⏳ Pending | 0% |
 | Phase 10 | ⏳ Pending | 0% |
 
-**Overall Progress:** 60% (6/10 phases complete)
+**Overall Progress:** 70% (7/10 phases complete)
 
 ---
 
 ## 🎯 Current Sprint Goals
 
-### This Week
-- [x] Complete Phase 6 specification
-- [x] Create Zod schemas
-- [x] Implement form components
-- [x] Create useForm hook
-- [x] Update collection-form with validation
+### Completed This Week
+- [x] Create API routes (sync, collections, items)
+- [x] Implement Sync Engine
+- [x] Push/Pull logic
+- [x] Conflict resolution
+- [x] Update sync-store
 
 ### Next Week
-- [ ] Start Phase 7: Sync Engine
-- [ ] Implement API routes
-- [ ] Add sync logic
+- [ ] Start Phase 8: Backend
+- [ ] SQLite setup
+- [ ] Drizzle ORM configuration
 
 ---
 
@@ -222,4 +240,4 @@
 ---
 
 **Last Updated:** March 8, 2026  
-**Current Phase:** Phase 6 Complete
+**Current Phase:** Phase 7 Complete
