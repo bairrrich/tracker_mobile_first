@@ -1,0 +1,160 @@
+{
+  "HomePage": {
+    "title": "All Tracker Mobile",
+    "description": "Track your activities - finances, exercises, books, vitamins, and more",
+    "dashboard": "Dashboard",
+    "trackActivities": "Track your activities and monitor progress",
+    "keyMetrics": "Key Metrics",
+    "totalItems": "Total Items",
+    "collections": "Collections",
+    "pendingSync": "Pending Sync",
+    "status": "Status",
+    "active": "Active",
+    "synced": "Synced",
+    "unsynced": "Unsynced",
+    "online": "Online",
+    "offline": "Offline",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "searchCollections": "Search collections...",
+    "quickAdd": "Quick Add",
+    "noCollections": "No collections yet",
+    "createFirstCollection": "Create your first collection to start tracking activities",
+    "createCollection": "Create Collection",
+    "recentActivity": "Recent Activity",
+    "noRecentActivity": "No recent activity",
+    "startAddingItems": "Start adding items to see your activity history"
+  },
+  "Settings": {
+    "title": "Settings",
+    "description": "Manage your app preferences and account",
+    "appearance": {
+      "title": "Appearance",
+      "description": "Customize how the app looks and feels",
+      "lightTheme": {
+        "title": "Light Theme",
+        "description": "Bright and clean interface"
+      },
+      "darkTheme": {
+        "title": "Dark Theme",
+        "description": "Easy on the eyes"
+      },
+      "amoledTheme": {
+        "title": "AMOLED Theme",
+        "description": "Pure black for OLED screens"
+      },
+      "active": "Active",
+      "select": "Select"
+    },
+    "languageAndRegion": {
+      "title": "Language & Region",
+      "description": "Set your preferred language and currency",
+      "language": "Language",
+      "currency": "Currency",
+      "selectLanguage": "Select language",
+      "selectCurrency": "Select currency"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Manage your notification preferences",
+      "pushNotifications": "Push Notifications",
+      "pushNotificationsDescription": "Receive updates and reminders"
+    },
+    "authentication": {
+      "title": "Authentication",
+      "description": "Manage your account and sign-in settings",
+      "signedIn": "Signed in",
+      "notSignedIn": "You are not signed in. Sign in to sync your data across devices.",
+      "signOut": "Sign Out",
+      "signIn": "Sign In"
+    },
+    "saveChanges": "Save Changes",
+    "resetToDefaults": "Reset to Defaults"
+  },
+  "Auth": {
+    "title": "All Tracker Mobile",
+    "description": "Sign in to sync your data across devices",
+    "welcomeBack": "Welcome back!",
+    "signedInAs": "You are signed in as",
+    "goToDashboard": "Go to Dashboard",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "createAccount": "Create Account"
+  },
+  "Collections": {
+    "title": "Collections",
+    "description": "Manage your activity collections",
+    "newCollection": "New Collection",
+    "searchCollections": "Search collections...",
+    "filterByType": "Filter by type",
+    "allTypes": "All Types",
+    "noCollectionsFound": "No collections found",
+    "adjustFilters": "Try adjusting your search or filters",
+    "createFirstCollection": "Create your first collection to get started",
+    "createCollection": "Create Collection",
+    "gridView": "Grid view",
+    "listView": "List view"
+  },
+  "ItemDetail": {
+    "back": "Back",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteItem": "Delete Item",
+    "deleteConfirmation": "Are you sure you want to delete this item? This action cannot be undone.",
+    "deleting": "Deleting...",
+    "loading": "Loading..."
+  },
+  "Navigation": {
+    "dashboard": "Dashboard",
+    "finances": "Finances",
+    "exercises": "Exercises",
+    "books": "Books",
+    "supplements": "Supplements",
+    "food": "Food",
+    "collections": "Collections",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "home": "Home",
+    "search": "Search",
+    "add": "Add",
+    "tracker": "Tracker",
+    "searchPlaceholder": "Search... (Cmd+K)",
+    "signOut": "Sign out"
+  },
+  "Languages": {
+    "en": "English",
+    "ru": "Русский"
+  },
+  "Currencies": {
+    "USD": "$ - US Dollar",
+    "EUR": "€ - Euro",
+    "GBP": "£ - British Pound",
+    "RUB": "₽ - Russian Ruble",
+    "JPY": "¥ - Japanese Yen",
+    "CNY": "¥ - Chinese Yuan"
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "success": "Success",
+    "failed": "Failed"
+  }
+}

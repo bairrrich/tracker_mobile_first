@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useTranslations } from 'next-intl'
 import { MainLayout } from '@/components/layout/main-layout'
 import { MetricCard } from '@/components/shared/metric-card'
 import { ActivityItem } from '@/components/shared/activity-item'
@@ -14,6 +15,7 @@ import { useSync } from '@/hooks/use-sync'
 import { Wallet, BookOpen, Dumbbell, Pill, Search, Plus } from 'lucide-react'
 
 export default function DashboardPage() {
+  const t = useTranslations('HomePage')
   const { fetchCollections, collections } = useCollectionsStore()
   const { items } = useItemsStore()
   const { isOnline, unsyncedCount } = useSync()
@@ -70,9 +72,9 @@ export default function DashboardPage() {
         {/* Page Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <h1 className="text-2xl font-bold">{t('dashboard')}</h1>
             <p className="text-muted-foreground">
-              Track your activities and monitor progress
+              {t('trackActivities')}
             </p>
           </div>
 
@@ -84,43 +86,43 @@ export default function DashboardPage() {
         {/* Metrics Grid */}
         <section aria-labelledby="metrics-heading">
           <h2 id="metrics-heading" className="sr-only">
-            Key Metrics
+            {t('keyMetrics')}
           </h2>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <MetricCard
               value={metrics.totalItems}
-              label="Total Items"
+              label={t('totalItems')}
               trend={
                 metrics.totalItems > 0
-                  ? { value: 'Active', direction: 'up' }
+                  ? { value: t('active'), direction: 'up' }
                   : undefined
               }
             />
             <MetricCard
               value={metrics.totalCollections}
-              label="Collections"
+              label={t('collections')}
               trend={
                 metrics.totalCollections > 0
-                  ? { value: 'Active', direction: 'up' }
+                  ? { value: t('active'), direction: 'up' }
                   : undefined
               }
             />
             <MetricCard
               value={metrics.pendingSync}
-              label="Pending Sync"
+              label={t('pendingSync')}
               trend={
                 metrics.pendingSync > 0
-                  ? { value: 'Unsynced', direction: 'neutral' }
-                  : { value: 'Synced', direction: 'up' }
+                  ? { value: t('unsynced'), direction: 'neutral' }
+                  : { value: t('synced'), direction: 'up' }
               }
             />
             <MetricCard
-              value={isOnline ? 'Online' : 'Offline'}
-              label="Status"
+              value={isOnline ? t('online') : t('offline')}
+              label={t('status')}
               trend={
                 isOnline
-                  ? { value: 'Connected', direction: 'up' }
-                  : { value: 'Disconnected', direction: 'down' }
+                  ? { value: t('connected'), direction: 'up' }
+                  : { value: t('disconnected'), direction: 'down' }
               }
             />
           </div>
@@ -132,7 +134,7 @@ export default function DashboardPage() {
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search collections..."
+                placeholder={t('searchCollections')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -141,7 +143,7 @@ export default function DashboardPage() {
 
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              Quick Add
+              {t('quickAdd')}
             </Button>
           </div>
         </section>
@@ -150,20 +152,20 @@ export default function DashboardPage() {
         <section aria-labelledby="collections-heading">
           <div className="flex items-center justify-between mb-4">
             <h2 id="collections-heading" className="text-xl font-semibold">
-              Collections
+              {t('collections')}
             </h2>
           </div>
 
           {filteredCollections.length === 0 ? (
             <div className="empty-state">
               <div className="empty-state-icon">📦</div>
-              <h3 className="empty-state-title">No collections yet</h3>
+              <h3 className="empty-state-title">{t('noCollections')}</h3>
               <p className="empty-state-description">
-                Create your first collection to start tracking activities
+                {t('createFirstCollection')}
               </p>
               <Button className="mt-4">
                 <Plus className="w-4 h-4 mr-2" />
-                Create Collection
+                {t('createCollection')}
               </Button>
             </div>
           ) : (
@@ -190,16 +192,16 @@ export default function DashboardPage() {
         <section aria-labelledby="activity-heading">
           <div className="flex items-center justify-between mb-4">
             <h2 id="activity-heading" className="text-xl font-semibold">
-              Recent Activity
+              {t('recentActivity')}
             </h2>
           </div>
 
           {recentItems.length === 0 ? (
             <div className="empty-state">
               <div className="empty-state-icon">📝</div>
-              <h3 className="empty-state-title">No recent activity</h3>
+              <h3 className="empty-state-title">{t('noRecentActivity')}</h3>
               <p className="empty-state-description">
-                Start adding items to see your activity history
+                {t('startAddingItems')}
               </p>
             </div>
           ) : (

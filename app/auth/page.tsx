@@ -1,17 +1,19 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { SignInForm } from '@/components/auth/sign-in-form'
 import { SignUpForm } from '@/components/auth/sign-up-form'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSupabase } from '@/components/auth/supabase-provider'
-import { useRouter } from 'next/navigation'
 
 export default function AuthPage() {
   const { user, signOut } = useSupabase()
   const router = useRouter()
+  const t = useTranslations('Auth')
   const [tab, setTab] = React.useState('signin')
 
   const handleSignOut = async () => {
@@ -24,17 +26,17 @@ export default function AuthPage() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Welcome back!</CardTitle>
+            <CardTitle>{t('welcomeBack')}</CardTitle>
             <CardDescription>
-              You are signed in as {user.email}
+              {t('signedInAs')} {user.email}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button onClick={() => router.push('/')} className="w-full">
-              Go to Dashboard
+              {t('goToDashboard')}
             </Button>
             <Button onClick={handleSignOut} variant="outline" className="w-full">
-              Sign Out
+              {t('signOut')}
             </Button>
           </CardContent>
         </Card>
@@ -46,16 +48,16 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">All Tracker Mobile</CardTitle>
+          <CardTitle className="text-2xl">{t('title')}</CardTitle>
           <CardDescription>
-            Sign in to sync your data across devices
+            {t('description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={tab} onValueChange={setTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin">{t('signIn')}</TabsTrigger>
+              <TabsTrigger value="signup">{t('signUp')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">

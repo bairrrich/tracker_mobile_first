@@ -1,12 +1,14 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages, setRequestLocale } from 'next-intl/server'
 import '@/styles/globals.css'
 import { ThemeProvider } from '@/components/layout/theme-provider'
 import { InstallPrompt } from '@/components/ui/install-prompt'
 import { QuickAddFAB } from '@/components/shared/quick-add-fab'
 import { SupabaseProvider } from '@/components/auth/supabase-provider'
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ['latin', 'cyrillic'],
   display: 'swap',
 })
@@ -68,21 +70,29 @@ export const viewport: Viewport = {
   themeColor: 'oklch(62% 0.19 260)',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+  
+  // Устанавливаем локаль для текущего запроса
+  setRequestLocale(locale)
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={inter.className}>
-        <SupabaseProvider>
-          <ThemeProvider>
-            {children}
-            <InstallPrompt />
-            <QuickAddFAB />
-          </ThemeProvider>
-        </SupabaseProvider>
+        <NextIntlClientProvider messages={messages}>
+          <SupabaseProvider>
+            <ThemeProvider>
+              {children}
+              <InstallPrompt />
+              <QuickAddFAB />
+            </ThemeProvider>
+          </SupabaseProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   )

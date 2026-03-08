@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
@@ -15,19 +16,20 @@ import {
   Settings
 } from 'lucide-react'
 
-const navItems = [
-  { id: 'dashboard', icon: Home, label: 'Dashboard', href: '/' },
-  { id: 'finances', icon: Wallet, label: 'Finances', href: '/finances' },
-  { id: 'exercises', icon: Dumbbell, label: 'Exercises', href: '/exercises' },
-  { id: 'books', icon: Book, label: 'Books', href: '/books' },
-  { id: 'supplements', icon: Pill, label: 'Supplements', href: '/supplements' },
-  { id: 'food', icon: Utensils, label: 'Food', href: '/food' },
-  { id: 'collections', icon: Folder, label: 'Collections', href: '/collections' },
-  { id: 'analytics', icon: BarChart3, label: 'Analytics', href: '/analytics' },
-] as const
-
 export function Sidebar() {
   const pathname = usePathname()
+  const t = useTranslations('Navigation')
+
+  const navItems = [
+    { id: 'dashboard', icon: Home, label: t('dashboard'), href: '/' },
+    { id: 'finances', icon: Wallet, label: t('finances'), href: '/finances' },
+    { id: 'exercises', icon: Dumbbell, label: t('exercises'), href: '/exercises' },
+    { id: 'books', icon: Book, label: t('books'), href: '/books' },
+    { id: 'supplements', icon: Pill, label: t('supplements'), href: '/supplements' },
+    { id: 'food', icon: Utensils, label: t('food'), href: '/food' },
+    { id: 'collections', icon: Folder, label: t('collections'), href: '/collections' },
+    { id: 'analytics', icon: BarChart3, label: t('analytics'), href: '/analytics' },
+  ] as const
 
   return (
     <aside className="sidebar" aria-label="Sidebar navigation">
@@ -37,7 +39,7 @@ export function Sidebar() {
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
             <span className="text-primary-foreground font-bold text-sm">T</span>
           </div>
-          <span className="font-semibold truncate">Tracker</span>
+          <span className="font-semibold truncate">{t('tracker')}</span>
         </div>
       </div>
 
@@ -54,8 +56,8 @@ export function Sidebar() {
                   href={item.href}
                   className={`
                     flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors
-                    ${isActive 
-                      ? 'bg-primary text-primary-foreground' 
+                    ${isActive
+                      ? 'bg-primary text-primary-foreground'
                       : 'text-theme-text-muted hover:bg-theme-card hover:text-theme-text'
                     }
                   `}
@@ -82,7 +84,7 @@ export function Sidebar() {
           )}
         >
           <Settings className="w-5 h-5" />
-          <span className="text-sm font-medium">Settings</span>
+          <span className="text-sm font-medium">{t('settings')}</span>
         </Link>
       </div>
     </aside>

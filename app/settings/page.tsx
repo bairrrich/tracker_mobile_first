@@ -2,11 +2,13 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { MainLayout } from '@/components/layout/main-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useTheme } from '@/components/layout/theme-provider'
 import { useSupabase } from '@/components/auth/supabase-provider'
+import { LocaleSwitcher } from '@/components/layout/locale-switcher'
 import { Moon, Sun, Smartphone, LogOut, User, Shield, Bell, Palette, Languages } from 'lucide-react'
 import {
   Select,
@@ -27,17 +29,12 @@ const currencies = [
   { value: 'CNY', label: '¥ - Chinese Yuan' },
 ]
 
-const languages = [
-  { value: 'en', label: 'English' },
-  { value: 'ru', label: 'Русский' },
-]
-
 export default function SettingsPage() {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const { user, signOut } = useSupabase()
+  const t = useTranslations('Settings')
   const [currency, setCurrency] = React.useState('USD')
-  const [language, setLanguage] = React.useState('en')
   const [notifications, setNotifications] = React.useState(true)
 
   const handleSignOut = async () => {
@@ -49,9 +46,9 @@ export default function SettingsPage() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold">Settings</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground">
-            Manage your app preferences and account
+            {t('description')}
           </p>
         </div>
 
@@ -60,10 +57,10 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Palette className="w-5 h-5" />
-              <CardTitle>Appearance</CardTitle>
+              <CardTitle>{t('appearance.title')}</CardTitle>
             </div>
             <CardDescription>
-              Customize how the app looks and feels
+              {t('appearance.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -73,9 +70,9 @@ export default function SettingsPage() {
                   <Sun className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">Light Theme</p>
+                  <p className="font-medium">{t('appearance.lightTheme.title')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Bright and clean interface
+                    {t('appearance.lightTheme.description')}
                   </p>
                 </div>
               </div>
@@ -84,7 +81,7 @@ export default function SettingsPage() {
                 size="sm"
                 onClick={() => setTheme('light')}
               >
-                {theme === 'light' ? 'Active' : 'Select'}
+                {theme === 'light' ? t('appearance.active') : t('appearance.select')}
               </Button>
             </div>
 
@@ -96,9 +93,9 @@ export default function SettingsPage() {
                   <Moon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="font-medium">Dark Theme</p>
+                  <p className="font-medium">{t('appearance.darkTheme.title')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Easy on the eyes
+                    {t('appearance.darkTheme.description')}
                   </p>
                 </div>
               </div>
@@ -107,7 +104,7 @@ export default function SettingsPage() {
                 size="sm"
                 onClick={() => setTheme('dark')}
               >
-                {theme === 'dark' ? 'Active' : 'Select'}
+                {theme === 'dark' ? t('appearance.active') : t('appearance.select')}
               </Button>
             </div>
 
@@ -119,9 +116,9 @@ export default function SettingsPage() {
                   <Smartphone className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="font-medium">AMOLED Theme</p>
+                  <p className="font-medium">{t('appearance.amoledTheme.title')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Pure black for OLED screens
+                    {t('appearance.amoledTheme.description')}
                   </p>
                 </div>
               </div>
@@ -130,7 +127,7 @@ export default function SettingsPage() {
                 size="sm"
                 onClick={() => setTheme('amoled')}
               >
-                {theme === 'amoled' ? 'Active' : 'Select'}
+                {theme === 'amoled' ? t('appearance.active') : t('appearance.select')}
               </Button>
             </div>
           </CardContent>
@@ -141,34 +138,23 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Languages className="w-5 h-5" />
-              <CardTitle>Language & Region</CardTitle>
+              <CardTitle>{t('languageAndRegion.title')}</CardTitle>
             </div>
             <CardDescription>
-              Set your preferred language and currency
+              {t('languageAndRegion.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Language</label>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent>
-                  {languages.map((lang) => (
-                    <SelectItem key={lang.value} value={lang.value}>
-                      {lang.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium">{t('languageAndRegion.language')}</label>
+              <LocaleSwitcher />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Currency</label>
+              <label className="text-sm font-medium">{t('languageAndRegion.currency')}</label>
               <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select currency" />
+                  <SelectValue placeholder={t('languageAndRegion.selectCurrency')} />
                 </SelectTrigger>
                 <SelectContent>
                   {currencies.map((curr) => (
@@ -187,18 +173,18 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Bell className="w-5 h-5" />
-              <CardTitle>Notifications</CardTitle>
+              <CardTitle>{t('notifications.title')}</CardTitle>
             </div>
             <CardDescription>
-              Manage your notification preferences
+              {t('notifications.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium">Push Notifications</p>
+                <p className="font-medium">{t('notifications.pushNotifications')}</p>
                 <p className="text-sm text-muted-foreground">
-                  Receive updates and reminders
+                  {t('notifications.pushNotificationsDescription')}
                 </p>
               </div>
               <Switch
@@ -214,10 +200,10 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Shield className="w-5 h-5" />
-              <CardTitle>Authentication</CardTitle>
+              <CardTitle>{t('authentication.title')}</CardTitle>
             </div>
             <CardDescription>
-              Manage your account and sign-in settings
+              {t('authentication.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -230,7 +216,7 @@ export default function SettingsPage() {
                   <div className="flex-1">
                     <p className="font-medium">{user.email}</p>
                     <p className="text-sm text-muted-foreground">
-                      Signed in
+                      {t('authentication.signedIn')}
                     </p>
                   </div>
                 </div>
@@ -241,20 +227,20 @@ export default function SettingsPage() {
                   className="w-full"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
+                  {t('authentication.signOut')}
                 </Button>
               </>
             ) : (
               <>
                 <div className="p-4 rounded-lg bg-theme-bg border border-theme-border">
                   <p className="text-sm text-theme-text">
-                    You are not signed in. Sign in to sync your data across devices.
+                    {t('authentication.notSignedIn')}
                   </p>
                 </div>
 
                 <Button className="w-full" onClick={() => router.push('/auth')}>
                   <User className="w-4 h-4 mr-2" />
-                  Sign In
+                  {t('authentication.signIn')}
                 </Button>
               </>
             )}
@@ -264,10 +250,10 @@ export default function SettingsPage() {
         {/* Save Changes */}
         <div className="flex justify-end gap-2">
           <Button variant="outline">
-            Reset to Defaults
+            {t('resetToDefaults')}
           </Button>
           <Button>
-            Save Changes
+            {t('saveChanges')}
           </Button>
         </div>
       </div>

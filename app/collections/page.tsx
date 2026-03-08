@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useTranslations } from 'next-intl'
 import { MainLayout } from '@/components/layout/main-layout'
 import { CollectionCard } from '@/components/shared/collection-card'
 import { Button } from '@/components/ui/button'
@@ -17,6 +18,7 @@ import { Search, Plus, Grid, List } from 'lucide-react'
 
 export default function CollectionsPage() {
   const { fetchCollections, collections } = useCollectionsStore()
+  const t = useTranslations('Collections')
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid')
   const [searchQuery, setSearchQuery] = React.useState('')
   const [filterType, setFilterType] = React.useState<string>('all')
@@ -72,15 +74,15 @@ export default function CollectionsPage() {
         {/* Page Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Collections</h1>
+            <h1 className="text-2xl font-bold">{t('title')}</h1>
             <p className="text-muted-foreground">
-              Manage your activity collections
+              {t('description')}
             </p>
           </div>
 
           <Button>
             <Plus className="w-4 h-4 mr-2" />
-            New Collection
+            {t('newCollection')}
           </Button>
         </div>
 
@@ -89,7 +91,7 @@ export default function CollectionsPage() {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search collections..."
+              placeholder={t('searchCollections')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -100,10 +102,10 @@ export default function CollectionsPage() {
             {/* Type Filter */}
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Filter by type" />
+                <SelectValue placeholder={t('filterByType')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="all">{t('allTypes')}</SelectItem>
                 {collectionTypes
                   .filter((t) => t !== 'all')
                   .map((type) => (
@@ -123,7 +125,7 @@ export default function CollectionsPage() {
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-theme-card hover:bg-theme-card/80'
                 }`}
-                aria-label="Grid view"
+                aria-label={t('gridView')}
               >
                 <Grid className="w-4 h-4" />
               </button>
@@ -134,7 +136,7 @@ export default function CollectionsPage() {
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-theme-card hover:bg-theme-card/80'
                 }`}
-                aria-label="List view"
+                aria-label={t('listView')}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -146,16 +148,16 @@ export default function CollectionsPage() {
         {filteredCollections.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">📦</div>
-            <h3 className="empty-state-title">No collections found</h3>
+            <h3 className="empty-state-title">{t('noCollectionsFound')}</h3>
             <p className="empty-state-description">
               {searchQuery || filterType !== 'all'
-                ? 'Try adjusting your search or filters'
-                : 'Create your first collection to get started'}
+                ? t('adjustFilters')
+                : t('createFirstCollection')}
             </p>
             {!searchQuery && filterType === 'all' && (
               <Button className="mt-4">
                 <Plus className="w-4 h-4 mr-2" />
-                Create Collection
+                {t('createCollection')}
               </Button>
             )}
           </div>

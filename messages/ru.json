@@ -1,0 +1,160 @@
+{
+  "HomePage": {
+    "title": "All Tracker Mobile",
+    "description": "Отслеживайте свои активности — финансы, тренировки, книги, витамины и многое другое",
+    "dashboard": "Панель управления",
+    "trackActivities": "Отслеживайте свои активности и контролируйте прогресс",
+    "keyMetrics": "Ключевые метрики",
+    "totalItems": "Всего элементов",
+    "collections": "Коллекции",
+    "pendingSync": "Ожидает синхронизации",
+    "status": "Статус",
+    "active": "Активно",
+    "synced": "Синхронизировано",
+    "unsynced": "Не синхронизировано",
+    "online": "Онлайн",
+    "offline": "Офлайн",
+    "connected": "Подключено",
+    "disconnected": "Отключено",
+    "searchCollections": "Поиск коллекций...",
+    "quickAdd": "Быстрое добавление",
+    "noCollections": "Пока нет коллекций",
+    "createFirstCollection": "Создайте свою первую коллекцию, чтобы начать отслеживать активности",
+    "createCollection": "Создать коллекцию",
+    "recentActivity": "Недавняя активность",
+    "noRecentActivity": "Нет недавней активности",
+    "startAddingItems": "Начните добавлять элементы, чтобы увидеть историю активности"
+  },
+  "Settings": {
+    "title": "Настройки",
+    "description": "Управляйте предпочтениями приложения и аккаунтом",
+    "appearance": {
+      "title": "Внешний вид",
+      "description": "Настройте внешний вид приложения",
+      "lightTheme": {
+        "title": "Светлая тема",
+        "description": "Яркий и чистый интерфейс"
+      },
+      "darkTheme": {
+        "title": "Тёмная тема",
+        "description": "Удобно для глаз"
+      },
+      "amoledTheme": {
+        "title": "AMOLED тема",
+        "description": "Чёрный для OLED-экранов"
+      },
+      "active": "Активно",
+      "select": "Выбрать"
+    },
+    "languageAndRegion": {
+      "title": "Язык и регион",
+      "description": "Установите предпочитаемый язык и валюту",
+      "language": "Язык",
+      "currency": "Валюта",
+      "selectLanguage": "Выберите язык",
+      "selectCurrency": "Выберите валюту"
+    },
+    "notifications": {
+      "title": "Уведомления",
+      "description": "Управляйте настройками уведомлений",
+      "pushNotifications": "Push-уведомления",
+      "pushNotificationsDescription": "Получать обновления и напоминания"
+    },
+    "authentication": {
+      "title": "Аутентификация",
+      "description": "Управляйте аккаунтом и настройками входа",
+      "signedIn": "Выполнен вход",
+      "notSignedIn": "Вы не вошли. Войдите, чтобы синхронизировать данные между устройствами.",
+      "signOut": "Выйти",
+      "signIn": "Войти"
+    },
+    "saveChanges": "Сохранить изменения",
+    "resetToDefaults": "Сбросить по умолчанию"
+  },
+  "Auth": {
+    "title": "All Tracker Mobile",
+    "description": "Войдите, чтобы синхронизировать данные между устройствами",
+    "welcomeBack": "С возвращением!",
+    "signedInAs": "Вы вошли как",
+    "goToDashboard": "Перейти к панели управления",
+    "signIn": "Войти",
+    "signUp": "Зарегистрироваться",
+    "signOut": "Выйти",
+    "email": "Email",
+    "password": "Пароль",
+    "confirmPassword": "Подтвердите пароль",
+    "forgotPassword": "Забыли пароль?",
+    "noAccount": "Нет аккаунта?",
+    "hasAccount": "Уже есть аккаунт?",
+    "createAccount": "Создать аккаунт"
+  },
+  "Collections": {
+    "title": "Коллекции",
+    "description": "Управляйте своими коллекциями активностей",
+    "newCollection": "Новая коллекция",
+    "searchCollections": "Поиск коллекций...",
+    "filterByType": "Фильтр по типу",
+    "allTypes": "Все типы",
+    "noCollectionsFound": "Коллекции не найдены",
+    "adjustFilters": "Попробуйте изменить запрос или фильтры",
+    "createFirstCollection": "Создайте свою первую коллекцию, чтобы начать",
+    "createCollection": "Создать коллекцию",
+    "gridView": "Вид сеткой",
+    "listView": "Вид списком"
+  },
+  "ItemDetail": {
+    "back": "Назад",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "deleteItem": "Удалить элемент",
+    "deleteConfirmation": "Вы уверены, что хотите удалить этот элемент? Это действие нельзя отменить.",
+    "deleting": "Удаление...",
+    "loading": "Загрузка..."
+  },
+  "Navigation": {
+    "dashboard": "Панель управления",
+    "finances": "Финансы",
+    "exercises": "Тренировки",
+    "books": "Книги",
+    "supplements": "Добавки",
+    "food": "Питание",
+    "collections": "Коллекции",
+    "analytics": "Аналитика",
+    "settings": "Настройки",
+    "home": "Главная",
+    "search": "Поиск",
+    "add": "Добавить",
+    "tracker": "Трекер",
+    "searchPlaceholder": "Поиск... (Cmd+K)",
+    "signOut": "Выйти"
+  },
+  "Languages": {
+    "en": "English",
+    "ru": "Русский"
+  },
+  "Currencies": {
+    "USD": "$ - Доллар США",
+    "EUR": "€ - Евро",
+    "GBP": "£ - Британский фунт",
+    "RUB": "₽ - Российский рубль",
+    "JPY": "¥ - Японская иена",
+    "CNY": "¥ - Китайский юань"
+  },
+  "Common": {
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "cancel": "Отмена",
+    "confirm": "Подтвердить",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "add": "Добавить",
+    "close": "Закрыть",
+    "back": "Назад",
+    "next": "Далее",
+    "previous": "Назад",
+    "submit": "Отправить",
+    "success": "Успешно",
+    "failed": "Ошибка"
+  }
+}

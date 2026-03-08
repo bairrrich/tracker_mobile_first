@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { MainLayout } from '@/components/layout/main-layout'
 import { ItemDetail as ItemDetailComponent } from '@/components/shared/item-detail'
 import { Button } from '@/components/ui/button'
@@ -26,6 +27,7 @@ export default function ItemDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { selectedItem, selectItem, deleteItem } = useItemsStore()
+  const t = useTranslations('ItemDetail')
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
 
@@ -61,7 +63,7 @@ export default function ItemDetailPage() {
       <MainLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <p className="text-muted-foreground">Loading...</p>
+            <p className="text-muted-foreground">{t('loading')}</p>
           </div>
         </div>
       </MainLayout>
@@ -80,13 +82,13 @@ export default function ItemDetailPage() {
             className="gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back
+            {t('back')}
           </Button>
 
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm">
               <Edit className="w-4 h-4 mr-2" />
-              Edit
+              {t('edit')}
             </Button>
 
             <DropdownMenu>
@@ -101,7 +103,7 @@ export default function ItemDetailPage() {
                   className="text-error"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
+                  {t('delete')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -127,10 +129,9 @@ export default function ItemDetailPage() {
         <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Delete Item</DialogTitle>
+              <DialogTitle>{t('deleteItem')}</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this item? This action cannot be
-                undone.
+                {t('deleteConfirmation')}
               </DialogDescription>
             </DialogHeader>
 
@@ -140,14 +141,14 @@ export default function ItemDetailPage() {
                 onClick={() => setShowDeleteDialog(false)}
                 disabled={isDeleting}
               >
-                Cancel
+                {t('cancel')}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDelete}
                 disabled={isDeleting}
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? t('deleting') : t('delete')}
               </Button>
             </DialogFooter>
           </DialogContent>
