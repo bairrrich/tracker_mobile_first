@@ -11,8 +11,10 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-theme-bg">
-      {/* Desktop Sidebar */}
-      <Sidebar />
+      {/* Desktop Sidebar - hidden on mobile */}
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
 
       {/* Header */}
       <Header />
@@ -24,8 +26,10 @@ export function MainLayout({ children }: MainLayoutProps) {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation */}
-      <BottomNav />
+      {/* Mobile Bottom Navigation - hidden on desktop */}
+      <div className="md:hidden">
+        <BottomNav />
+      </div>
     </div>
   )
 }

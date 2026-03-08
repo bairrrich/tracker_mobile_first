@@ -188,6 +188,13 @@
     border-top: 1px solid var(--border);
     padding-bottom: env(safe-area-inset-bottom);
   }
+  
+  /* Hide bottom nav on desktop */
+  @media (min-width: 768px) {
+    .bottom-nav {
+      display: none;
+    }
+  }
 
   /* Sidebar navigation */
   @media (min-width: 768px) {

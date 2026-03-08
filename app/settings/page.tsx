@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
 import { MainLayout } from '@/components/layout/main-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -32,6 +33,7 @@ const languages = [
 ]
 
 export default function SettingsPage() {
+  const router = useRouter()
   const { theme, setTheme } = useTheme()
   const { user, signOut } = useSupabase()
   const [currency, setCurrency] = React.useState('USD')
@@ -221,7 +223,7 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             {user ? (
               <>
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-neutral-100 dark:bg-neutral-800">
+                <div className="flex items-center gap-3 p-4 rounded-lg bg-theme-bg border border-theme-border">
                   <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
                     <User className="w-6 h-6 text-primary-foreground" />
                   </div>
@@ -244,13 +246,13 @@ export default function SettingsPage() {
               </>
             ) : (
               <>
-                <div className="p-4 rounded-lg bg-neutral-100 dark:bg-neutral-800">
-                  <p className="text-sm text-muted-foreground">
+                <div className="p-4 rounded-lg bg-theme-bg border border-theme-border">
+                  <p className="text-sm text-theme-text">
                     You are not signed in. Sign in to sync your data across devices.
                   </p>
                 </div>
 
-                <Button className="w-full">
+                <Button className="w-full" onClick={() => router.push('/auth')}>
                   <User className="w-4 h-4 mr-2" />
                   Sign In
                 </Button>
