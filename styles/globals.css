@@ -1,0 +1,246 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   OKLCH Theme System
+   ============================================ */
+
+:root {
+  /* Light theme (default) */
+  --bg: oklch(98% 0.01 260);
+  --card: oklch(100% 0 0);
+  --border: oklch(90% 0.01 260);
+  --text: oklch(20% 0.02 260);
+  --text-muted: oklch(44% 0.02 260);
+  --primary: oklch(62% 0.19 260);
+  --primary-foreground: oklch(99% 0.01 260);
+  --success: oklch(65% 0.18 150);
+  --warning: oklch(75% 0.17 80);
+  --error: oklch(62% 0.22 25);
+}
+
+[data-theme='dark'] {
+  /* Dark theme */
+  --bg: oklch(18% 0.02 260);
+  --card: oklch(22% 0.02 260);
+  --border: oklch(32% 0.02 260);
+  --text: oklch(92% 0.02 260);
+  --text-muted: oklch(68% 0.02 260);
+  --primary: oklch(70% 0.14 260);
+  --primary-foreground: oklch(18% 0.02 260);
+}
+
+[data-theme='amoled'] {
+  /* AMOLED theme (pure black) */
+  --bg: oklch(0% 0 0);
+  --card: oklch(10% 0.01 260);
+  --border: oklch(20% 0.01 260);
+  --text: oklch(92% 0.02 260);
+  --text-muted: oklch(68% 0.02 260);
+  --primary: oklch(70% 0.14 260);
+  --primary-foreground: oklch(0% 0 0);
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    overflow-y: scroll;
+  }
+
+  body {
+    @apply bg-theme-bg text-theme-text;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Mobile-first: prevent zoom on double tap */
+  @media (max-width: 768px) {
+    * {
+      touch-action: manipulation;
+    }
+  }
+
+  /* Remove number input spinners */
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ============================================
+   Component Classes
+   ============================================ */
+
+@layer components {
+  /* Card base style */
+  .card {
+    @apply bg-theme-card border border-theme-border rounded-lg p-4;
+  }
+
+  /* Button base styles */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md font-medium 
+           transition-colors focus-visible:outline-none focus-visible:ring-2 
+           focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2;
+  }
+
+  .btn-outline {
+    @apply btn border border-theme-border bg-transparent hover:bg-theme-card h-10 px-4 py-2;
+  }
+
+  .btn-ghost {
+    @apply btn hover:bg-theme-card hover:text-theme-text h-10 px-4 py-2;
+  }
+
+  .btn-destructive {
+    @apply btn bg-error text-white hover:bg-error/90 h-10 px-4 py-2;
+  }
+
+  /* Input base style */
+  .input {
+    @apply w-full rounded-md border border-theme-border bg-theme-card 
+           px-3 py-2 text-sm placeholder:text-theme-text-muted 
+           focus-visible:outline-none focus-visible:ring-2 
+           focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Bottom navigation */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 flex items-center justify-around 
+           bg-theme-card border-t border-theme-border safe-area-inset-bottom md:hidden;
+  }
+
+  /* Sidebar navigation */
+  .sidebar {
+    @apply hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 
+           bg-theme-card border-r border-theme-border;
+  }
+
+  /* Floating Action Button */
+  .fab {
+    @apply fixed bottom-20 right-4 w-14 h-14 rounded-full 
+           bg-primary text-primary-foreground shadow-lg 
+           flex items-center justify-center z-50
+           hover:bg-primary/90 transition-transform active:scale-95
+           md:bottom-8 md:right-8;
+  }
+
+  /* Metric card */
+  .metric-card {
+    @apply card flex flex-col gap-1 min-w-[140px];
+  }
+
+  .metric-value {
+    @apply text-2xl font-bold text-theme-text;
+  }
+
+  .metric-label {
+    @apply text-sm text-theme-text-muted;
+  }
+
+  .metric-trend {
+    @apply text-xs font-medium;
+  }
+
+  .metric-trend-up {
+    @apply metric-trend text-success;
+  }
+
+  .metric-trend-down {
+    @apply metric-trend text-error;
+  }
+
+  /* Collection grid */
+  .collection-grid {
+    @apply grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4;
+  }
+
+  /* List item */
+  .list-item {
+    @apply flex items-center gap-3 p-3 rounded-md 
+           hover:bg-theme-card transition-colors cursor-pointer;
+  }
+
+  /* Empty state */
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-12 text-center;
+  }
+
+  .empty-state-icon {
+    @apply w-16 h-16 text-theme-text-muted mb-4;
+  }
+
+  .empty-state-title {
+    @apply text-lg font-semibold text-theme-text mb-2;
+  }
+
+  .empty-state-description {
+    @apply text-sm text-theme-text-muted max-w-xs;
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    @apply animate-pulse bg-neutral-200 dark:bg-neutral-700 rounded;
+  }
+
+  /* Safe area for mobile devices */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+@layer utilities {
+  /* Text truncation */
+  .text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Mobile-first responsive utilities */
+  .mobile-only {
+    @apply md:hidden;
+  }
+
+  .desktop-only {
+    @apply hidden md:block;
+  }
+}
