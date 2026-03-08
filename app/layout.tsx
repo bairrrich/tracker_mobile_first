@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import '@/styles/globals.css'
 import { ThemeProvider } from '@/components/layout/theme-provider'
 import { InstallPrompt } from '@/components/ui/install-prompt'
+import { QuickAddFAB } from '@/components/shared/quick-add-fab'
 
 const inter = Inter({ 
   subsets: ['latin', 'cyrillic'],
@@ -39,6 +40,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <InstallPrompt />
+          <QuickAddFAB />
         </ThemeProvider>
       </body>
     </html>

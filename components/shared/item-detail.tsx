@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 
 export interface ItemDetailProps {
-  id: string
+  id?: string
   title: string
   subtitle?: string
   description?: string
