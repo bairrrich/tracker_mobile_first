@@ -2,16 +2,17 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { 
-  Home, 
-  Wallet, 
-  Dumbbell, 
-  Book, 
-  Pill, 
-  Utensils, 
-  Folder, 
-  BarChart3, 
-  Settings 
+import { cn } from '@/lib/utils'
+import {
+  Home,
+  Wallet,
+  Dumbbell,
+  Book,
+  Pill,
+  Utensils,
+  Folder,
+  BarChart3,
+  Settings
 } from 'lucide-react'
 
 const navItems = [
@@ -73,7 +74,12 @@ export function Sidebar() {
       <div className="p-4 border-t border-theme-border">
         <Link
           href="/settings"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-md text-theme-text-muted hover:bg-theme-card hover:text-theme-text transition-colors"
+          className={cn(
+            'flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors',
+            pathname === '/settings'
+              ? 'bg-primary text-primary-foreground'
+              : 'text-theme-text-muted hover:bg-theme-card hover:text-theme-text'
+          )}
         >
           <Settings className="w-5 h-5" />
           <span className="text-sm font-medium">Settings</span>
