@@ -19,7 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { FormField } from '@/components/forms/form-field'
 import { useCollectionsStore } from '@/store/collections-store'
+import { collectionSchema, type CollectionFormData } from '@/lib/validations/collection.schema'
+import { useForm } from '@/hooks/use-form'
 import type { CollectionType } from '@/lib/db'
 
 interface CollectionFormProps {
@@ -48,56 +51,51 @@ export function CollectionForm({
   const { addCollection, updateCollection } = useCollectionsStore()
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
-  // Form state
-  const [name, setName] = React.useState('')
-  const [type, setType] = React.useState<CollectionType>('custom')
-  const [description, setDescription] = React.useState('')
-  const [color, setColor] = React.useState('')
+  // Use custom form hook with Zod validation
+  const { values, errors, setValue, handleSubmit, reset, setErrors } = useForm<CollectionFormData>({
+    schema: collectionSchema,
+    defaultValues: {
+      name: '',
+      type: 'custom',
+      description: '',
+      color: '',
+      icon: '',
+    },
+    onSubmit: async (data) => {
+      setIsSubmitting(true)
+      try {
+        if (editId) {
+          await updateCollection(editId, {
+            name: data.name,
+            description: data.description || undefined,
+            color: data.color || undefined,
+          })
+        } else {
+          await addCollection({
+            name: data.name,
+            type: data.type,
+            description: data.description || undefined,
+            color: data.color || undefined,
+            icon: collectionTypes.find((t) => t.value === data.type)?.icon,
+          })
+        }
+        onOpenChange(false)
+      } catch (error) {
+        console.error('Failed to save collection:', error)
+        setErrors({ name: 'Failed to save collection' })
+      } finally {
+        setIsSubmitting(false)
+      }
+    },
+  })
 
   // Reset form when dialog opens/closes
   React.useEffect(() => {
     if (!open) {
-      setName('')
-      setType('custom')
-      setDescription('')
-      setColor('')
+      reset()
       setIsSubmitting(false)
     }
-  }, [open])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!name.trim()) {
-      return
-    }
-
-    setIsSubmitting(true)
-
-    try {
-      if (editId) {
-        await updateCollection(editId, {
-          name: name.trim(),
-          description: description.trim() || undefined,
-          color: color || undefined,
-        })
-      } else {
-        await addCollection({
-          name: name.trim(),
-          type,
-          description: description.trim() || undefined,
-          color: color || undefined,
-          icon: collectionTypes.find((t) => t.value === type)?.icon,
-        })
-      }
-
-      onOpenChange(false)
-    } catch (error) {
-      console.error('Failed to save collection:', error)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  }, [open, reset])
 
   const isEdit = !!editId
 
@@ -118,32 +116,31 @@ export function CollectionForm({
 
           <div className="space-y-4 py-4">
             {/* Name */}
-            <div className="space-y-2">
-              <label
-                htmlFor="name"
-                className="text-sm font-medium leading-none"
-              >
-                Name
-              </label>
+            <FormField
+              label="Name"
+              error={errors.name}
+              id="name"
+            >
               <Input
                 id="name"
                 placeholder="My Collection"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={values.name}
+                onChange={(e) => setValue('name', e.target.value)}
                 required
               />
-            </div>
+            </FormField>
 
             {/* Type */}
             {!isEdit && (
-              <div className="space-y-2">
-                <label
-                  htmlFor="type"
-                  className="text-sm font-medium leading-none"
+              <FormField
+                label="Type"
+                error={errors.type}
+                id="type"
+              >
+                <Select
+                  value={values.type}
+                  onValueChange={(v) => setValue('type', v as CollectionType)}
                 >
-                  Type
-                </label>
-                <Select value={type} onValueChange={(v) => setType(v as CollectionType)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
@@ -156,47 +153,44 @@ export function CollectionForm({
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </FormField>
             )}
 
             {/* Description */}
-            <div className="space-y-2">
-              <label
-                htmlFor="description"
-                className="text-sm font-medium leading-none"
-              >
-                Description
-              </label>
+            <FormField
+              label="Description"
+              error={errors.description}
+              id="description"
+              description="Optional description for your collection"
+            >
               <Textarea
                 id="description"
                 placeholder="Describe your collection..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={values.description || ''}
+                onChange={(e) => setValue('description', e.target.value)}
                 rows={3}
               />
-            </div>
+            </FormField>
 
             {/* Color */}
-            <div className="space-y-2">
-              <label
-                htmlFor="color"
-                className="text-sm font-medium leading-none"
-              >
-                Color (optional)
-              </label>
+            <FormField
+              label="Color (optional)"
+              error={errors.color}
+              id="color"
+            >
               <div className="flex gap-2">
                 <Input
                   id="color"
                   type="color"
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
+                  value={values.color || '#000000'}
+                  onChange={(e) => setValue('color', e.target.value)}
                   className="w-20 h-10"
                 />
                 <div className="flex-1 flex items-center text-sm text-muted-foreground">
                   Choose a color for this collection
                 </div>
               </div>
-            </div>
+            </FormField>
           </div>
 
           <DialogFooter>
