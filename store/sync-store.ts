@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
-import { getUnsyncedRecords, markAsSynced } from '@/lib/db'
+import { performSync, getUnsyncedCount } from '@/lib/sync-engine'
 
 type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline'
 
@@ -40,31 +40,21 @@ export const useSyncStore = create<SyncState>()(
       }
 
       try {
-        // Get unsynced records
-        const unsynced = await getUnsyncedRecords()
+        // Perform sync using sync engine
+        const result = await performSync()
 
-        if (unsynced.length === 0) {
-          set({ syncStatus: 'idle' })
-          return
+        if (result.success) {
+          set({
+            syncStatus: 'idle',
+            lastSync: result.lastSync,
+            unsyncedCount: 0,
+          })
+        } else {
+          set({
+            syncStatus: 'error',
+            errorMessage: result.errors.join(', '),
+          })
         }
-
-        // Send to server (placeholder - implement actual sync logic)
-        await fetch('/api/sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ changes: unsynced }),
-        })
-
-        // Mark as synced
-        const ids = unsynced.map((record) => record.id)
-        await markAsSynced(ids)
-
-        // Update state
-        set({
-          syncStatus: 'idle',
-          lastSync: new Date(),
-          unsyncedCount: 0,
-        })
       } catch (error) {
         set({
           syncStatus: 'error',
@@ -96,8 +86,8 @@ export const useSyncStore = create<SyncState>()(
 
     // Check unsynced count
     checkUnsyncedCount: async () => {
-      const unsynced = await getUnsyncedRecords()
-      set({ unsyncedCount: unsynced.length })
+      const count = await getUnsyncedCount()
+      set({ unsyncedCount: count })
     },
 
     // Set offline status
