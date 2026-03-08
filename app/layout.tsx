@@ -4,6 +4,7 @@ import '@/styles/globals.css'
 import { ThemeProvider } from '@/components/layout/theme-provider'
 import { InstallPrompt } from '@/components/ui/install-prompt'
 import { QuickAddFAB } from '@/components/shared/quick-add-fab'
+import { SupabaseProvider } from '@/components/auth/supabase-provider'
 
 const inter = Inter({ 
   subsets: ['latin', 'cyrillic'],
@@ -75,11 +76,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider>
-          {children}
-          <InstallPrompt />
-          <QuickAddFAB />
-        </ThemeProvider>
+        <SupabaseProvider>
+          <ThemeProvider>
+            {children}
+            <InstallPrompt />
+            <QuickAddFAB />
+          </ThemeProvider>
+        </SupabaseProvider>
       </body>
     </html>
   )

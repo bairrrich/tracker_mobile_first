@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Tracker Mobile - OG Image</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, oklch(62% 0.19 260) 0%, oklch(48% 0.16 260) 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      width: 1200px;
+      height: 630px;
+      background: linear-gradient(135deg, oklch(62% 0.19 260) 0%, oklch(48% 0.16 260) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Background Pattern */
+    .pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.1;
+    }
+    
+    .pattern circle {
+      fill: none;
+      stroke: white;
+      stroke-width: 2;
+    }
+    
+    /* Icon */
+    .icon {
+      width: 200px;
+      height: 200px;
+      background: white;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    .icon svg {
+      width: 120px;
+      height: 120px;
+    }
+    
+    /* Text */
+    .title {
+      font-size: 72px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .subtitle {
+      font-size: 32px;
+      color: rgba(255, 255, 255, 0.9);
+      text-align: center;
+      max-width: 800px;
+    }
+    
+    /* Features */
+    .features {
+      position: absolute;
+      bottom: 60px;
+      display: flex;
+      gap: 40px;
+    }
+    
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 20px;
+    }
+    
+    .feature-icon {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Background Pattern -->
+    <svg class="pattern" viewBox="0 0 1200 630">
+      <circle cx="100" cy="100" r="80"/>
+      <circle cx="1100" cy="530" r="120"/>
+      <circle cx="1100" cy="100" r="60"/>
+      <circle cx="100" cy="530" r="100"/>
+    </svg>
+    
+    <!-- Icon -->
+    <div class="icon">
+      <svg viewBox="0 0 512 512">
+        <path d="M 256 100 L 256 412" stroke="oklch(62% 0.19 260)" stroke-width="40" stroke-linecap="round"/>
+        <path d="M 256 200 L 380 320" stroke="oklch(62% 0.19 260)" stroke-width="40" stroke-linecap="round"/>
+        <path d="M 256 200 L 132 320" stroke="oklch(62% 0.19 260)" stroke-width="40" stroke-linecap="round"/>
+        <circle cx="256" cy="180" r="40" fill="oklch(62% 0.19 260)"/>
+      </svg>
+    </div>
+    
+    <!-- Title -->
+    <div class="title">All Tracker Mobile</div>
+    <div class="subtitle">Track your activities - finances, exercises, books, vitamins, and more</div>
+    
+    <!-- Features -->
+    <div class="features">
+      <div class="feature">
+        <svg class="feature-icon" viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        Offline-first
+      </div>
+      <div class="feature">
+        <svg class="feature-icon" viewBox="0 0 24 24">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+          <path d="M12 18h.01"/>
+        </svg>
+        PWA
+      </div>
+      <div class="feature">
+        <svg class="feature-icon" viewBox="0 0 24 24">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        Secure
+      </div>
+    </div>
+  </div>
+</body>
+</html>

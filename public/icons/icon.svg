@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="oklch(62% 0.19 260)"/>
+  
+  <!-- Main Icon - Tracker Symbol -->
+  <g transform="translate(256, 256)">
+    <!-- Circle -->
+    <circle cx="0" cy="0" r="180" fill="none" stroke="white" stroke-width="24" opacity="0.3"/>
+    
+    <!-- Checkmark/Activity Line -->
+    <path d="M -100 50 L -20 -30 L 40 30 L 120 -80" 
+          fill="none" 
+          stroke="white" 
+          stroke-width="28" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    
+    <!-- Center Dot -->
+    <circle cx="0" cy="0" r="20" fill="white"/>
+  </g>
+  
+  <!-- Text T -->
+  <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" 
+        font-family="system-ui, -apple-system, sans-serif" 
+        font-size="200" 
+        font-weight="bold" 
+        fill="white"
+        opacity="0.1">T</text>
+</svg>
