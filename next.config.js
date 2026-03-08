@@ -1,11 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [320, 375, 425, 768, 1024, 1280],
   },
+  // Turbopack config (Next.js 16+)
+  turbopack: {},
 }
 
 const withPWA = require('next-pwa')({

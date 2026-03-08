@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="oklch(62% 0.19 260)">
+  <title>Offline - All Tracker Mobile</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: oklch(98% 0.01 260);
+      color: oklch(20% 0.02 260);
+      padding: 2rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: oklch(18% 0.02 260);
+        color: oklch(92% 0.02 260);
+      }
+    }
+
+    .container {
+      text-align: center;
+      max-width: 400px;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: oklch(44% 0.02 260);
+      margin-bottom: 2rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      p {
+        color: oklch(68% 0.02 260);
+      }
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: oklch(90% 0.01 260);
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .status {
+        background: oklch(30% 0.02 260);
+      }
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: oklch(62% 0.22 25);
+      border-radius: 50%;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    .status-dot.online {
+      background: oklch(65% 0.18 150);
+    }
+
+    button {
+      background: oklch(62% 0.19 260);
+      color: white;
+      border: none;
+      padding: 0.875rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+
+    button:hover {
+      background: oklch(55% 0.18 260);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 8px -1px rgb(0 0 0 / 0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .info {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid oklch(90% 0.01 260);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .info {
+        border-top-color: oklch(30% 0.02 260);
+      }
+    }
+
+    .info p {
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📡</div>
+    
+    <h1>You're Offline</h1>
+    
+    <div class="status">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Checking connection...</span>
+    </div>
+    
+    <p>
+      Don't worry! Your data is saved locally and will sync when you're back online.
+    </p>
+    
+    <button onclick="handleRetry()">Try Again</button>
+    
+    <div class="info">
+      <p><strong>What you can do offline:</strong></p>
+      <p>✓ View your data</p>
+      <p>✓ Add new items</p>
+      <p>✓ Edit existing entries</p>
+      <p>✓ Track activities</p>
+    </div>
+  </div>
+
+  <script>
+    const statusDot = document.getElementById('statusDot')
+    const statusText = document.getElementById('statusText')
+
+    function updateStatus() {
+      if (navigator.onLine) {
+        statusDot.classList.add('online')
+        statusText.textContent = 'Online - Redirecting...'
+        
+        // Redirect to home page after 1 second
+        setTimeout(() => {
+          window.location.href = '/'
+        }, 1000)
+      } else {
+        statusDot.classList.remove('online')
+        statusText.textContent = 'Offline'
+      }
+    }
+
+    function handleRetry() {
+      if (navigator.onLine) {
+        window.location.reload()
+      } else {
+        // Show a message that we're still offline
+        statusText.textContent = 'Still offline - waiting...'
+      }
+    }
+
+    // Listen for online/offline events
+    window.addEventListener('online', updateStatus)
+    window.addEventListener('offline', updateStatus)
+
+    // Check status on load
+    updateStatus()
+
+    // Periodically check connection
+    setInterval(updateStatus, 5000)
+  </script>
+</body>
+</html>

@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* ============================================
    OKLCH Theme System
@@ -48,7 +46,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: var(--border);
   }
 
   html {
@@ -57,7 +55,8 @@
   }
 
   body {
-    @apply bg-theme-bg text-theme-text;
+    background-color: var(--bg);
+    color: var(--text);
     font-feature-settings: "rlig" 1, "calt" 1;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -90,117 +89,262 @@
 @layer components {
   /* Card base style */
   .card {
-    @apply bg-theme-card border border-theme-border rounded-lg p-4;
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1rem;
   }
 
   /* Button base styles */
   .btn {
-    @apply inline-flex items-center justify-center rounded-md font-medium 
-           transition-colors focus-visible:outline-none focus-visible:ring-2 
-           focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: colors;
+  }
+  
+  .btn:focus-visible {
+    outline: none;
+    ring: 2px var(--primary);
+  }
+  
+  .btn:disabled {
+    pointer-events: none;
+    opacity: 0.5;
   }
 
   .btn-primary {
-    @apply btn bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+  
+  .btn-primary:hover {
+    background-color: color-mix(in oklch, var(--primary) 90%, black);
   }
 
   .btn-outline {
-    @apply btn border border-theme-border bg-transparent hover:bg-theme-card h-10 px-4 py-2;
+    border: 1px solid var(--border);
+    background-color: var(--card);
+  }
+  
+  .btn-outline:hover {
+    background-color: color-mix(in oklch, var(--card) 80%, white);
   }
 
   .btn-ghost {
-    @apply btn hover:bg-theme-card hover:text-theme-text h-10 px-4 py-2;
+    background: transparent;
+  }
+  
+  .btn-ghost:hover {
+    background-color: var(--card);
+    color: var(--text);
   }
 
   .btn-destructive {
-    @apply btn bg-error text-white hover:bg-error/90 h-10 px-4 py-2;
+    background-color: var(--error);
+    color: white;
+  }
+  
+  .btn-destructive:hover {
+    background-color: color-mix(in oklch, var(--error) 90%, black);
   }
 
   /* Input base style */
   .input {
-    @apply w-full rounded-md border border-theme-border bg-theme-card 
-           px-3 py-2 text-sm placeholder:text-theme-text-muted 
-           focus-visible:outline-none focus-visible:ring-2 
-           focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50;
+    width: 100%;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .input::placeholder {
+    color: var(--text-muted);
+  }
+  
+  .input:focus-visible {
+    outline: none;
+    ring: 2px var(--primary);
+  }
+  
+  .input:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   /* Bottom navigation */
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 flex items-center justify-around 
-           bg-theme-card border-t border-theme-border safe-area-inset-bottom md:hidden;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background-color: var(--card);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   /* Sidebar navigation */
-  .sidebar {
-    @apply hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 
-           bg-theme-card border-r border-theme-border;
+  @media (min-width: 768px) {
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      width: 256px;
+      position: fixed;
+      inset: 0 auto;
+      background-color: var(--card);
+      border-right: 1px solid var(--border);
+    }
   }
 
   /* Floating Action Button */
   .fab {
-    @apply fixed bottom-20 right-4 w-14 h-14 rounded-full 
-           bg-primary text-primary-foreground shadow-lg 
-           flex items-center justify-center z-50
-           hover:bg-primary/90 transition-transform active:scale-95
-           md:bottom-8 md:right-8;
+    position: fixed;
+    bottom: 5rem;
+    right: 1rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 9999px;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    transition: background-color, transform;
+  }
+  
+  .fab:hover {
+    background-color: color-mix(in oklch, var(--primary) 90%, black);
+    transform: scale(0.95);
+  }
+  
+  @media (min-width: 768px) {
+    .fab {
+      bottom: 2rem;
+      right: 2rem;
+    }
   }
 
   /* Metric card */
   .metric-card {
-    @apply card flex flex-col gap-1 min-w-[140px];
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 140px;
   }
 
   .metric-value {
-    @apply text-2xl font-bold text-theme-text;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
   }
 
   .metric-label {
-    @apply text-sm text-theme-text-muted;
+    font-size: 0.875rem;
+    color: var(--text-muted);
   }
 
   .metric-trend {
-    @apply text-xs font-medium;
+    font-size: 0.75rem;
+    font-weight: 500;
   }
 
   .metric-trend-up {
-    @apply metric-trend text-success;
+    color: var(--success);
   }
 
   .metric-trend-down {
-    @apply metric-trend text-error;
+    color: var(--error);
   }
 
   /* Collection grid */
   .collection-grid {
-    @apply grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  
+  @media (min-width: 768px) {
+    .collection-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .collection-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   /* List item */
   .list-item {
-    @apply flex items-center gap-3 p-3 rounded-md 
-           hover:bg-theme-card transition-colors cursor-pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    transition: background-color;
+    cursor: pointer;
+  }
+  
+  .list-item:hover {
+    background-color: var(--card);
   }
 
   /* Empty state */
   .empty-state {
-    @apply flex flex-col items-center justify-center py-12 text-center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
   }
 
   .empty-state-icon {
-    @apply w-16 h-16 text-theme-text-muted mb-4;
+    width: 4rem;
+    height: 4rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
   }
 
   .empty-state-title {
-    @apply text-lg font-semibold text-theme-text mb-2;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
   }
 
   .empty-state-description {
-    @apply text-sm text-theme-text-muted max-w-xs;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    max-width: 20rem;
   }
 
   /* Loading skeleton */
   .skeleton {
-    @apply animate-pulse bg-neutral-200 dark:bg-neutral-700 rounded;
+    background-color: var(--neutral-200);
+    border-radius: 0.25rem;
+  }
+  
+  [data-theme='dark'] .skeleton {
+    background-color: var(--neutral-700);
+  }
+  
+  .skeleton.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
   }
 
   /* Safe area for mobile devices */
@@ -237,10 +381,22 @@
 
   /* Mobile-first responsive utilities */
   .mobile-only {
-    @apply md:hidden;
+    display: block;
+  }
+  
+  @media (min-width: 768px) {
+    .mobile-only {
+      display: none;
+    }
   }
 
   .desktop-only {
-    @apply hidden md:block;
+    display: none;
+  }
+  
+  @media (min-width: 768px) {
+    .desktop-only {
+      display: block;
+    }
   }
 }
