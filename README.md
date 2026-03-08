@@ -28,22 +28,55 @@ npm run dev
 
 ## 📋 Технологии
 
-| Категория | Технология |
-|-----------|------------|
-| **Framework** | Next.js 14+ |
-| **Language** | TypeScript |
-| **Styling** | Tailwind CSS + OKLCH |
-| **UI Components** | shadcn/ui + Radix UI |
-| **Icons** | Lucide Icons |
-| **State** | Zustand |
-| **Data** | TanStack React Query |
-| **Validation** | Zod |
-| **Testing** | Jest + React Testing Library |
-| **E2E** | Playwright |
+### 🧩 Полный стек (offline-first)
+
+| Категория | Технология | Назначение |
+|-----------|------------|------------|
+| **Framework** | Next.js 14+ (App Router) | SSR, API routes, PWA |
+| **Language** | TypeScript | Типобезопасность |
+| **Styling** | Tailwind CSS + OKLCH | Утилитарные стили, доступность |
+| **UI Components** | shadcn/ui + Radix UI | Готовые доступные компоненты |
+| **Icons** | Lucide Icons | Векторные иконки |
+| **State** | Zustand | Глобальное состояние |
+| **Data Fetching** | TanStack React Query | Кэширование, background sync |
+| **Offline DB (Web)** | IndexedDB + Dexie.js | Локальное хранилище |
+| **ORM** | Drizzle ORM | Работа с SQLite/PostgreSQL |
+| **Backend DB** | SQLite (dev) / PostgreSQL (prod) | Хранение данных |
+| **PWA** | next-pwa + Workbox | Offline caching, installable app |
+| **Sync** | Custom Sync Engine + API routes | Синхронизация данных |
+| **Validation** | Zod | Валидация схем |
+| **Testing** | Jest + React Testing Library | Unit тесты |
+| **E2E** | Playwright | End-to-end тесты |
+| **Cloud (optional)** | Supabase | Backend-as-a-Service |
 
 ---
 
 ## 🏗️ Архитектура
+
+### Архитектура offline-first приложения
+
+```
+Next.js (React UI)
+       │
+       │
+Zustand state
+       │
+       │
+Dexie.js
+IndexedDB (offline DB)
+       │
+       │
+Sync Engine
+       │
+       │
+Next.js API routes
+       │
+       │
+SQLite / PostgreSQL
+       │
+       │
+Supabase (optional)
+```
 
 ### Принципы разработки
 
@@ -53,6 +86,7 @@ npm run dev
 4. **Accessibility** — ARIA, контраст >4.5:1, keyboard navigation
 5. **Localization** — RU + EN с первого дня
 6. **English-only Code** — переменные, комментарии, коммиты на английском
+7. **shadcn/ui + Radix UI** — обязательные компоненты (без нативных HTML элементов)
 
 ### Структура проекта
 
@@ -66,12 +100,141 @@ All_Tracker_mobile/
 │       └── templates/        # Шаблоны документов
 ├── .agents/skills/           # Vercel Agent Skills
 ├── app/                      # Next.js App Router
+│   ├── api/                  # API routes (sync, backend)
+│   │   └── sync/
+│   │       └── route.ts
+│   ├── (auth)/               # Route groups
+│   ├── layout.tsx
+│   └── page.tsx
 ├── components/               # React компоненты
+│   ├── ui/                   # Переиспользуемые UI компоненты (shadcn/ui)
+│   └── ...
 ├── hooks/                    # Custom hooks
 ├── lib/                      # Утилиты и конфигурация
+│   ├── db.ts                 # Dexie.js конфигурация
+│   ├── sync.ts               # Sync engine логика
+│   └── api.ts                # API client
+├── store/                    # Zustand stores
+│   └── notesStore.ts
 ├── styles/                   # Глобальные стили
-└── tests/                    # Тесты
+├── tests/                    # Тесты
+└── public/
+    ├── manifest.json         # PWA manifest
+    └── sw.js                 # Service Worker
 ```
+
+---
+
+## 💾 Offline Database
+
+### IndexedDB слой (Dexie.js)
+
+**Почему Dexie:**
+
+* Удобный API
+* Транзакции
+* Reactive queries
+* Versioning migrations
+
+**Пример использования:**
+
+```typescript
+// lib/db.ts
+import Dexie from "dexie"
+
+export const db = new Dexie("tracker_db")
+
+db.version(1).stores({
+  activities: "++id, type, title, createdAt, updatedAt",
+  settings: "key, value"
+})
+```
+
+---
+
+## 📱 PWA (Progressive Web App)
+
+### next-pwa + Workbox
+
+**Функции:**
+
+* Offline caching статических активов
+* Installable app (Add to Home Screen)
+* Push notifications
+* Background sync
+
+**Конфигурация:**
+
+```typescript
+// next.config.js
+const withPWA = require('next-pwa')()
+
+module.exports = withPWA({
+  // Next.js config
+})
+```
+
+---
+
+## 🔄 Sync Engine
+
+### Синхронизация данных
+
+**Компоненты:**
+
+* Custom sync engine (`lib/sync.ts`)
+* API routes (`app/api/sync/route.ts`)
+* Conflict resolution стратегия
+
+**Пример sync endpoint:**
+
+```typescript
+// app/api/sync/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function POST(request: NextRequest) {
+  const data = await request.json()
+  // Sync logic with SQLite/PostgreSQL
+  return NextResponse.json({ synced: true })
+}
+```
+
+---
+
+## 🗄️ Backend Database
+
+### Production setup
+
+| Среда | Database |
+|-------|----------|
+| **Local/Dev** | SQLite |
+| **Production** | PostgreSQL |
+
+**ORM:** Drizzle ORM
+
+**Пример подключения:**
+
+```typescript
+// lib/drizzle.ts
+import { drizzle } from 'drizzle-orm/better-sqlite3'
+import Database from 'better-sqlite3'
+
+const sqlite = new Database('tracker.db')
+export const db = drizzle(sqlite)
+```
+
+---
+
+## ☁️ Cloud Integration (optional)
+
+### Supabase
+
+Можно подключить как backend-as-a-service:
+
+* PostgreSQL database
+* Authentication
+* Real-time subscriptions
+* Storage
 
 ---
 

@@ -80,13 +80,20 @@
 - Integrates with OKLCH and themes
 - No custom CSS files
 
-### 7. Component Libraries
-- **shadcn/ui** or **Radix UI** — minimalistic, customizable components
-- Buttons, modals, tables, forms
+### 7. Component Libraries (Mandatory)
+- **shadcn/ui** + **Radix UI** — обязательные библиотеки компонентов
+- **Запрещено использование нативных HTML элементов** для UI компонентов:
+  - ❌ Нативные `<input>`, `<select>`, `<textarea>` — использовать компоненты shadcn/ui
+  - ❌ Нативные `<button>` — использовать `Button` из shadcn/ui
+  - ❌ Нативные выпадающие списки — использовать `Select` из Radix UI
+  - ❌ Нативные календари и date picker — использовать `Calendar` / `DatePicker` компоненты
+  - ❌ Нативные чекбоксы и радиокнопки — использовать `Checkbox`, `RadioGroup` из Radix UI
+- **Создавайте переиспользуемые компоненты** в `/components/ui/` на основе shadcn/ui
+- Все формы, модальные окна, таблицы должны использовать готовые компоненты
 - Tailwind-integrated
 
 ### 8. Icons
-- **Lucide Icons** or **Heroicons** — vector, lightweight
+- **Lucide Icons** или **Heroicons** — vector, lightweight
 - Consistent stroke width
 - Accessible with aria-labels
 
