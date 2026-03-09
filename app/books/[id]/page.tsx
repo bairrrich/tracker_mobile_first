@@ -5,11 +5,14 @@ import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { MainLayout } from '@/components/layout/main-layout'
 import { BookForm } from '@/components/forms/book-form'
+import { QuoteForm } from '@/components/forms/quote-form'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useBooksStore } from '@/store/books-store'
+import { useBookQuotesStore } from '@/store/book-quotes-store'
 import {
   ArrowLeft,
   Edit,
@@ -17,9 +20,10 @@ import {
   MoreVertical,
   Star,
   Calendar,
-  Book,
   Tag,
   FileText,
+  Quote,
+  Plus,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -43,16 +47,20 @@ export default function BookDetailPage() {
   const t = useTranslations('Books')
   const tCommon = useTranslations('Common')
   const { books, deleteBook, fetchBooks } = useBooksStore()
+  const { quotes, fetchQuotes, addQuote, updateQuote, deleteQuote } = useBookQuotesStore()
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [isFormOpen, setIsFormOpen] = React.useState(false)
+  const [isQuoteFormOpen, setIsQuoteFormOpen] = React.useState(false)
   const [editData, setEditData] = React.useState<BookFormData & { id?: number } | null>(null)
+  const [editQuoteData, setEditQuoteData] = React.useState<{ text: string; page?: number } | null>(null)
+  const [selectedQuoteId, setSelectedQuoteId] = React.useState<number | null>(null)
 
   const bookId = params.id as string
   const bookIdNum = Number(bookId)
 
   // Find current book from books array
-  const selectedBook = React.useMemo(
+  const selectedBookData = React.useMemo(
     () => books.find((b) => b.id === bookIdNum) || null,
     [books, bookIdNum]
   )
@@ -61,12 +69,34 @@ export default function BookDetailPage() {
     fetchBooks()
   }, [fetchBooks])
 
+  // Fetch quotes when book is loaded
+  React.useEffect(() => {
+    if (bookIdNum) {
+      fetchQuotes(bookIdNum)
+    }
+  }, [bookIdNum, fetchQuotes])
+
+  const handleAddQuote = async (text: string, page?: number) => {
+    if (!bookIdNum) return
+    await addQuote(bookIdNum, text, page)
+  }
+
+  const handleEditQuote = async (text: string, page?: number) => {
+    if (!selectedQuoteId) return
+    await updateQuote(selectedQuoteId, text, page)
+    setSelectedQuoteId(null)
+  }
+
+  const handleDeleteQuote = async (id: number) => {
+    await deleteQuote(id)
+  }
+
   const handleDelete = async () => {
-    if (!selectedBook) return
+    if (!selectedBookData) return
 
     setIsDeleting(true)
     try {
-      await deleteBook(selectedBook.id)
+      await deleteBook(selectedBookData.id)
       router.push('/books')
     } catch (error) {
       console.error('Failed to delete book:', error)
@@ -77,27 +107,27 @@ export default function BookDetailPage() {
   }
 
   const handleEdit = () => {
-    if (!selectedBook) return
+    if (!selectedBookData) return
 
     setEditData({
-      id: selectedBook.id,
-      title: selectedBook.title,
-      author: selectedBook.author,
-      description: selectedBook.description || '',
-      coverImage: selectedBook.coverImage || '',
-      status: selectedBook.status,
-      rating: selectedBook.rating,
-      pagesTotal: selectedBook.pagesTotal,
-      pagesRead: selectedBook.pagesRead || 0,
-      startDate: selectedBook.startDate ? selectedBook.startDate.toISOString().split('T')[0] : '',
-      endDate: selectedBook.endDate ? selectedBook.endDate.toISOString().split('T')[0] : '',
-      genre: selectedBook.genre || '',
-      isbn: selectedBook.isbn || '',
-      publisher: selectedBook.publisher || '',
-      publishYear: selectedBook.publishYear,
-      language: selectedBook.language || '',
-      format: selectedBook.format,
-      notes: selectedBook.notes || '',
+      id: selectedBookData.id,
+      title: selectedBookData.title,
+      author: selectedBookData.author,
+      description: selectedBookData.description || '',
+      coverImage: selectedBookData.coverImage || '',
+      status: selectedBookData.status,
+      rating: selectedBookData.rating,
+      pagesTotal: selectedBookData.pagesTotal,
+      pagesRead: selectedBookData.pagesRead || 0,
+      startDate: selectedBookData.startDate ? selectedBookData.startDate.toISOString().split('T')[0] : '',
+      endDate: selectedBookData.endDate ? selectedBookData.endDate.toISOString().split('T')[0] : '',
+      genre: selectedBookData.genre || '',
+      isbn: selectedBookData.isbn || '',
+      publisher: selectedBookData.publisher || '',
+      publishYear: selectedBookData.publishYear,
+      language: selectedBookData.language || '',
+      format: selectedBookData.format,
+      notes: selectedBookData.notes || '',
     })
     setIsFormOpen(true)
   }
@@ -110,7 +140,7 @@ export default function BookDetailPage() {
     abandoned: 'bg-red-500/10 text-red-600 dark:text-red-400',
   }
 
-  if (!selectedBook) {
+  if (!selectedBookData) {
     return (
       <MainLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -122,8 +152,8 @@ export default function BookDetailPage() {
     )
   }
 
-  const progress = selectedBook.pagesTotal && selectedBook.pagesTotal > 0
-    ? Math.round(((selectedBook.pagesRead || 0) / selectedBook.pagesTotal) * 100)
+  const progress = selectedBookData.pagesTotal && selectedBookData.pagesTotal > 0
+    ? Math.round(((selectedBookData.pagesRead || 0) / selectedBookData.pagesTotal) * 100)
     : 0
 
   return (
@@ -169,13 +199,13 @@ export default function BookDetailPage() {
         {/* Book Cover and Info */}
         <div className="grid gap-6 md:grid-cols-[200px_1fr]">
           {/* Cover */}
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden h-fit">
             <CardContent className="p-0">
-              <div className="aspect-[2/3] relative bg-[var(--card)]">
-                {selectedBook.coverImage ? (
+              <div className="aspect-[2/3] w-full max-w-[200px] mx-auto relative bg-[var(--card)]">
+                {selectedBookData.coverImage ? (
                   <img
-                    src={selectedBook.coverImage}
-                    alt={selectedBook.title}
+                    src={selectedBookData.coverImage}
+                    alt={selectedBookData.title}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -189,32 +219,53 @@ export default function BookDetailPage() {
 
           {/* Details */}
           <div className="space-y-4">
-            <div>
-              <h1 className="text-2xl font-bold">{selectedBook.title}</h1>
-              <p className="text-lg text-muted-foreground">{selectedBook.author}</p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-2xl font-bold truncate">{selectedBookData.title}</h1>
+                <p className="text-lg text-muted-foreground truncate">{selectedBookData.author}</p>
+              </div>
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <Badge className={statusColors[selectedBookData.status]}>
+                    {t(selectedBookData.status)}
+                  </Badge>
+                  {selectedBookData.rating && (
+                    <span className="inline-flex items-center gap-1 text-sm font-medium">
+                      <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+                      {selectedBookData.rating}
+                    </span>
+                  )}
+                </div>
+                {/* Progress */}
+                {selectedBookData.pagesTotal && selectedBookData.pagesTotal > 0 && (
+                  <div className="w-36">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-muted-foreground font-medium">
+                        {selectedBookData.pagesRead} / {selectedBookData.pagesTotal}
+                      </span>
+                      <span className="font-semibold text-primary">{progress}%</span>
+                    </div>
+                    <Progress value={progress} className="h-2" />
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Badge className={statusColors[selectedBook.status]}>
-                {t(selectedBook.status)}
-              </Badge>
-              {selectedBook.genre && (
-                <Badge variant="outline">{selectedBook.genre}</Badge>
-              )}
-              {selectedBook.format && (
-                <Badge variant="outline" className="capitalize">
-                  {t(selectedBook.format)}
-                </Badge>
-              )}
-              {selectedBook.rating && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                  {selectedBook.rating}
-                </Badge>
-              )}
-            </div>
+            {/* Genre and format badges */}
+            {(selectedBookData.genre || selectedBookData.format) && (
+              <div className="flex flex-wrap gap-2">
+                {selectedBookData.genre && (
+                  <Badge variant="outline">{selectedBookData.genre}</Badge>
+                )}
+                {selectedBookData.format && (
+                  <Badge variant="outline" className="capitalize">
+                    {t(selectedBookData.format)}
+                  </Badge>
+                )}
+              </div>
+            )}
 
-            {selectedBook.description && (
+            {selectedBookData.description && (
               <Card>
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-2 text-sm font-medium">
@@ -224,95 +275,24 @@ export default function BookDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    {selectedBook.description}
+                    {selectedBookData.description}
                   </p>
                 </CardContent>
               </Card>
             )}
+          </div>
+        </div>
 
-            {/* Progress */}
-            {selectedBook.pagesTotal && selectedBook.pagesTotal > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <Book className="w-4 h-4" />
-                    {t('progress')}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {selectedBook.pagesRead} / {selectedBook.pagesTotal} {t('pages')}
-                    </span>
-                    <span className="font-medium">{progress}%</span>
-                  </div>
-                  <Progress value={progress} className="h-2" />
-                </CardContent>
-              </Card>
-            )}
+        {/* Tabs for Book Details and Notes - full width row below columns */}
+        <div className="w-full">
+          <Tabs defaultValue="notes" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="notes">{t('notes')}</TabsTrigger>
+              <TabsTrigger value="quotes">{t('quotes')}</TabsTrigger>
+              <TabsTrigger value="details">{t('bookDetails')}</TabsTrigger>
+            </TabsList>
 
-            {/* Metadata */}
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <Tag className="w-4 h-4" />
-                  {t('bookDetails')}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid grid-cols-2 gap-3 text-sm">
-                  {selectedBook.isbn && (
-                    <div>
-                      <dt className="text-muted-foreground">{t('isbn')}</dt>
-                      <dd className="font-medium">{selectedBook.isbn}</dd>
-                    </div>
-                  )}
-                  {selectedBook.publisher && (
-                    <div>
-                      <dt className="text-muted-foreground">{t('publisher')}</dt>
-                      <dd className="font-medium">{selectedBook.publisher}</dd>
-                    </div>
-                  )}
-                  {selectedBook.publishYear && (
-                    <div>
-                      <dt className="text-muted-foreground">{t('publishYear')}</dt>
-                      <dd className="font-medium">{selectedBook.publishYear}</dd>
-                    </div>
-                  )}
-                  {selectedBook.language && (
-                    <div>
-                      <dt className="text-muted-foreground">{t('language')}</dt>
-                      <dd className="font-medium capitalize">{selectedBook.language}</dd>
-                    </div>
-                  )}
-                  {selectedBook.startDate && (
-                    <div>
-                      <dt className="text-muted-foreground">
-                        <Calendar className="w-3 h-3 inline mr-1" />
-                        {t('startDate')}
-                      </dt>
-                      <dd className="font-medium">
-                        {new Date(selectedBook.startDate).toLocaleDateString()}
-                      </dd>
-                    </div>
-                  )}
-                  {selectedBook.endDate && (
-                    <div>
-                      <dt className="text-muted-foreground">
-                        <Calendar className="w-3 h-3 inline mr-1" />
-                        {t('endDate')}
-                      </dt>
-                      <dd className="font-medium">
-                        {new Date(selectedBook.endDate).toLocaleDateString()}
-                      </dd>
-                    </div>
-                  )}
-                </dl>
-              </CardContent>
-            </Card>
-
-            {/* Notes */}
-            {selectedBook.notes && (
+            <TabsContent value="notes">
               <Card>
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-2 text-sm font-medium">
@@ -321,13 +301,151 @@ export default function BookDetailPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {selectedBook.notes}
-                  </p>
+                  {selectedBookData.notes ? (
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {selectedBookData.notes}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {t('noNotes')}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
-            )}
-          </div>
+            </TabsContent>
+
+            <TabsContent value="quotes">
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Quote className="w-4 h-4" />
+                      {t('quotes')}
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => {
+                      setEditQuoteData(null)
+                      setSelectedQuoteId(null)
+                      setIsQuoteFormOpen(true)
+                    }}>
+                      <Plus className="w-4 h-4 mr-1" />
+                      {t('addQuote')}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {quotes.length > 0 ? (
+                    <div className="space-y-3">
+                      {quotes.map((quote) => (
+                        <div
+                          key={quote.id}
+                          className="group relative border-l-4 border-primary pl-4 py-2 bg-primary/5 rounded-r hover:bg-primary/10 transition-colors"
+                        >
+                          <p className="text-sm text-muted-foreground italic pr-16">
+                            {quote.text}
+                          </p>
+                          {quote.page && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              {t('page')} {quote.page}
+                            </p>
+                          )}
+                          <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8"
+                              onClick={() => {
+                                setEditQuoteData({ text: quote.text, page: quote.page })
+                                setSelectedQuoteId(quote.id)
+                                setIsQuoteFormOpen(true)
+                              }}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-error hover:text-error"
+                              onClick={() => handleDeleteQuote(quote.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Quote className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                      <p className="text-sm text-muted-foreground">
+                        {t('noQuotes')}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="details">
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Tag className="w-4 h-4" />
+                    {t('bookDetails')}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <dl className="grid grid-cols-2 gap-3 text-sm">
+                    {selectedBookData.isbn && (
+                      <div>
+                        <dt className="text-muted-foreground">{t('isbn')}</dt>
+                        <dd className="font-medium">{selectedBookData.isbn}</dd>
+                      </div>
+                    )}
+                    {selectedBookData.publisher && (
+                      <div>
+                        <dt className="text-muted-foreground">{t('publisher')}</dt>
+                        <dd className="font-medium">{selectedBookData.publisher}</dd>
+                      </div>
+                    )}
+                    {selectedBookData.publishYear && (
+                      <div>
+                        <dt className="text-muted-foreground">{t('publishYear')}</dt>
+                        <dd className="font-medium">{selectedBookData.publishYear}</dd>
+                      </div>
+                    )}
+                    {selectedBookData.language && (
+                      <div>
+                        <dt className="text-muted-foreground">{t('language')}</dt>
+                        <dd className="font-medium capitalize">{selectedBookData.language}</dd>
+                      </div>
+                    )}
+                    {selectedBookData.startDate && (
+                      <div>
+                        <dt className="text-muted-foreground">
+                          <Calendar className="w-3 h-3 inline mr-1" />
+                          {t('startDate')}
+                        </dt>
+                        <dd className="font-medium">
+                          {new Date(selectedBookData.startDate).toLocaleDateString()}
+                        </dd>
+                      </div>
+                    )}
+                    {selectedBookData.endDate && (
+                      <div>
+                        <dt className="text-muted-foreground">
+                          <Calendar className="w-3 h-3 inline mr-1" />
+                          {t('endDate')}
+                        </dt>
+                        <dd className="font-medium">
+                          {new Date(selectedBookData.endDate).toLocaleDateString()}
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Delete Confirmation Dialog */}
@@ -367,6 +485,20 @@ export default function BookDetailPage() {
             if (!open) setEditData(null)
           }}
           editBook={editData}
+        />
+
+        {/* Add/Edit Quote Form */}
+        <QuoteForm
+          open={isQuoteFormOpen}
+          onOpenChange={(open) => {
+            setIsQuoteFormOpen(open)
+            if (!open) {
+              setEditQuoteData(null)
+              setSelectedQuoteId(null)
+            }
+          }}
+          onSubmit={editQuoteData ? handleEditQuote : handleAddQuote}
+          editQuote={editQuoteData}
         />
       </div>
     </MainLayout>

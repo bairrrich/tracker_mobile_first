@@ -42,6 +42,15 @@ export interface Book {
   synced: boolean
 }
 
+export interface BookQuote {
+  id: number
+  bookId: number
+  text: string
+  page?: number
+  createdAt: Date
+  synced: boolean
+}
+
 export interface Collection {
   id: number
   name: string
@@ -131,6 +140,7 @@ export class TrackerDatabase extends Dexie {
   notes!: EntityTable<Note, 'id'>
   syncQueue!: EntityTable<SyncQueue, 'id'>
   books!: EntityTable<Book, 'id'>
+  bookQuotes!: EntityTable<BookQuote, 'id'>
 
   constructor() {
     super('tracker_db')
@@ -173,6 +183,11 @@ export class TrackerDatabase extends Dexie {
     // Add books table in version 3
     this.version(3).stores({
       books: '++id, title, author, status, genre, createdAt, updatedAt, synced',
+    })
+
+    // Add book quotes table in version 4
+    this.version(4).stores({
+      bookQuotes: '++id, bookId, createdAt, synced',
     })
   }
 }
