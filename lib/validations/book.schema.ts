@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 export const bookSchema = z.object({
+  id: z.string().uuid().optional(),
   title: z.string().min(1, 'Title is required').max(500, 'Title is too long'),
   author: z.string().min(1, 'Author is required').max(200, 'Author is too long'),
   description: z.string().max(2000, 'Description is too long').optional(),
@@ -18,7 +19,7 @@ export const bookSchema = z.object({
   language: z.string().max(50).optional().or(z.literal('')),
   format: z.enum(['hardcover', 'paperback', 'ebook', 'audiobook']).optional(),
   notes: z.string().max(5000).optional().or(z.literal('')),
-  collectionId: z.number().optional(),
+  collectionId: z.string().uuid().optional(),
 })
 
 export type BookFormData = z.infer<typeof bookSchema>

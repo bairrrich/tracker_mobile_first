@@ -113,7 +113,7 @@ export class CollectionsRepository {
       db.syncQueue.add({
         id: Date.now() + Math.floor(Math.random() * 1000),
         table: 'collections',
-        recordId: id,
+        recordId: String(id),  // Convert to string
         operation,
         data: data ? JSON.stringify(data) : '',
         synced: false,

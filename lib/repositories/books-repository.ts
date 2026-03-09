@@ -1,4 +1,5 @@
 import { withDB, type Book, type BookStatus, type BookFormat } from '@/lib/db'
+import { generateUUID } from '@/lib/utils/uuid'
 
 export interface CreateBookData {
   title: string
@@ -18,7 +19,7 @@ export interface CreateBookData {
   language?: string
   format?: BookFormat
   notes?: string
-  collectionId?: number
+  collectionId?: string  // UUID
 }
 
 export interface UpdateBookData {
@@ -39,7 +40,7 @@ export interface UpdateBookData {
   language?: string
   format?: BookFormat
   notes?: string
-  collectionId?: number
+  collectionId?: string  // UUID
 }
 
 export class BooksRepository {
@@ -53,7 +54,7 @@ export class BooksRepository {
   /**
    * Get book by ID
    */
-  async getById(id: number): Promise<Book | undefined> {
+  async getById(id: string): Promise<Book | undefined> {
     return withDB((db) => db.books.get(id)) ?? undefined
   }
 
@@ -102,39 +103,44 @@ export class BooksRepository {
   /**
    * Create a new book
    */
-  async create(data: CreateBookData): Promise<number> {
+  async create(data: CreateBookData): Promise<string> {
     const now = new Date()
-    const id = await withDB((db) =>
-      db.books.add({
-        id: Date.now() + Math.floor(Math.random() * 1000),
-        title: data.title,
-        author: data.author,
-        description: data.description,
-        coverImage: data.coverImage,
-        status: data.status || 'planned',
-        rating: data.rating,
-        pagesTotal: data.pagesTotal,
-        pagesRead: data.pagesRead || 0,
-        startDate: data.startDate,
-        endDate: data.endDate,
-        genre: data.genre,
-        isbn: data.isbn,
-        publisher: data.publisher,
-        publishYear: data.publishYear,
-        language: data.language,
-        format: data.format,
-        notes: data.notes,
-        collectionId: data.collectionId,
-        createdAt: now,
-        updatedAt: now,
-        synced: false,
-      })
+    const id = generateUUID()  // Generate UUID client-side
+    
+    // Include id in the data that gets synced
+    const bookData = {
+      id,  // UUID for Supabase
+      title: data.title,
+      author: data.author,
+      description: data.description,
+      coverImage: data.coverImage,
+      status: data.status || 'planned',
+      rating: data.rating,
+      pagesTotal: data.pagesTotal,
+      pagesRead: data.pagesRead || 0,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      genre: data.genre,
+      isbn: data.isbn,
+      publisher: data.publisher,
+      publishYear: data.publishYear,
+      language: data.language,
+      format: data.format,
+      notes: data.notes,
+      collectionId: data.collectionId,
+      createdAt: now,
+      updatedAt: now,
+      synced: false,
+    }
+    
+    const result = await withDB((db) =>
+      db.books.add(bookData)
     )
 
-    if (id === null) return -1
+    if (result === null) return ''
 
-    // Mark for sync
-    await this.markForSync(id, 'insert', data)
+    // Mark for sync - include id in data
+    await this.markForSync(id, 'insert', bookData)
 
     return id
   }
@@ -142,7 +148,7 @@ export class BooksRepository {
   /**
    * Update a book
    */
-  async update(id: number, data: UpdateBookData): Promise<void> {
+  async update(id: string, data: UpdateBookData): Promise<void> {
     await withDB((db) =>
       db.books.update(id, {
         ...data,
@@ -157,7 +163,7 @@ export class BooksRepository {
   /**
    * Delete a book
    */
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     await withDB((db) => db.books.delete(id))
 
     // Mark for sync
@@ -230,7 +236,7 @@ export class BooksRepository {
   /**
    * Update reading progress
    */
-  async updateProgress(id: number, pagesRead: number): Promise<void> {
+  async updateProgress(id: string, pagesRead: number): Promise<void> {
     const book = await this.getById(id)
     if (!book) return
 
@@ -245,7 +251,7 @@ export class BooksRepository {
    * Mark book for sync
    */
   private async markForSync(
-    id: number,
+    id: string,
     operation: 'insert' | 'update' | 'delete',
     data?: object
   ): Promise<void> {
@@ -288,7 +294,7 @@ export class BooksRepository {
   /**
    * Mark book as synced
    */
-  async markAsSynced(id: number): Promise<void> {
+  async markAsSynced(id: string): Promise<void> {
     await withDB((db) => db.books.update(id, { synced: true }))
 
     const syncRecords = (await withDB((db) =>

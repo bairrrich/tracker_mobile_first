@@ -31,7 +31,7 @@ import { Star } from 'lucide-react'
 interface BookFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  editBook?: BookFormData & { id?: number } | null
+  editBook?: BookFormData & { id?: string } | null
 }
 
 const bookStatuses: { value: BookStatus; label: string }[] = [

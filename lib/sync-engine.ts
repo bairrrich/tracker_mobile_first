@@ -109,13 +109,17 @@ export async function pullChanges(): Promise<{
 
     console.log(`[Sync Engine] Pulling changes since ${lastSync}...`)
 
-    // For now, we don't have actual remote changes
-    // This will be implemented when backend is ready
+    // Get unsynced records to send to API
+    const unsyncedRecords = (await withDB((db) => 
+      db.syncQueue.where('synced').equals(0).toArray()
+    )) ?? []
+
+    // Send to API to get remote changes
     const response = await fetch('/api/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        changes: [],
+        changes: unsyncedRecords,
         lastSync: lastSync.toISOString(),
       }),
     })
@@ -132,6 +136,7 @@ export async function pullChanges(): Promise<{
         await applyRemoteChange(change)
         count++
       }
+      console.log(`[Sync Engine] Applied ${count} remote changes`)
     }
 
     console.log(`[Sync Engine] Pulled ${count} changes successfully`)
@@ -152,8 +157,9 @@ async function applyRemoteChange(change: {
   operation: string
   data: object
   id?: number
+  recordId?: string  // Local ID from syncQueue (UUID string)
 }): Promise<void> {
-  const { table, operation, data, id } = change
+  const { table, operation, data, id, recordId } = change
 
   switch (table) {
     case 'collections':
@@ -161,6 +167,12 @@ async function applyRemoteChange(change: {
       break
     case 'items':
       await applyItemChange(operation as any, data, id)
+      break
+    case 'books':
+      await applyBookChange(operation as any, data, recordId, String(id))
+      break
+    case 'book_quotes':
+      await applyBookQuoteChange(operation as any, data, recordId, id)
       break
     // Add more tables as needed
     default:
@@ -215,10 +227,72 @@ async function applyItemChange(
 }
 
 /**
+ * Apply book change
+ */
+async function applyBookChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  localId?: string,  // UUID string
+  remoteId?: string
+): Promise<void> {
+  const id = remoteId || localId
+  
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (id) {
+        // Update existing record or create new one
+        await withDB((db) => db.books.put({ ...data, id, synced: true }))
+      }
+      break
+    case 'delete':
+      if (localId) {
+        await withDB((db) => db.books.delete(localId))
+      }
+      break
+  }
+}
+
+/**
+ * Apply book quote change
+ */
+async function applyBookQuoteChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  _recordId?: string,  // UUID string from syncQueue (unused for quotes)
+  id?: number  // Quote ID (number, auto-increment)
+): Promise<void> {
+  const quoteId = id  // Keep as number for auto-increment
+  
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (quoteId) {
+        await withDB((db) => db.bookQuotes.put({ ...data, id: quoteId, synced: true }))
+      }
+      break
+    case 'delete':
+      if (quoteId) {
+        await withDB((db) => db.bookQuotes.delete(quoteId))
+      }
+      break
+  }
+}
+
+/**
  * Mark sync queue records as synced
  */
-async function markAsSynced(ids: number[]): Promise<void> {
-  console.log('[Sync Engine] markAsSynced: Marking IDs as synced:', ids)
+async function markAsSynced(processedIds: Array<{ 
+  id?: {
+    localId: number
+    remoteId: number | string
+    recordId: number
+  }
+  localId?: number
+  remoteId?: number | string
+  recordId?: number
+} | number>): Promise<void> {
+  console.log('[Sync Engine] markAsSynced: Marking IDs as synced:', processedIds)
   
   const db = await ensureDB()
   if (!db) {
@@ -227,9 +301,28 @@ async function markAsSynced(ids: number[]): Promise<void> {
   }
   
   await db.transaction('rw', db.syncQueue, async () => {
-    for (const id of ids) {
-      console.log('[Sync Engine] markAsSynced: Updating record', id)
-      await db.syncQueue.update(id, { synced: true })
+    for (const item of processedIds) {
+      // Extract localId from nested structure or direct property
+      let localId: number | undefined
+      
+      if (typeof item === 'object' && item !== null) {
+        // Check for nested structure { id: { localId, ... } }
+        if ('id' in item && typeof item.id === 'object' && item.id !== null && 'localId' in item.id) {
+          localId = (item.id as any).localId
+        } 
+        // Check for flat structure { localId, ... }
+        else if ('localId' in item) {
+          localId = (item as any).localId
+        }
+      }
+      
+      if (localId !== undefined) {
+        console.log('[Sync Engine] markAsSynced: Marking localId', localId, 'as synced')
+        await db.syncQueue.update(localId, { synced: true })
+      } else {
+        // Simple case - item is the ID
+        await db.syncQueue.update(item as number, { synced: true })
+      }
     }
   })
   

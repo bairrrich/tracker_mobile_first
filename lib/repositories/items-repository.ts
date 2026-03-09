@@ -169,7 +169,7 @@ export class ItemsRepository {
       db.syncQueue.add({
         id: Date.now() + Math.floor(Math.random() * 1000),
         table: 'items',
-        recordId: id,
+        recordId: String(id),
         operation,
         data: data ? JSON.stringify(data) : '',
         synced: false,
@@ -192,7 +192,7 @@ export class ItemsRepository {
 
     const items: Item[] = []
     for (const record of await syncRecords) {
-      const item = await withDB((db) => db.items.get(record.recordId))
+      const item = await withDB((db) => db.items.get(Number(record.recordId)))
       if (item) {
         items.push(item)
       }

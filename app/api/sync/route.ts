@@ -51,12 +51,19 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient()
-    const processedIds: number[] = []
+    const processedIds: Array<{ localId: number; remoteId: string; recordId: string }> = []
     const errors: string[] = []
 
     // Process incoming changes
     for (const change of changes) {
       try {
+        console.log(`[Sync API] Processing change:`, {
+          id: change.id,
+          table: change.table,
+          recordId: change.recordId,
+          operation: change.operation,
+        })
+        
         const tableName = TABLE_MAPPING[change.table]
         if (!tableName) {
           console.warn(`[Sync API] Unknown table: ${change.table}`)
@@ -93,25 +100,58 @@ export async function POST(request: NextRequest) {
         switch (change.operation) {
           case 'insert':
             console.log(`[Sync API] Insert into ${tableName}:`, change.recordId)
+            console.log(`[Sync API] Data from client:`, data)
+            console.log(`[Sync API] ID from data:`, (data as any).id)
+            
             const insertData = {
               ...data,
               user_id: userId || null,
               synced: true,
               updated_at: new Date().toISOString(),
             }
-            // Remove id from data if it exists (let DB generate it)
-            delete (insertData as any).id
+            
+            // Use client-generated UUID - DON'T delete it!
+            // The id field is already in data from the client
+            
             const { data: insertResult, error: insertError } = await supabase
               .from(tableName)
               .insert(insertData)
               .select()
               .single()
             if (insertError) {
+              // Handle duplicate key error - record already exists
+              if (insertError.code === '23505') {
+                console.log(`[Sync API] Record already exists, updating instead`)
+                const { data: updateResult, error: updateError } = await supabase
+                  .from(tableName)
+                  .update({ ...insertData, updated_at: new Date().toISOString() })
+                  .eq('id', (insertData as any).id)
+                  .select()
+                  .single()
+                if (updateError) {
+                  console.error(`[Sync API] Update error:`, updateError)
+                  throw updateError
+                }
+                console.log(`[Sync API] Updated existing:`, updateResult.id)
+                processedIds.push({
+                  localId: change.id,
+                  remoteId: updateResult.id,
+                  recordId: change.recordId,
+                })
+                break
+              }
+              
               console.error(`[Sync API] Insert error:`, insertError)
               throw insertError
             }
-            console.log(`[Sync API] Inserted:`, insertResult)
-            processedIds.push(change.id)
+            console.log(`[Sync API] Inserted with ID:`, insertResult.id)
+            
+            // Return mapping of local ID to remote ID
+            processedIds.push({
+              localId: change.id,  // syncQueue record ID
+              remoteId: insertResult.id,  // Supabase ID (should match client ID)
+              recordId: change.recordId,  // Book/Item record ID in IndexedDB
+            })
             break
 
           case 'update':
@@ -207,7 +247,7 @@ export async function POST(request: NextRequest) {
     const response = {
       success: errors.length === 0,
       changes: remoteChanges,
-      processed: processedIds,
+      processed: processedIds.map(id => ({ id })),  // Return both id and recordId
       lastSync: new Date().toISOString(),
       errors: errors.length > 0 ? errors : undefined,
     }

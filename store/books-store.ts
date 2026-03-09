@@ -31,10 +31,10 @@ interface BooksState {
     language?: string
     format?: BookFormat
     notes?: string
-    collectionId?: number
-  }) => Promise<number>
+    collectionId?: string
+  }) => Promise<string>
   updateBook: (
-    id: number,
+    id: string,
     data: {
       title?: string
       author?: string
@@ -53,11 +53,11 @@ interface BooksState {
       language?: string
       format?: BookFormat
       notes?: string
-      collectionId?: number
+      collectionId?: string
     }
   ) => Promise<void>
-  deleteBook: (id: number) => Promise<void>
-  updateProgress: (id: number, pagesRead: number) => Promise<void>
+  deleteBook: (id: string) => Promise<void>
+  updateProgress: (id: string, pagesRead: number) => Promise<void>
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
 }
@@ -154,7 +154,7 @@ export const useBooksStore = create<BooksState>()(
     },
 
     // Update reading progress
-    updateProgress: async (id, pagesRead) => {
+    updateProgress: async (id: string, pagesRead: number) => {
       try {
         await booksRepository.updateProgress(id, pagesRead)
         const books = await booksRepository.getAll()

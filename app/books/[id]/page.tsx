@@ -52,17 +52,16 @@ export default function BookDetailPage() {
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [isFormOpen, setIsFormOpen] = React.useState(false)
   const [isQuoteFormOpen, setIsQuoteFormOpen] = React.useState(false)
-  const [editData, setEditData] = React.useState<BookFormData & { id?: number } | null>(null)
+  const [editData, setEditData] = React.useState<BookFormData & { id?: string } | null>(null)
   const [editQuoteData, setEditQuoteData] = React.useState<{ text: string; page?: number } | null>(null)
   const [selectedQuoteId, setSelectedQuoteId] = React.useState<number | null>(null)
 
-  const bookId = params.id as string
-  const bookIdNum = Number(bookId)
+  const bookId = params.id as string  // UUID string
 
-  // Find current book from books array
+  // Find current book from books array by UUID
   const selectedBookData = React.useMemo(
-    () => books.find((b) => b.id === bookIdNum) || null,
-    [books, bookIdNum]
+    () => books.find((b) => b.id === bookId) || null,
+    [books, bookId]
   )
 
   React.useEffect(() => {
@@ -71,14 +70,14 @@ export default function BookDetailPage() {
 
   // Fetch quotes when book is loaded
   React.useEffect(() => {
-    if (bookIdNum) {
-      fetchQuotes(bookIdNum)
+    if (bookId) {
+      fetchQuotes(bookId)
     }
-  }, [bookIdNum, fetchQuotes])
+  }, [bookId, fetchQuotes])
 
   const handleAddQuote = async (text: string, page?: number) => {
-    if (!bookIdNum) return
-    await addQuote(bookIdNum, text, page)
+    if (!bookId) return
+    await addQuote(bookId, text, page)
   }
 
   const handleEditQuote = async (text: string, page?: number) => {

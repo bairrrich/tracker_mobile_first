@@ -1,7 +1,7 @@
 import { withDB, type BookQuote } from '@/lib/db'
 
 export interface CreateQuoteData {
-  bookId: number
+  bookId: string  // UUID
   text: string
   page?: number
 }
@@ -15,7 +15,7 @@ export class BookQuotesRepository {
   /**
    * Get all quotes for a book
    */
-  async getByBook(bookId: number): Promise<BookQuote[]> {
+  async getByBook(bookId: string): Promise<BookQuote[]> {
     return withDB((db) =>
       db.bookQuotes.where('bookId').equals(bookId).reverse().toArray()
     ) ?? []
@@ -88,7 +88,7 @@ export class BookQuotesRepository {
       db.syncQueue.add({
         id: Date.now() + Math.floor(Math.random() * 1000),
         table: 'bookQuotes',
-        recordId: id,
+        recordId: String(id),  // Convert number to string for UUID compatibility
         operation,
         data: data ? JSON.stringify(data) : '',
         synced: false,

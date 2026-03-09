@@ -18,7 +18,7 @@ export type BookStatus = 'reading' | 'completed' | 'planned' | 'abandoned'
 export type BookFormat = 'hardcover' | 'paperback' | 'ebook' | 'audiobook'
 
 export interface Book {
-  id: number
+  id: string  // UUID instead of number
   title: string
   author: string
   description?: string
@@ -36,7 +36,7 @@ export interface Book {
   language?: string
   format?: BookFormat
   notes?: string
-  collectionId?: number
+  collectionId?: string  // UUID instead of number
   createdAt: Date
   updatedAt: Date
   synced: boolean
@@ -44,7 +44,7 @@ export interface Book {
 
 export interface BookQuote {
   id: number
-  bookId: number
+  bookId: string  // UUID
   text: string
   page?: number
   createdAt: Date
@@ -119,7 +119,7 @@ export interface Note {
 export interface SyncQueue {
   id: number
   table: string
-  recordId: number
+  recordId: string  // UUID
   operation: 'insert' | 'update' | 'delete'
   data: string
   synced: boolean
@@ -263,7 +263,7 @@ export function generateId(): number {
  */
 export async function markForSync(
   table: string,
-  recordId: number,
+  recordId: string,
   operation: 'insert' | 'update' | 'delete',
   data?: object
 ): Promise<void> {
@@ -271,7 +271,7 @@ export async function markForSync(
     console.warn('IndexedDB is not available')
     return
   }
-  
+
   await db.syncQueue.add({
     id: generateId(),
     table,
