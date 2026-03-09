@@ -1,12 +1,21 @@
 import { withDB, type Collection, type CollectionType } from '@/lib/db'
 import { generateUUID } from '@/lib/utils/uuid'
+import { createTombstone, filterActive } from '@/lib/utils/sync-utils'
 
 export class CollectionsRepository {
   /**
-   * Get all collections
+   * Get all collections (including deleted)
    */
   async getAll(): Promise<Collection[]> {
     return withDB((db) => db.collections.orderBy('updatedAt').reverse().toArray()) ?? []
+  }
+
+  /**
+   * Get active collections only (excludes deleted)
+   */
+  async getActive(): Promise<Collection[]> {
+    const all = await this.getAll()
+    return filterActive(all)
   }
 
   /**
@@ -67,15 +76,32 @@ export class CollectionsRepository {
   }
 
   /**
-   * Delete a collection
+   * Delete a collection (soft delete with tombstone)
    */
   async delete(id: string): Promise<void> {
+    const collection = await this.getById(id)
+    if (!collection) return
+
+    withDB((db) => {
+      db.collections.update(id, {
+        ...collection,
+        ...createTombstone(),
+        synced: false,
+      })
+    })
+
+    // Mark for sync - send tombstone to server
+    await this.markForSync(id, 'delete', { id, deleted: true })
+  }
+
+  /**
+   * Permanently delete a collection (hard delete)
+   * Use only for cleaning up old tombstones or local-only records
+   */
+  async hardDelete(id: string): Promise<void> {
     withDB((db) => {
       db.collections.delete(id)
     })
-
-    // Mark for sync
-    await this.markForSync(id, 'delete')
   }
 
   /**

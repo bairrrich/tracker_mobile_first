@@ -19,7 +19,7 @@ export type BookStatus = 'reading' | 'completed' | 'planned' | 'abandoned'
 export type BookFormat = 'hardcover' | 'paperback' | 'ebook' | 'audiobook'
 
 export interface Book {
-  id: string  // UUID instead of number
+  id: string  // UUID
   title: string
   author: string
   description?: string
@@ -37,9 +37,11 @@ export interface Book {
   language?: string
   format?: BookFormat
   notes?: string
-  collectionId?: string  // UUID instead of number
+  collectionId?: string  // UUID
   createdAt: Date
   updatedAt: Date
+  deleted?: boolean  // Tombstone flag for offline-first sync
+  deletedAt?: Date  // Tombstone timestamp
   synced: boolean
 }
 
@@ -49,6 +51,8 @@ export interface BookQuote {
   text: string
   page?: number
   createdAt: Date
+  deleted?: boolean  // Tombstone flag
+  deletedAt?: Date  // Tombstone timestamp
   synced: boolean
 }
 
@@ -61,6 +65,8 @@ export interface Collection {
   description?: string
   createdAt: Date
   updatedAt: Date
+  deleted?: boolean  // Tombstone flag
+  deletedAt?: Date  // Tombstone timestamp
   synced: boolean
 }
 
@@ -74,6 +80,8 @@ export interface Item {
   rating?: number
   createdAt: Date
   updatedAt: Date
+  deleted?: boolean  // Tombstone flag
+  deletedAt?: Date  // Tombstone timestamp
   synced: boolean
 }
 
@@ -85,6 +93,8 @@ export interface Metric {
   unit?: string
   date: Date
   createdAt: Date
+  deleted?: boolean  // Tombstone flag
+  deletedAt?: Date  // Tombstone timestamp
 }
 
 export interface History {
@@ -94,6 +104,8 @@ export interface History {
   value?: number
   note?: string
   createdAt: Date
+  deleted?: boolean  // Tombstone flag
+  deletedAt?: Date  // Tombstone timestamp
 }
 
 export interface Tag {
@@ -101,12 +113,16 @@ export interface Tag {
   name: string
   color?: string
   createdAt: Date
+  deleted?: boolean  // Tombstone flag
+  deletedAt?: Date  // Tombstone timestamp
 }
 
 export interface ItemTag {
   id: string  // UUID
   itemId: string  // UUID
   tagId: string  // UUID
+  deleted?: boolean  // Tombstone flag
+  deletedAt?: Date  // Tombstone timestamp
 }
 
 export interface Note {
@@ -115,6 +131,8 @@ export interface Note {
   content: string
   createdAt: Date
   updatedAt: Date
+  deleted?: boolean  // Tombstone flag
+  deletedAt?: Date  // Tombstone timestamp
 }
 
 export interface SyncQueue {

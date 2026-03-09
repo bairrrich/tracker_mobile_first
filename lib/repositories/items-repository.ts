@@ -1,5 +1,6 @@
 import { withDB, type Item } from '@/lib/db'
 import { generateUUID } from '@/lib/utils/uuid'
+import { createTombstone, filterActive } from '@/lib/utils/sync-utils'
 
 export type ItemStatus = 'active' | 'archived' | 'completed'
 
@@ -22,10 +23,18 @@ export interface UpdateItemData {
 
 export class ItemsRepository {
   /**
-   * Get all items
+   * Get all items (including deleted)
    */
   async getAll(): Promise<Item[]> {
     return withDB((db) => db.items.orderBy('updatedAt').reverse().toArray()) ?? []
+  }
+
+  /**
+   * Get active items only (excludes deleted)
+   */
+  async getActive(): Promise<Item[]> {
+    const all = await this.getAll()
+    return filterActive(all)
   }
 
   /**
@@ -120,9 +129,30 @@ export class ItemsRepository {
   }
 
   /**
-   * Delete an item
+   * Delete an item (soft delete with tombstone)
    */
   async delete(id: string): Promise<void> {
+    const item = await this.getById(id)
+    if (!item) return
+
+    // Mark as deleted with tombstone (soft delete)
+    await withDB((db) =>
+      db.items.update(id, {
+        ...item,
+        ...createTombstone(),
+        synced: false,
+      })
+    )
+
+    // Mark for sync - send tombstone to server
+    await this.markForSync(id, 'delete', { id, deleted: true })
+  }
+
+  /**
+   * Permanently delete an item (hard delete)
+   * Use only for cleaning up old tombstones or local-only records
+   */
+  async hardDelete(id: string): Promise<void> {
     // Delete related metrics, history, notes, and tags
     await withDB((db) => db.metrics.where('itemId').equals(id).delete())
     await withDB((db) => db.history.where('itemId').equals(id).delete())
@@ -130,9 +160,6 @@ export class ItemsRepository {
     await withDB((db) => db.itemTags.where('itemId').equals(id).delete())
 
     await withDB((db) => db.items.delete(id))
-
-    // Mark for sync
-    await this.markForSync(id, 'delete')
   }
 
   /**

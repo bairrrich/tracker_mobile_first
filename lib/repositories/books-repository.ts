@@ -1,5 +1,6 @@
 import { withDB, type Book, type BookStatus, type BookFormat } from '@/lib/db'
 import { generateUUID } from '@/lib/utils/uuid'
+import { createTombstone, filterActive } from '@/lib/utils/sync-utils'
 
 export interface CreateBookData {
   title: string
@@ -44,13 +45,6 @@ export interface UpdateBookData {
 }
 
 export class BooksRepository {
-  /**
-   * Get all books
-   */
-  async getAll(): Promise<Book[]> {
-    return withDB((db) => db.books.orderBy('updatedAt').reverse().toArray()) ?? []
-  }
-
   /**
    * Get book by ID
    */
@@ -161,13 +155,47 @@ export class BooksRepository {
   }
 
   /**
-   * Delete a book
+   * Delete a book (soft delete with tombstone)
    */
   async delete(id: string): Promise<void> {
-    await withDB((db) => db.books.delete(id))
+    const book = await this.getById(id)
+    if (!book) return
 
-    // Mark for sync
-    await this.markForSync(id, 'delete')
+    await withDB((db) =>
+      db.books.update(id, {
+        ...book,
+        ...createTombstone(),
+        synced: false,
+      })
+    )
+
+    // Mark for sync - send tombstone to server
+    await this.markForSync(id, 'delete', { id, deleted: true })
+  }
+
+  /**
+   * Permanently delete a book (hard delete)
+   * Use only for cleaning up old tombstones or local-only records
+   */
+  async hardDelete(id: string): Promise<void> {
+    // Also delete related quotes
+    await withDB((db) => db.bookQuotes.where('bookId').equals(id).delete())
+    await withDB((db) => db.books.delete(id))
+  }
+
+  /**
+   * Get all books (including deleted)
+   */
+  async getAll(): Promise<Book[]> {
+    return withDB((db) => db.books.orderBy('updatedAt').reverse().toArray()) ?? []
+  }
+
+  /**
+   * Get active books only (excludes deleted)
+   */
+  async getActive(): Promise<Book[]> {
+    const all = await this.getAll()
+    return filterActive(all)
   }
 
   /**

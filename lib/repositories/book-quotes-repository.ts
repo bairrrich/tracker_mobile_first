@@ -1,5 +1,6 @@
 import { withDB, type BookQuote } from '@/lib/db'
 import { generateUUID } from '@/lib/utils/uuid'
+import { createTombstone, filterActive } from '@/lib/utils/sync-utils'
 
 export interface CreateQuoteData {
   bookId: string  // UUID
@@ -14,12 +15,20 @@ export interface UpdateQuoteData {
 
 export class BookQuotesRepository {
   /**
-   * Get all quotes for a book
+   * Get all quotes for a book (including deleted)
    */
   async getByBook(bookId: string): Promise<BookQuote[]> {
     return withDB((db) =>
       db.bookQuotes.where('bookId').equals(bookId).reverse().toArray()
     ) ?? []
+  }
+
+  /**
+   * Get active quotes for a book (excludes deleted)
+   */
+  async getActiveByBook(bookId: string): Promise<BookQuote[]> {
+    const all = await this.getByBook(bookId)
+    return filterActive(all)
   }
 
   /**
@@ -70,13 +79,45 @@ export class BookQuotesRepository {
   }
 
   /**
-   * Delete a quote
+   * Delete a quote (soft delete with tombstone)
    */
   async delete(id: string): Promise<void> {
-    await withDB((db) => db.bookQuotes.delete(id))
+    const quote = await this.getById(id)
+    if (!quote) return
 
-    // Mark for sync
-    await this.markForSync(id, 'delete')
+    await withDB((db) =>
+      db.bookQuotes.update(id, {
+        ...quote,
+        ...createTombstone(),
+        synced: false,
+      })
+    )
+
+    // Mark for sync - send tombstone to server
+    await this.markForSync(id, 'delete', { id, deleted: true })
+  }
+
+  /**
+   * Permanently delete a quote (hard delete)
+   * Use only for cleaning up old tombstones or local-only records
+   */
+  async hardDelete(id: string): Promise<void> {
+    await withDB((db) => db.bookQuotes.delete(id))
+  }
+
+  /**
+   * Get all quotes (including deleted)
+   */
+  async getAll(): Promise<BookQuote[]> {
+    return withDB((db) => db.bookQuotes.orderBy('createdAt').reverse().toArray()) ?? []
+  }
+
+  /**
+   * Get active quotes only (excludes deleted)
+   */
+  async getActive(): Promise<BookQuote[]> {
+    const all = await this.getAll()
+    return filterActive(all)
   }
 
   /**

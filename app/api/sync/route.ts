@@ -165,6 +165,26 @@ export async function POST(request: NextRequest) {
 
           case 'update':
             console.log(`[Sync API] Update ${tableName}:`, change.recordId)
+            
+            // First, check if the record exists and if it's deleted on the server
+            const { data: existingRecord } = await supabase
+              .from(tableName)
+              .select('id, deleted, deleted_at, updated_at')
+              .eq('id', change.recordId)
+              .single()
+
+            // Conflict resolution: if server has tombstone but client is updating
+            if (existingRecord?.deleted) {
+              console.log(`[Sync API] Conflict: Record ${change.recordId} is deleted on server but updated on client`)
+              // Delete wins - reject the update and keep tombstone
+              processedIds.push({
+                localId: change.id,
+                remoteId: change.recordId,
+                recordId: change.recordId,
+              })
+              break
+            }
+
             const updateData = {
               ...data,
               updated_at: new Date().toISOString(),
@@ -172,6 +192,7 @@ export async function POST(request: NextRequest) {
             // Remove user_id from update to avoid changing ownership
             delete (updateData as any).user_id
             delete (updateData as any).id
+            
             const { data: updateResult, error: updateError } = await supabase
               .from(tableName)
               .update(updateData)
@@ -192,15 +213,31 @@ export async function POST(request: NextRequest) {
 
           case 'delete':
             console.log(`[Sync API] Delete from ${tableName}:`, change.recordId)
-            const { error: deleteError } = await supabase
+            
+            // Soft delete: mark as deleted instead of physical delete
+            const { data: deleteResult, error: deleteError } = await supabase
               .from(tableName)
-              .delete()
+              .update({
+                deleted: true,
+                deleted_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
               .eq('id', change.recordId)
+              .select()
+              .single()
+            
             if (deleteError) {
-              console.error(`[Sync API] Delete error:`, deleteError)
-              throw deleteError
+              // If record doesn't exist, that's ok - it was already deleted
+              if (deleteError.code === 'PGRST116') {
+                console.log(`[Sync API] Record ${change.recordId} not found (already deleted?)`)
+              } else {
+                console.error(`[Sync API] Delete error:`, deleteError)
+                throw deleteError
+              }
+            } else {
+              console.log(`[Sync API] Soft deleted:`, deleteResult)
             }
-            console.log(`[Sync API] Deleted`)
+            
             processedIds.push({
               localId: change.id,  // syncQueue record ID
               remoteId: change.recordId,  // Same as recordId for deletes
@@ -219,6 +256,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get remote changes since lastSync
+    // This includes both updates AND tombstones (soft deletes)
     const remoteChanges: Array<{
       table: string
       operation: string
@@ -233,11 +271,13 @@ export async function POST(request: NextRequest) {
     if (userId) {
       for (const [localTable, remoteTable] of Object.entries(TABLE_MAPPING)) {
         try {
+          // Fetch records updated/changed since last sync
+          // This includes both regular updates and tombstones (deleted=true)
           const { data: records, error } = await supabase
             .from(remoteTable)
             .select('*')
             .eq('user_id', userId)
-            .gt('updated_at', lastSync || '1970-01-01')
+            .or(`updated_at.gt.${lastSync || '1970-01-01'},deleted_at.gt.${lastSync || '1970-01-01'}`)
             .limit(100)
 
           if (error) {
@@ -247,12 +287,17 @@ export async function POST(request: NextRequest) {
 
           if (records && records.length > 0) {
             for (const record of records) {
+              // Determine operation based on deleted flag
+              const operation = record.deleted ? 'delete' : 'update'
+              
               remoteChanges.push({
                 table: localTable,
-                operation: 'update',
+                operation,
                 data: record,
                 id: record.id,
               })
+              
+              console.log(`[Sync API] Remote change: ${operation} ${localTable}/${record.id}`)
             }
           }
         } catch (error) {

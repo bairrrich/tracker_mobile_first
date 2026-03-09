@@ -151,6 +151,7 @@ export async function pullChanges(): Promise<{
 
 /**
  * Apply a remote change to local database
+ * Handles both regular updates and tombstones (soft deletes)
  */
 async function applyRemoteChange(change: {
   table: string
@@ -197,7 +198,18 @@ async function applyCollectionChange(
       break
     case 'delete':
       if (id) {
-        await withDB((db) => db.collections.delete(id))
+        // Apply tombstone (soft delete) instead of hard delete
+        // This preserves the record for potential future sync
+        await withDB((db) =>
+          db.collections.put({
+            id,
+            deleted: true,
+            deletedAt: new Date(),
+            synced: true,
+            ...(data as any),
+          })
+        )
+        console.log(`[Sync Engine] Applied tombstone for collection ${id}`)
       }
       break
   }
@@ -220,7 +232,17 @@ async function applyItemChange(
       break
     case 'delete':
       if (id) {
-        await withDB((db) => db.items.delete(id))
+        // Apply tombstone (soft delete)
+        await withDB((db) =>
+          db.items.put({
+            id,
+            deleted: true,
+            deletedAt: new Date(),
+            synced: true,
+            ...(data as any),
+          })
+        )
+        console.log(`[Sync Engine] Applied tombstone for item ${id}`)
       }
       break
   }
@@ -246,8 +268,18 @@ async function applyBookChange(
       }
       break
     case 'delete':
-      if (localId) {
-        await withDB((db) => db.books.delete(localId))
+      if (id) {
+        // Apply tombstone (soft delete)
+        await withDB((db) =>
+          db.books.put({
+            id,
+            deleted: true,
+            deletedAt: new Date(),
+            synced: true,
+            ...(data as any),
+          })
+        )
+        console.log(`[Sync Engine] Applied tombstone for book ${id}`)
       }
       break
   }
@@ -263,7 +295,7 @@ async function applyBookQuoteChange(
   quoteId?: string  // Quote ID (UUID string)
 ): Promise<void> {
   const id = quoteId  // Keep as string for UUID
-  
+
   switch (operation) {
     case 'insert':
     case 'update':
@@ -273,7 +305,17 @@ async function applyBookQuoteChange(
       break
     case 'delete':
       if (id) {
-        await withDB((db) => db.bookQuotes.delete(id))
+        // Apply tombstone (soft delete)
+        await withDB((db) =>
+          db.bookQuotes.put({
+            id,
+            deleted: true,
+            deletedAt: new Date(),
+            synced: true,
+            ...(data as any),
+          })
+        )
+        console.log(`[Sync Engine] Applied tombstone for quote ${id}`)
       }
       break
   }

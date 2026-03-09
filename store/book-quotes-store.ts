@@ -29,7 +29,7 @@ export const useBookQuotesStore = create<BookQuotesState>()(
     fetchQuotes: async (bookId) => {
       set({ isLoading: true, error: null })
       try {
-        const quotes = await bookQuotesRepository.getByBook(bookId)
+        const quotes = await bookQuotesRepository.getActiveByBook(bookId)
         set({ quotes, isLoading: false })
       } catch (error) {
         set({
@@ -44,7 +44,7 @@ export const useBookQuotesStore = create<BookQuotesState>()(
       set({ isLoading: true, error: null })
       try {
         const id = await bookQuotesRepository.create({ bookId, text, page })
-        const quotes = await bookQuotesRepository.getByBook(bookId)
+        const quotes = await bookQuotesRepository.getActiveByBook(bookId)
         set({ quotes, isLoading: false })
         return id
       } catch (error) {
@@ -65,7 +65,7 @@ export const useBookQuotesStore = create<BookQuotesState>()(
         const currentQuotes = get().quotes
         const bookId = currentQuotes[0]?.bookId
         if (bookId) {
-          const quotes = await bookQuotesRepository.getByBook(bookId)
+          const quotes = await bookQuotesRepository.getActiveByBook(bookId)
           set({ quotes, isLoading: false })
         }
       } catch (error) {
@@ -82,11 +82,11 @@ export const useBookQuotesStore = create<BookQuotesState>()(
       set({ isLoading: true, error: null })
       try {
         await bookQuotesRepository.delete(id)
-        // Reload quotes to get updated data
+        // Reload quotes to get updated data (excluding deleted)
         const currentQuotes = get().quotes
         const bookId = currentQuotes[0]?.bookId
         if (bookId) {
-          const quotes = await bookQuotesRepository.getByBook(bookId)
+          const quotes = await bookQuotesRepository.getActiveByBook(bookId)
           set({ quotes, isLoading: false })
         }
       } catch (error) {
