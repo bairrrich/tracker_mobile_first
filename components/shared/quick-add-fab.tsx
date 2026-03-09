@@ -83,53 +83,52 @@ export function QuickAddFAB() {
       )}
 
       {/* Action Buttons */}
-      <div className="fixed bottom-28 right-4 z-50 flex flex-col items-center gap-2 md:bottom-24 md:right-8">
-        {isOpen && (
-          <div className="flex flex-col gap-2 mb-2">
-            {actions.map((action, index) => (
-              <button
-                key={action.id}
-                onClick={action.onClick}
-                className={cn(
-                  'flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-lg',
-                  'bg-[var(--card)] border border-[var(--border)]',
-                  'text-[var(--text)] hover:bg-[var(--card)]/80',
-                  'transition-all animate-in slide-in-from-bottom-2',
-                  'max-w-[200px] self-end'
-                )}
-                style={{
-                  animationDelay: `${index * 50}ms`,
-                }}
-              >
-                <div className={cn('w-8 h-8 rounded-full flex items-center justify-center text-[var(--primary-foreground)]', action.color)}>
-                  {action.icon}
-                </div>
-                <span className="text-sm font-medium">{action.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Main FAB */}
-        <button
-          onClick={toggleOpen}
-          className={cn(
-            'relative w-14 h-14 rounded-full shadow-lg',
-            'flex items-center justify-center',
-            'transition-all duration-300',
-            'bg-[var(--primary)] hover:scale-105',
-            isOpen && 'rotate-45 bg-[var(--error)]'
-          )}
-          aria-label={isOpen ? 'Close quick add' : 'Quick add'}
-          aria-expanded={isOpen}
-        >
-          {isOpen ? (
-            <X className="w-6 h-6 text-[var(--primary-foreground)]" />
-          ) : (
-            <Plus className="w-6 h-6 text-[var(--primary-foreground)]" />
-          )}
-        </button>
+      <div className="fixed bottom-40 right-4 z-50 flex flex-col gap-2 md:bottom-32 md:right-8">
+        {isOpen &&
+          actions.map((action, index) => (
+            <button
+              key={action.id}
+              onClick={action.onClick}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-lg',
+                'bg-[var(--card)] border border-[var(--border)]',
+                'text-[var(--text)] hover:bg-[var(--card)]/80',
+                'transition-all animate-in slide-in-from-bottom-2',
+                'max-w-[200px] self-end'
+              )}
+              style={{
+                animationDelay: `${index * 50}ms`,
+              }}
+            >
+              <div className={cn('w-8 h-8 rounded-full flex items-center justify-center text-[var(--primary-foreground)]', action.color)}>
+                {action.icon}
+              </div>
+              <span className="text-sm font-medium">{action.label}</span>
+            </button>
+          ))
+        }
       </div>
+
+      {/* Main FAB - Fixed position */}
+      <button
+        onClick={toggleOpen}
+        className={cn(
+          'fixed bottom-28 right-4 z-50 w-14 h-14 rounded-full shadow-lg',
+          'flex items-center justify-center',
+          'transition-all duration-300',
+          'bg-[var(--primary)] hover:scale-105',
+          'md:bottom-24 md:right-8',
+          isOpen && 'rotate-45 bg-[var(--error)]'
+        )}
+        aria-label={isOpen ? 'Close quick add' : 'Quick add'}
+        aria-expanded={isOpen}
+      >
+        {isOpen ? (
+          <X className="w-6 h-6 text-[var(--primary-foreground)]" />
+        ) : (
+          <Plus className="w-6 h-6 text-[var(--primary-foreground)]" />
+        )}
+      </button>
     </>
   )
 }
