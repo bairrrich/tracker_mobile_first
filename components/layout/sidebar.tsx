@@ -36,8 +36,8 @@ export function Sidebar() {
       {/* Logo */}
       <div className="h-[55px] flex items-center px-4 border-b border-[var(--border)]">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-            <span className="text-primary-foreground font-bold text-sm">T</span>
+          <div className="w-8 h-8 rounded-lg bg-[var(--primary)] flex items-center justify-center flex-shrink-0">
+            <span className="text-[var(--primary-foreground)] font-bold text-sm">T</span>
           </div>
           <span className="font-semibold truncate">{t('tracker')}</span>
         </div>
@@ -57,7 +57,7 @@ export function Sidebar() {
                   className={`
                     flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors
                     ${isActive
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
                       : 'text-[var(--text)]/70 hover:bg-[var(--card)] hover:text-[var(--text)]'
                     }
                   `}
@@ -79,7 +79,7 @@ export function Sidebar() {
           className={cn(
             'flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors',
             pathname === '/settings'
-              ? 'bg-primary text-primary-foreground'
+              ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
               : 'text-[var(--text)]/70 hover:bg-[var(--card)] hover:text-[var(--text)]'
           )}
         >

@@ -66,8 +66,8 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Sun className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center">
+                  <Sun className="w-5 h-5 text-[var(--primary)]" />
                 </div>
                 <div>
                   <p className="font-medium">{t('appearance.lightTheme.title')}</p>
@@ -210,8 +210,8 @@ export default function SettingsPage() {
             {user ? (
               <>
                 <div className="flex items-center gap-3 p-4 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
-                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-                    <User className="w-6 h-6 text-primary-foreground" />
+                  <div className="w-12 h-12 rounded-full bg-[var(--primary)] flex items-center justify-center">
+                    <User className="w-6 h-6 text-[var(--primary-foreground)]" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium">{user.email}</p>

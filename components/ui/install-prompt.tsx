@@ -103,8 +103,8 @@ export function InstallPrompt({ className }: InstallPromptProps) {
         <div className="p-4">
           <div className="flex items-start gap-3">
             {/* Icon */}
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary">
-              <Download className="h-6 w-6 text-primary-foreground" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)]">
+              <Download className="h-6 w-6 text-[var(--primary-foreground)]" />
             </div>
 
             {/* Text */}

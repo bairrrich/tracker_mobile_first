@@ -24,7 +24,7 @@ export function ThemeToggle() {
             className={`
               flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors
               ${theme === t.value
-                ? 'bg-primary text-primary-foreground'
+                ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
                 : 'bg-[var(--card)] hover:bg-[var(--card)]/80'
               }
             `}

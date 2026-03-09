@@ -68,7 +68,7 @@ export const CollectionCard = React.forwardRef<HTMLDivElement, CollectionCardPro
               </div>
               <div className="h-2 w-full rounded-full bg-[var(--border)] overflow-hidden">
                 <div
-                  className="h-full bg-primary transition-all"
+                  className="h-full bg-[var(--primary)] transition-all"
                   style={{ width: `${progress}%` }}
                 />
               </div>

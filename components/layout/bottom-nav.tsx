@@ -33,9 +33,9 @@ export function BottomNav() {
               flex flex-col items-center justify-center gap-1 p-2 min-w-[64px]
               transition-colors
               ${isPrimary
-                ? 'text-primary -mt-8'
+                ? 'text-[var(--primary)] -mt-8'
                 : isActive
-                  ? 'text-primary'
+                  ? 'text-[var(--primary)]'
                   : 'text-muted-foreground hover:text-[var(--text)]'
               }
             `}
@@ -46,7 +46,7 @@ export function BottomNav() {
               className={`
                 w-10 h-10 rounded-full flex items-center justify-center
                 ${isPrimary
-                  ? 'bg-primary text-primary-foreground shadow-lg'
+                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)] shadow-lg'
                   : ''
                 }
               `}

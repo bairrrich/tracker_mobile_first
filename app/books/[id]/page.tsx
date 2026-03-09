@@ -242,7 +242,7 @@ export default function BookDetailPage() {
                       <span className="text-muted-foreground font-medium">
                         {selectedBookData.pagesRead} / {selectedBookData.pagesTotal}
                       </span>
-                      <span className="font-semibold text-primary">{progress}%</span>
+                      <span className="font-semibold text-[var(--primary)]">{progress}%</span>
                     </div>
                     <Progress value={progress} className="h-2" />
                   </div>

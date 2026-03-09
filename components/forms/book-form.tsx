@@ -341,7 +341,7 @@ export function BookForm({ open, onOpenChange, editBook }: BookFormProps) {
                   {values.rating ? (
                     <>
                       <span className="font-medium">{values.rating}</span>
-                      <Star className="w-4 h-4 fill-primary text-primary" />
+                      <Star className="w-4 h-4 fill-[var(--primary)] text-[var(--primary)]" />
                     </>
                   ) : (
                     <span className="text-muted-foreground text-sm">No rating</span>

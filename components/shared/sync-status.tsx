@@ -25,7 +25,7 @@ export function SyncStatus() {
 
     switch (syncStatus) {
       case 'syncing':
-        return <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+        return <RefreshCw className="h-4 w-4 animate-spin text-[var(--primary)]" />
       case 'error':
         return <AlertCircle className="h-4 w-4 text-error" />
       case 'idle':
@@ -65,7 +65,7 @@ export function SyncStatus() {
 
     switch (syncStatus) {
       case 'syncing':
-        return 'text-primary'
+        return 'text-[var(--primary)]'
       case 'error':
         return 'text-error'
       case 'idle':

@@ -117,7 +117,7 @@ export function QuickAddFAB() {
             'fab relative w-14 h-14 rounded-full shadow-lg',
             'flex items-center justify-center',
             'transition-all duration-200',
-            isOpen ? 'bg-error rotate-45' : 'bg-primary'
+            isOpen ? 'bg-[var(--error)] rotate-45' : 'bg-[var(--primary)]'
           )}
           aria-label={isOpen ? 'Close quick add' : 'Quick add'}
           aria-expanded={isOpen}

@@ -122,7 +122,7 @@ export default function CollectionsPage() {
                 onClick={() => setViewMode('grid')}
                 className={`p-2 transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
                     : 'bg-[var(--card)] hover:bg-[var(--card)]/80'
                 }`}
                 aria-label={t('gridView')}
@@ -133,7 +133,7 @@ export default function CollectionsPage() {
                 onClick={() => setViewMode('list')}
                 className={`p-2 transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
                     : 'bg-[var(--card)] hover:bg-[var(--card)]/80'
                 }`}
                 aria-label={t('listView')}
@@ -193,7 +193,7 @@ export default function CollectionsPage() {
                       console.log('Navigate to collection:', collection.id)
                     }}
                   >
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-[var(--primary)]/10 flex items-center justify-center flex-shrink-0">
                       <span className="text-xl">
                         {getCollectionIcon(collection.type)}
                       </span>

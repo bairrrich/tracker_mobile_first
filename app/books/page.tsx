@@ -133,7 +133,7 @@ export default function BooksPage() {
                 onClick={() => setViewMode('grid')}
                 className={`p-2 transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
                     : 'bg-[var(--card)] hover:bg-[var(--card)]/80'
                 }`}
                 aria-label={t('gridView')}
@@ -144,7 +144,7 @@ export default function BooksPage() {
                 onClick={() => setViewMode('list')}
                 className={`p-2 transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
                     : 'bg-[var(--card)] hover:bg-[var(--card)]/80'
                 }`}
                 aria-label={t('listView')}
@@ -227,7 +227,7 @@ export default function BooksPage() {
                     <div className="flex-1 min-w-0">
                       {/* Title row with status and rating */}
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="font-semibold text-base truncate group-hover:text-primary transition-colors flex-1 min-w-0">
+                        <div className="font-semibold text-base truncate group-hover:text-[var(--primary)] transition-colors flex-1 min-w-0">
                           {book.title}
                         </div>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -268,7 +268,7 @@ export default function BooksPage() {
                               <span className="text-muted-foreground font-medium">
                                 {book.pagesRead} / {book.pagesTotal}
                               </span>
-                              <span className="font-semibold text-primary">{progress}%</span>
+                              <span className="font-semibold text-[var(--primary)]">{progress}%</span>
                             </div>
                             <Progress
                               value={progress}

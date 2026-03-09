@@ -22,8 +22,8 @@ export function Header() {
       <div className="h-[55px] flex items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-            <span className="text-primary-foreground font-bold text-sm">T</span>
+          <div className="w-8 h-8 rounded-lg bg-[var(--primary)] flex items-center justify-center flex-shrink-0">
+            <span className="text-[var(--primary-foreground)] font-bold text-sm">T</span>
           </div>
           <span className="font-semibold hidden sm:inline">{t('tracker')}</span>
         </div>
