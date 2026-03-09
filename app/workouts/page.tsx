@@ -13,7 +13,16 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Search, Plus, Calendar, Clock, Dumbbell, Activity, Heart } from 'lucide-react'
+import { WorkoutLogger } from '@/components/workouts/workout-logger'
 import { workoutsRepository } from '@/lib/repositories/workouts-repository'
 import type { Workout } from '@/lib/db'
 
@@ -31,10 +40,14 @@ const WORKOUT_TYPE_COLORS: Record<string, string> = {
 
 export default function WorkoutsPage() {
   const t = useTranslations('Workouts')
+  const tCommon = useTranslations('Common')
   const [workouts, setWorkouts] = React.useState<Workout[]>([])
+  const [workout, setWorkout] = React.useState<Workout | null>(null)
   const [selectedType, setSelectedType] = React.useState<string>('all')
   const [searchQuery, setSearchQuery] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(true)
+  const [isWorkoutLoggerOpen, setIsWorkoutLoggerOpen] = React.useState(false)
+  const [selectedWorkoutType, setSelectedWorkoutType] = React.useState<'strength' | 'cardio' | 'yoga'>('strength')
 
   // Load data on mount
   React.useEffect(() => {
@@ -115,8 +128,9 @@ export default function WorkoutsPage() {
           </div>
 
           <Button onClick={() => {
-            // TODO: Start new workout
-            console.log('Start new workout')
+            // Open workout type selector
+            setSelectedWorkoutType('strength')
+            setIsWorkoutLoggerOpen(true)
           }}>
             <Plus className="w-4 h-4 mr-2" />
             {t('startWorkout')}
@@ -169,7 +183,8 @@ export default function WorkoutsPage() {
             </p>
             {!searchQuery && selectedType === 'all' && (
               <Button onClick={() => {
-                // TODO: Start new workout
+                setSelectedWorkoutType('strength')
+                setIsWorkoutLoggerOpen(true)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 {t('startWorkout')}
@@ -239,6 +254,66 @@ export default function WorkoutsPage() {
           </div>
         )}
       </div>
+
+      {/* Workout Type Selector Dialog */}
+      <Dialog open={isWorkoutLoggerOpen && !workout} onOpenChange={(open) => {
+        if (!open) setIsWorkoutLoggerOpen(false)
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('startWorkout')}</DialogTitle>
+            <DialogDescription>{t('selectWorkoutType')}</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3 py-4">
+            <Button
+              variant="outline"
+              onClick={() => setSelectedWorkoutType('strength')}
+              className={selectedWorkoutType === 'strength' ? 'border-primary bg-primary/10' : ''}
+            >
+              <Dumbbell className="w-5 h-5 mr-2" />
+              {t('strength')}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setSelectedWorkoutType('cardio')}
+              className={selectedWorkoutType === 'cardio' ? 'border-primary bg-primary/10' : ''}
+            >
+              <Activity className="w-5 h-5 mr-2" />
+              {t('cardio')}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setSelectedWorkoutType('yoga')}
+              className={selectedWorkoutType === 'yoga' ? 'border-primary bg-primary/10' : ''}
+            >
+              <Heart className="w-5 h-5 mr-2" />
+              {t('yoga')}
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsWorkoutLoggerOpen(true)}>
+              {tCommon('continue')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Workout Logger */}
+      <WorkoutLogger
+        open={isWorkoutLoggerOpen && !!workout}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsWorkoutLoggerOpen(false)
+            setWorkout(null)
+          }
+        }}
+        workoutType={selectedWorkoutType}
+        onComplete={(_workoutId) => {
+          loadData() // Reload workouts list
+          setIsWorkoutLoggerOpen(false)
+          setWorkout(null)
+        }}
+      />
     </MainLayout>
   )
 }

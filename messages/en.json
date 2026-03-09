@@ -159,7 +159,8 @@
     "comingSoon": "Coming soon!",
     "saving": "Saving...",
     "selectStatus": "Select status",
-    "selectFormat": "Select format"
+    "selectFormat": "Select format",
+    "continue": "Continue"
   },
   "Placeholders": {
     "finances": {
@@ -324,5 +325,20 @@
     "weight": "Weight",
     "duration": "Duration",
     "notes": "Notes"
+  },
+  "WorkoutLogger": {
+    "activeWorkout": "Active Workout",
+    "trackingWorkout": "Tracking workout",
+    "addExercise": "Add Exercise",
+    "selectExercise": "Select exercise",
+    "noExercisesAdded": "No exercises added",
+    "completeWorkout": "Complete Workout",
+    "set": "Set",
+    "weight": "Weight (kg)",
+    "reps": "Reps",
+    "duration": "Duration",
+    "seconds": "Seconds",
+    "mark": "Mark",
+    "addSet": "Add Set"
   }
 }

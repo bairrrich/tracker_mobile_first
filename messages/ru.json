@@ -159,7 +159,8 @@
     "comingSoon": "Скоро!",
     "saving": "Сохранение...",
     "selectStatus": "Выберите статус",
-    "selectFormat": "Выберите формат"
+    "selectFormat": "Выберите формат",
+    "continue": "Продолжить"
   },
   "Placeholders": {
     "finances": {
@@ -324,5 +325,20 @@
     "weight": "Вес",
     "duration": "Длительность",
     "notes": "Заметки"
+  },
+  "WorkoutLogger": {
+    "activeWorkout": "Активная тренировка",
+    "trackingWorkout": "Запись тренировки",
+    "addExercise": "Добавить упражнение",
+    "selectExercise": "Выберите упражнение",
+    "noExercisesAdded": "Упражнения не добавлены",
+    "completeWorkout": "Завершить тренировку",
+    "set": "Подход",
+    "weight": "Вес (кг)",
+    "reps": "Повторения",
+    "duration": "Длительность",
+    "seconds": "Секунды",
+    "mark": "Отметить",
+    "addSet": "Добавить подход"
   }
 }
