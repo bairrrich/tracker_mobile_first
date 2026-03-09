@@ -252,5 +252,43 @@
     "saving": "Saving...",
     "add": "Add",
     "edit": "Edit"
+  },
+  "Exercises": {
+    "title": "Exercises",
+    "description": "Exercise library for all workout types",
+    "addExercise": "Add Exercise",
+    "searchExercises": "Search exercises...",
+    "filterByType": "Workout type",
+    "filterByCategory": "Category",
+    "allTypes": "All types",
+    "allCategories": "All categories",
+    "strength": "Strength",
+    "cardio": "Cardio",
+    "yoga": "Yoga",
+    "loading": "Loading...",
+    "noExercisesFound": "No exercises found",
+    "adjustFilters": "Try adjusting filters",
+    "createFirstExercise": "Create your first exercise to start the library",
+    "categories": {
+      "chest": "Chest",
+      "back": "Back",
+      "legs": "Legs",
+      "shoulders": "Shoulders",
+      "biceps": "Biceps",
+      "triceps": "Triceps",
+      "abs": "Abs",
+      "running": "Running",
+      "cycling": "Cycling",
+      "swimming": "Swimming",
+      "elliptical": "Elliptical",
+      "rowing": "Rowing",
+      "jumping": "Jumping",
+      "standing_poses": "Standing Poses",
+      "balances": "Balances",
+      "seated_poses": "Seated Poses",
+      "twists": "Twists",
+      "backbends": "Backbends",
+      "inversions": "Inversions"
+    }
   }
 }

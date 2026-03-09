@@ -252,5 +252,43 @@
     "saving": "Сохранение...",
     "add": "Добавить",
     "edit": "Редактировать"
+  },
+  "Exercises": {
+    "title": "Упражнения",
+    "description": "Библиотека упражнений для всех типов тренировок",
+    "addExercise": "Добавить упражнение",
+    "searchExercises": "Поиск упражнений...",
+    "filterByType": "Тип тренировки",
+    "filterByCategory": "Категория",
+    "allTypes": "Все типы",
+    "allCategories": "Все категории",
+    "strength": "Силовая",
+    "cardio": "Кардио",
+    "yoga": "Йога",
+    "loading": "Загрузка...",
+    "noExercisesFound": "Упражнения не найдены",
+    "adjustFilters": "Попробуйте изменить фильтры",
+    "createFirstExercise": "Создайте первое упражнение, чтобы начать библиотеку",
+    "categories": {
+      "chest": "Грудь",
+      "back": "Спина",
+      "legs": "Ноги",
+      "shoulders": "Плечи",
+      "biceps": "Бицепс",
+      "triceps": "Трицепс",
+      "abs": "Пресс",
+      "running": "Бег",
+      "cycling": "Велоспорт",
+      "swimming": "Плавание",
+      "elliptical": "Эллипс",
+      "rowing": "Гребля",
+      "jumping": "Прыжки",
+      "standing_poses": "Асаны стоя",
+      "balances": "Балансы",
+      "seated_poses": "Сидячие асаны",
+      "twists": "Скрутки",
+      "backbends": "Прогибы",
+      "inversions": "Перевернутые позы"
+    }
   }
 }
