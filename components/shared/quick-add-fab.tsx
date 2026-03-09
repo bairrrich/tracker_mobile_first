@@ -77,14 +77,17 @@ export function QuickAddFAB() {
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-[var(--text)]/20 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-[var(--text)]/20 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Main FAB - Fixed position */}
       <button
-        onClick={toggleOpen}
+        onClick={(e) => {
+          e.stopPropagation()
+          toggleOpen()
+        }}
         className={cn(
           'fixed bottom-28 right-4 z-50 w-14 h-14 rounded-full shadow-lg',
           'flex items-center justify-center',
@@ -109,7 +112,10 @@ export function QuickAddFAB() {
           actions.map((action, index) => (
             <button
               key={action.id}
-              onClick={action.onClick}
+              onClick={(e) => {
+                e.stopPropagation()
+                action.onClick()
+              }}
               className={cn(
                 'flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-lg',
                 'bg-[var(--card)] border border-[var(--border)]',
