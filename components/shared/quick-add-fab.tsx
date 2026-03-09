@@ -83,9 +83,9 @@ export function QuickAddFAB() {
       )}
 
       {/* Action Buttons */}
-      <div className="fixed bottom-24 right-4 z-50 flex flex-col items-center gap-2 md:bottom-8 md:right-8">
+      <div className="fixed bottom-28 right-4 z-50 flex flex-col items-center gap-2 md:bottom-24 md:right-8">
         {isOpen && (
-          <div className="flex flex-col gap-2 w-full">
+          <div className="flex flex-col gap-2 mb-2">
             {actions.map((action, index) => (
               <button
                 key={action.id}
@@ -114,10 +114,11 @@ export function QuickAddFAB() {
         <button
           onClick={toggleOpen}
           className={cn(
-            'fab relative w-14 h-14 rounded-full shadow-lg',
+            'relative w-14 h-14 rounded-full shadow-lg',
             'flex items-center justify-center',
-            'transition-all duration-200',
-            isOpen ? 'bg-[var(--error)] rotate-45' : 'bg-[var(--primary)]'
+            'transition-all duration-300',
+            'bg-[var(--primary)] hover:scale-105',
+            isOpen && 'rotate-45 bg-[var(--error)]'
           )}
           aria-label={isOpen ? 'Close quick add' : 'Quick add'}
           aria-expanded={isOpen}
