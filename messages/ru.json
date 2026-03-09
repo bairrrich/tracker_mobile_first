@@ -301,5 +301,28 @@
       "backbends": "Прогибы",
       "inversions": "Перевернутые позы"
     }
+  },
+  "Workouts": {
+    "title": "Тренировки",
+    "description": "История ваших тренировок",
+    "startWorkout": "Начать тренировку",
+    "searchWorkouts": "Поиск тренировок...",
+    "filterByType": "Тип тренировки",
+    "allTypes": "Все типы",
+    "strength": "Силовая",
+    "cardio": "Кардио",
+    "yoga": "Йога",
+    "loading": "Загрузка...",
+    "noWorkoutsFound": "Тренировки не найдены",
+    "adjustFilters": "Попробуйте изменить фильтры",
+    "startFirstWorkout": "Начните свою первую тренировку, чтобы отслеживать прогресс",
+    "noDuration": "--",
+    "workoutDetails": "Детали тренировки",
+    "exercises": "Упражнения",
+    "sets": "Подходы",
+    "reps": "Повторения",
+    "weight": "Вес",
+    "duration": "Длительность",
+    "notes": "Заметки"
   }
 }

@@ -301,5 +301,28 @@
       "backbends": "Backbends",
       "inversions": "Inversions"
     }
+  },
+  "Workouts": {
+    "title": "Workouts",
+    "description": "Your workout history",
+    "startWorkout": "Start Workout",
+    "searchWorkouts": "Search workouts...",
+    "filterByType": "Workout type",
+    "allTypes": "All types",
+    "strength": "Strength",
+    "cardio": "Cardio",
+    "yoga": "Yoga",
+    "loading": "Loading...",
+    "noWorkoutsFound": "No workouts found",
+    "adjustFilters": "Try adjusting filters",
+    "startFirstWorkout": "Start your first workout to track progress",
+    "noDuration": "--",
+    "workoutDetails": "Workout Details",
+    "exercises": "Exercises",
+    "sets": "Sets",
+    "reps": "Reps",
+    "weight": "Weight",
+    "duration": "Duration",
+    "notes": "Notes"
   }
 }
