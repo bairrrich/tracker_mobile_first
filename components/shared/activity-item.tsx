@@ -18,7 +18,7 @@ export const ActivityItem = React.forwardRef<HTMLDivElement, ActivityItemProps>(
         className={cn('list-item', className)}
       >
         {icon && (
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-[var(--primary)]/10 flex items-center justify-center flex-shrink-0 text-2xl">
             {icon}
           </div>
         )}
