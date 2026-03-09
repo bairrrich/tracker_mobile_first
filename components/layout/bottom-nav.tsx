@@ -1,46 +1,40 @@
 'use client'
 
-import * as React from 'react'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { Home, Search, Plus, Folder, Settings } from 'lucide-react'
 
 export function BottomNav() {
   const t = useTranslations('Navigation')
-  const [active, setActive] = React.useState('home')
+  const router = useRouter()
 
   const navItems = [
-    { id: 'home', icon: Home, label: t('home') },
-    { id: 'search', icon: Search, label: t('search') },
-    { id: 'add', icon: Plus, label: t('add'), isPrimary: true },
-    { id: 'collections', icon: Folder, label: t('collections') },
-    { id: 'settings', icon: Settings, label: t('settings') },
+    { id: 'home', icon: Home, label: t('home'), href: '/' },
+    { id: 'search', icon: Search, label: t('search'), href: '/search' },
+    { id: 'add', icon: Plus, label: t('add'), href: '/collections', isPrimary: true },
+    { id: 'collections', icon: Folder, label: t('collections'), href: '/collections' },
+    { id: 'settings', icon: Settings, label: t('settings'), href: '/settings' },
   ] as const
-
-  type NavItem = typeof navItems[number]
 
   return (
     <nav className="bottom-nav" aria-label="Bottom navigation">
       {navItems.map((item) => {
         const Icon = item.icon
-        const isActive = active === item.id
-        const isPrimary = (item as NavItem & { isPrimary?: boolean }).isPrimary
+        const isPrimary = (item as typeof navItems[number] & { isPrimary?: boolean }).isPrimary
 
         return (
           <button
             key={item.id}
-            onClick={() => setActive(item.id)}
+            onClick={() => router.push(item.href)}
             className={`
               flex flex-col items-center justify-center gap-1 p-2 min-w-[64px]
               transition-colors
               ${isPrimary
                 ? 'text-[var(--primary)] -mt-8'
-                : isActive
-                  ? 'text-[var(--primary)]'
-                  : 'text-muted-foreground hover:text-[var(--text)]'
+                : 'text-muted-foreground hover:text-[var(--text)]'
               }
             `}
             aria-label={item.label}
-            aria-current={isActive ? 'page' : undefined}
           >
             <div
               className={`
