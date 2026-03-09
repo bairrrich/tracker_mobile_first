@@ -45,11 +45,11 @@ const TABLE_MAPPING: Record<string, string> = {
   collections: 'collections',
   items: 'items',
   books: 'books',
-  bookQuotes: 'book_quotes',
+  book_quotes: 'book_quotes',
   metrics: 'metrics',
   history: 'history',
   tags: 'tags',
-  itemTags: 'item_tags',
+  item_tags: 'item_tags',
   notes: 'notes',
 }
 

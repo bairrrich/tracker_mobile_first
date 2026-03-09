@@ -131,7 +131,7 @@ export class BookQuotesRepository {
     await withDB((db) =>
       db.syncQueue.add({
         id: generateUUID(),  // Use UUID for sync queue id
-        table: 'bookQuotes',
+        table: 'book_quotes',
         recordId: id,  // Now string UUID
         operation,
         data: data ? JSON.stringify(data) : '',
@@ -150,7 +150,7 @@ export class BookQuotesRepository {
     const syncRecords = (await withDB((db) =>
       db.syncQueue
         .where('table')
-        .equals('bookQuotes')
+        .equals('book_quotes')
         .and((record) => record.recordId === id && !record.synced)
         .toArray()
     )) ?? []
