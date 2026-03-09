@@ -278,10 +278,13 @@
     "strength": "Strength",
     "cardio": "Cardio",
     "yoga": "Yoga",
+    "workouts": "Workouts",
     "loading": "Loading...",
     "noExercisesFound": "No exercises found",
     "adjustFilters": "Try adjusting filters",
     "createFirstExercise": "Create your first exercise to start the library",
+    "deleteExercise": "Delete Exercise",
+    "deleteExerciseDescription": "Are you sure you want to delete this exercise? This action cannot be undone.",
     "categories": {
       "chest": "Chest",
       "back": "Back",
@@ -326,7 +329,9 @@
     "reps": "Reps",
     "weight": "Weight",
     "duration": "Duration",
-    "notes": "Notes"
+    "notes": "Notes",
+    "deleteWorkout": "Delete Workout",
+    "deleteWorkoutDescription": "Are you sure you want to delete this workout? This action cannot be undone."
   },
   "WorkoutLogger": {
     "activeWorkout": "Active Workout",
@@ -341,6 +346,10 @@
     "duration": "Duration",
     "seconds": "Seconds",
     "mark": "Mark",
-    "addSet": "Add Set"
+    "addSet": "Add Set",
+    "deleteSet": "Delete Set",
+    "deleteSetDescription": "Are you sure you want to delete this set? This action cannot be undone.",
+    "deleteExercise": "Delete Exercise",
+    "deleteExerciseDescription": "Are you sure you want to delete this exercise from the workout? This action cannot be undone."
   }
 }

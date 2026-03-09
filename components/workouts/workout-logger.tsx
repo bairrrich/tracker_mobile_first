@@ -23,6 +23,16 @@ import {
 import { Plus, Trash2, CheckCircle, Timer, Dumbbell, Activity, Heart } from 'lucide-react'
 import { workoutsRepository, workoutExercisesRepository, workoutSetsRepository } from '@/lib/repositories/workouts-repository'
 import { exercisesRepository, exerciseCategoriesRepository } from '@/lib/repositories/exercises-repository'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import type { Workout, Exercise, WorkoutExercise, WorkoutSet } from '@/lib/db'
 
 interface WorkoutLoggerProps {
@@ -71,9 +81,11 @@ export function WorkoutLogger({ open, onOpenChange, workoutType, onComplete }: W
   React.useEffect(() => {
     if (open) {
       loadExercises()
-      startNewWorkout()
+      // Don't start workout automatically - will start when adding first exercise
+      setElapsedTime(0)
+      setIsRunning(true)
     } else {
-      // Reset state when closing
+      // Reset state when closing without completing
       setWorkout(null)
       setWorkoutExercises([])
       setElapsedTime(0)
@@ -92,19 +104,6 @@ export function WorkoutLogger({ open, onOpenChange, workoutType, onComplete }: W
     setExercises(filteredExercises)
   }
 
-  const startNewWorkout = async () => {
-    const workoutId = await workoutsRepository.create({
-      workoutTypeId: workoutType,
-      date: new Date(),
-    })
-    
-    const newWorkout = await workoutsRepository.getById(workoutId)
-    if (newWorkout) {
-      setWorkout(newWorkout)
-      setIsRunning(true)
-    }
-  }
-
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
@@ -117,39 +116,41 @@ export function WorkoutLogger({ open, onOpenChange, workoutType, onComplete }: W
   }
 
   const addExercise = async () => {
-    if (!selectedExerciseId || !workout) return
+    if (!selectedExerciseId) return
 
     const exercise = exercises.find(e => e.id === selectedExerciseId)
     if (!exercise) return
 
+    // Create workout only when adding first exercise
+    let currentWorkout = workout
+    if (!currentWorkout) {
+      const workoutId = await workoutsRepository.create({
+        workoutTypeId: workoutType,
+        date: new Date(),
+      })
+      const newWorkout = await workoutsRepository.getById(workoutId)
+      if (!newWorkout) return
+      currentWorkout = newWorkout
+      setWorkout(newWorkout)
+    }
+
     const workoutExerciseId = await workoutExercisesRepository.addToWorkout(
-      workout.id,
+      currentWorkout.id,
       exercise.id,
       workoutExercises.length
     )
 
+    // Add first set immediately
+    await workoutSetsRepository.add(workoutExerciseId, 1)
+
+    // Get the complete workout exercise with sets
     const newWorkoutExercise = await workoutExercisesRepository.getById(workoutExerciseId)
+    
     if (newWorkoutExercise) {
       setWorkoutExercises(prev => [...prev, { ...newWorkoutExercise, exercise }])
     }
-    
+
     setSelectedExerciseId('')
-  }
-
-  const addSet = async (workoutExerciseId: string) => {
-    if (!workout) return
-
-    const existingSets = await workoutSetsRepository.getByWorkoutExercise(workoutExerciseId)
-    const nextSetNumber = existingSets.length + 1
-
-    await workoutSetsRepository.add(workoutExerciseId, nextSetNumber)
-    
-    // Reload workout exercises to get updated sets
-    reloadWorkoutExercises()
-  }
-
-  const updateSet = async (setId: string, data: { reps?: number; weight?: number }) => {
-    await workoutSetsRepository.update(setId, data)
   }
 
   const removeExercise = async (workoutExerciseId: string) => {
@@ -157,21 +158,8 @@ export function WorkoutLogger({ open, onOpenChange, workoutType, onComplete }: W
     setWorkoutExercises(prev => prev.filter(we => we.id !== workoutExerciseId))
   }
 
-  const reloadWorkoutExercises = async () => {
-    if (!workout) return
-
-    const weList = await workoutExercisesRepository.getByWorkout(workout.id)
-    const weWithExercises = await Promise.all(
-      weList.map(async (we) => {
-        const exercise = await exercisesRepository.getById(we.exerciseId)
-        return { ...we, exercise: exercise! }
-      })
-    )
-    setWorkoutExercises(weWithExercises)
-  }
-
   const completeWorkout = async () => {
-    if (!workout) return
+    if (!workout || workoutExercises.length === 0) return
 
     setIsCompleting(true)
     try {
@@ -182,10 +170,10 @@ export function WorkoutLogger({ open, onOpenChange, workoutType, onComplete }: W
 
       // Mark as synced
       await workoutsRepository.markAsSynced(workout.id)
-      
+
       // Reload to get updated workout
       const updatedWorkout = await workoutsRepository.getById(workout.id)
-      
+
       onOpenChange(false)
       if (onComplete && updatedWorkout) {
         onComplete(updatedWorkout.id)
@@ -249,13 +237,11 @@ export function WorkoutLogger({ open, onOpenChange, workoutType, onComplete }: W
               {t('noExercisesAdded')}
             </p>
           ) : (
-            workoutExercises.map((we) => (
+            workoutExercises.map((we, index) => (
               <WorkoutExerciseCard
-                key={we.id}
+                key={`${we.id}-${index}`}
                 workoutExercise={we}
                 workoutType={workoutType}
-                onAddSet={() => addSet(we.id)}
-                onUpdateSet={updateSet}
                 onRemove={() => removeExercise(we.id)}
               />
             ))
@@ -276,9 +262,10 @@ export function WorkoutLogger({ open, onOpenChange, workoutType, onComplete }: W
           <Button
             onClick={completeWorkout}
             disabled={isCompleting || workoutExercises.length === 0}
+            variant={workoutExercises.length === 0 ? 'secondary' : 'default'}
           >
             <CheckCircle className="w-4 h-4 mr-2" />
-            {isCompleting ? tCommon('saving') : t('completeWorkout')}
+            {workoutExercises.length === 0 ? t('noExercisesAdded') : (isCompleting ? tCommon('saving') : t('completeWorkout'))}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -292,21 +279,20 @@ export function WorkoutLogger({ open, onOpenChange, workoutType, onComplete }: W
 
 interface WorkoutExerciseCardProps {
   workoutExercise: WorkoutExercise & { exercise: Exercise }
-  workoutType: string
-  onAddSet: () => void
-  onUpdateSet: (setId: string, data: { reps?: number; weight?: number }) => void
+  workoutType: 'strength' | 'cardio' | 'yoga'
   onRemove: () => void
 }
 
 function WorkoutExerciseCard({
   workoutExercise,
   workoutType,
-  onAddSet,
-  onUpdateSet,
   onRemove,
 }: WorkoutExerciseCardProps) {
   const t = useTranslations('WorkoutLogger')
+  const tCommon = useTranslations('Common')
   const [sets, setSets] = React.useState<WorkoutSet[]>([])
+  const [setToDelete, setSetToDelete] = React.useState<string | null>(null)
+  const [showDeleteExerciseDialog, setShowDeleteExerciseDialog] = React.useState(false)
 
   React.useEffect(() => {
     loadSets()
@@ -317,10 +303,30 @@ function WorkoutExerciseCard({
     setSets(workoutSets)
   }
 
+  const handleAddSet = async () => {
+    const existingSets = await workoutSetsRepository.getByWorkoutExercise(workoutExercise.id)
+    const nextSetNumber = existingSets.length + 1
+    await workoutSetsRepository.add(workoutExercise.id, nextSetNumber)
+    await loadSets()
+  }
+
   const handleUpdateSet = async (setId: string, field: 'reps' | 'weight' | 'durationSeconds', value: string) => {
     const numValue = value === '' ? undefined : parseFloat(value)
-    await onUpdateSet(setId, { [field]: numValue })
-    loadSets()
+    await workoutSetsRepository.update(setId, { [field]: numValue })
+    setSets(prevSets => prevSets.map(s => 
+      s.id === setId ? { ...s, [field]: numValue } as WorkoutSet : s
+    ))
+  }
+
+  const handleDeleteSet = async (setId: string) => {
+    await workoutSetsRepository.delete(setId)
+    await loadSets()
+    setSetToDelete(null)
+  }
+
+  const handleDeleteExercise = () => {
+    onRemove()
+    setShowDeleteExerciseDialog(false)
   }
 
   return (
@@ -332,7 +338,7 @@ function WorkoutExerciseCard({
             <p className="text-sm text-muted-foreground">{workoutExercise.exercise.description}</p>
           )}
         </div>
-        <Button variant="ghost" size="icon" onClick={onRemove}>
+        <Button variant="ghost" size="icon" onClick={() => setShowDeleteExerciseDialog(true)}>
           <Trash2 className="w-4 h-4" />
         </Button>
       </div>
@@ -390,7 +396,7 @@ function WorkoutExerciseCard({
                 />
               </div>
             )}
-            <div className="col-span-2">
+            <div className="col-span-2 flex gap-1">
               <Button
                 variant={set.completed ? 'default' : 'outline'}
                 size="sm"
@@ -398,9 +404,17 @@ function WorkoutExerciseCard({
                   workoutSetsRepository.update(set.id, { completed: !set.completed })
                   loadSets()
                 }}
-                className="w-full"
+                className="flex-1"
               >
                 {set.completed ? <CheckCircle className="w-4 h-4" /> : t('mark')}
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setSetToDelete(set.id)}
+                className="w-9 px-0"
+              >
+                <Trash2 className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -411,12 +425,56 @@ function WorkoutExerciseCard({
       <Button
         variant="outline"
         size="sm"
-        onClick={onAddSet}
+        onClick={handleAddSet}
         className="w-full mt-3"
       >
         <Plus className="w-4 h-4 mr-2" />
         {t('addSet')}
       </Button>
+
+      {/* Delete Set Confirmation Dialog */}
+      <AlertDialog open={!!setToDelete} onOpenChange={(open: boolean) => {
+        if (!open) setSetToDelete(null)
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('deleteSet')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('deleteSetDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => setToDelete && handleDeleteSet(setToDelete)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {tCommon('delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Exercise Confirmation Dialog */}
+      <AlertDialog open={showDeleteExerciseDialog} onOpenChange={setShowDeleteExerciseDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('deleteExercise')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('deleteExerciseDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteExercise}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {tCommon('delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

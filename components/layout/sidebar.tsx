@@ -23,7 +23,7 @@ export function Sidebar() {
   const navItems = [
     { id: 'dashboard', icon: Home, label: t('dashboard'), href: '/' },
     { id: 'finances', icon: Wallet, label: t('finances'), href: '/finances' },
-    { id: 'exercises', icon: Dumbbell, label: t('exercises'), href: '/exercises' },
+    { id: 'workouts', icon: Dumbbell, label: t('workouts'), href: '/workouts' },
     { id: 'books', icon: Book, label: t('books'), href: '/books' },
     { id: 'supplements', icon: Pill, label: t('supplements'), href: '/supplements' },
     { id: 'food', icon: Utensils, label: t('food'), href: '/food' },

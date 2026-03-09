@@ -16,6 +16,8 @@ import { Badge } from '@/components/ui/badge'
 import { Search, Plus, Dumbbell, Activity, Heart } from 'lucide-react'
 import { ExerciseForm } from '@/components/forms/exercise-form'
 import { exercisesRepository, exerciseCategoriesRepository } from '@/lib/repositories/exercises-repository'
+import { WORKOUT_TYPES } from '@/lib/static-exercise-data'
+import Link from 'next/link'
 import type { Exercise, ExerciseCategory, WorkoutTypeEntity } from '@/lib/db'
 
 type WorkoutType = 'strength' | 'cardio' | 'yoga' | 'all'
@@ -53,19 +55,13 @@ export default function ExercisesPage() {
   const loadData = async () => {
     setIsLoading(true)
     try {
-      const [exercisesData, categoriesData, workoutTypesData] = await Promise.all([
+      const [exercisesData, categoriesData] = await Promise.all([
         exercisesRepository.getActive(),
         exerciseCategoriesRepository.getAll(),
-        // For now, use hardcoded workout types
-        Promise.resolve([
-          { id: 'strength', name: 'Strength', createdAt: new Date(), synced: true },
-          { id: 'cardio', name: 'Cardio', createdAt: new Date(), synced: true },
-          { id: 'yoga', name: 'Yoga', createdAt: new Date(), synced: true },
-        ] as WorkoutTypeEntity[]),
       ])
       setExercises(exercisesData)
       setCategories(categoriesData)
-      setWorkoutTypes(workoutTypesData)
+      setWorkoutTypes(WORKOUT_TYPES)
     } catch (error) {
       console.error('Failed to load exercises:', error)
     } finally {
@@ -122,13 +118,21 @@ export default function ExercisesPage() {
             </p>
           </div>
 
-          <Button onClick={() => {
-            setEditExercise(null)
-            setIsFormOpen(true)
-          }}>
-            <Plus className="w-4 h-4 mr-2" />
-            {t('addExercise')}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" asChild>
+              <Link href="/workouts">
+                <Dumbbell className="w-4 h-4 mr-2" />
+                {t('workouts')}
+              </Link>
+            </Button>
+            <Button onClick={() => {
+              setEditExercise(null)
+              setIsFormOpen(true)
+            }}>
+              <Plus className="w-4 h-4 mr-2" />
+              {t('addExercise')}
+            </Button>
+          </div>
         </div>
 
         {/* Search and Filters */}

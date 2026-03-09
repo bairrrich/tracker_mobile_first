@@ -146,35 +146,35 @@ export interface SyncQueue {
 }
 
 // ============================================
-// Exercise & Workout Types
+// Exercise & Workout Types (Static Data)
 // ============================================
 
-export type WorkoutType = 'strength' | 'cardio' | 'yoga'
+export type WorkoutTypeId = 'strength' | 'cardio' | 'yoga'
 
 export interface WorkoutTypeEntity {
-  id: string  // UUID
+  id: WorkoutTypeId  // Static ID: 'strength', 'cardio', 'yoga'
   name: string
-  createdAt: Date
-  synced: boolean
-  deleted?: boolean
-  deletedAt?: Date
 }
 
+export type ExerciseCategoryId = 
+  // Strength
+  | 'chest' | 'back' | 'legs' | 'shoulders' | 'biceps' | 'triceps' | 'abs'
+  // Cardio
+  | 'running' | 'cycling' | 'swimming' | 'elliptical' | 'rowing' | 'jumping'
+  // Yoga
+  | 'standing_poses' | 'balances' | 'seated_poses' | 'twists' | 'backbends' | 'inversions'
+
 export interface ExerciseCategory {
-  id: string  // UUID
+  id: ExerciseCategoryId  // Static ID
   name: string
-  workoutTypeId: string  // UUID
-  createdAt: Date
-  synced: boolean
-  deleted?: boolean
-  deletedAt?: Date
+  workoutTypeId: WorkoutTypeId
 }
 
 export interface Exercise {
   id: string  // UUID
   name: string
   description?: string
-  categoryId: string  // UUID
+  categoryId: ExerciseCategoryId  // Static category ID
   isDefault: boolean
   createdAt: Date
   updatedAt: Date
@@ -185,7 +185,7 @@ export interface Exercise {
 
 export interface Workout {
   id: string  // UUID
-  workoutTypeId: string  // UUID
+  workoutTypeId: WorkoutTypeId  // Static workout type ID
   date: Date
   durationSeconds?: number
   notes?: string
@@ -236,9 +236,7 @@ export class TrackerDatabase extends Dexie {
   syncQueue!: EntityTable<SyncQueue, 'id'>
   books!: EntityTable<Book, 'id'>
   bookQuotes!: EntityTable<BookQuote, 'id'>
-  // Exercise & Workout tables
-  workoutTypes!: EntityTable<WorkoutTypeEntity, 'id'>
-  exerciseCategories!: EntityTable<ExerciseCategory, 'id'>
+  // Exercise & Workout tables (workoutTypes and exerciseCategories are now static)
   exercises!: EntityTable<Exercise, 'id'>
   workouts!: EntityTable<Workout, 'id'>
   workoutExercises!: EntityTable<WorkoutExercise, 'id'>
@@ -270,10 +268,8 @@ export class TrackerDatabase extends Dexie {
       syncQueue: 'id, table, recordId, synced, createdAt, [table+recordId]',
     })
 
-    // Version 9: Add exercise and workout tables
+    // Version 9: Add exercise and workout tables (removed workoutTypes and exerciseCategories - now static)
     this.version(9).stores({
-      workoutTypes: 'id, name, createdAt, synced, deleted',
-      exerciseCategories: 'id, name, workoutTypeId, createdAt, synced, deleted',
       exercises: 'id, name, categoryId, isDefault, createdAt, updatedAt, synced, deleted',
       workouts: 'id, workoutTypeId, date, createdAt, updatedAt, synced, deleted',
       workoutExercises: 'id, workoutId, exerciseId, orderIndex, synced, deleted',

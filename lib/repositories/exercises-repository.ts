@@ -1,18 +1,19 @@
-import { withDB, type Exercise, type ExerciseCategory } from '@/lib/db'
+import { withDB, type Exercise, type ExerciseCategoryId } from '@/lib/db'
 import { generateUUID } from '@/lib/utils/uuid'
 import { createTombstone, filterActive } from '@/lib/utils/sync-utils'
+import { EXERCISE_CATEGORIES, WORKOUT_TYPES, type WorkoutTypeId } from '@/lib/static-exercise-data'
 
 export interface CreateExerciseData {
   name: string
   description?: string
-  categoryId: string  // UUID
+  categoryId: ExerciseCategoryId  // Static category ID
   isDefault?: boolean
 }
 
 export interface UpdateExerciseData {
   name?: string
   description?: string
-  categoryId?: string
+  categoryId?: ExerciseCategoryId
 }
 
 export class ExercisesRepository {
@@ -41,7 +42,7 @@ export class ExercisesRepository {
   /**
    * Get exercises by category
    */
-  async getByCategory(categoryId: string): Promise<Exercise[]> {
+  async getByCategory(categoryId: ExerciseCategoryId): Promise<Exercise[]> {
     const exercises = await withDB((db) =>
       db.exercises
         .where('categoryId')
@@ -56,17 +57,13 @@ export class ExercisesRepository {
   /**
    * Get exercises by workout type
    */
-  async getByWorkoutType(workoutTypeId: string): Promise<Exercise[]> {
-    const categories = await withDB((db) =>
-      db.exerciseCategories
-        .where('workoutTypeId')
-        .equals(workoutTypeId)
-        .toArray()
-    ) ?? []
+  async getByWorkoutType(workoutTypeId: WorkoutTypeId): Promise<Exercise[]> {
+    // Get category IDs for this workout type from static data
+    const categoryIds = EXERCISE_CATEGORIES
+      .filter(cat => cat.workoutTypeId === workoutTypeId)
+      .map(cat => cat.id)
 
-    const categoryIds = categories.map(c => c.id)
     const exercises = await this.getActive()
-    
     return exercises.filter(e => categoryIds.includes(e.categoryId))
   }
 
@@ -213,98 +210,36 @@ export class ExercisesRepository {
 }
 
 // ============================================
-// Exercise Categories Repository
+// Exercise Categories Repository (Static Data)
 // ============================================
 
 export class ExerciseCategoriesRepository {
   /**
-   * Get category by ID
+   * Get category by ID (from static data)
    */
-  async getById(id: string): Promise<ExerciseCategory | undefined> {
-    return withDB((db) => db.exerciseCategories.get(id)) ?? undefined
+  getById(id: ExerciseCategoryId) {
+    return EXERCISE_CATEGORIES.find(cat => cat.id === id)
   }
 
   /**
-   * Get all categories
+   * Get all categories (from static data)
    */
-  async getAll(): Promise<ExerciseCategory[]> {
-    return withDB((db) => db.exerciseCategories.orderBy('name').toArray()) ?? []
+  getAll() {
+    return EXERCISE_CATEGORIES
   }
 
   /**
-   * Get categories by workout type
+   * Get categories by workout type (from static data)
    */
-  async getByWorkoutType(workoutTypeId: string): Promise<ExerciseCategory[]> {
-    const categories = await withDB((db) =>
-      db.exerciseCategories
-        .where('workoutTypeId')
-        .equals(workoutTypeId)
-        .toArray()
-    ) || []
-    // Filter out deleted categories
-    return categories.filter(cat => !cat.deleted)
+  getByWorkoutType(workoutTypeId: WorkoutTypeId) {
+    return EXERCISE_CATEGORIES.filter(cat => cat.workoutTypeId === workoutTypeId)
   }
 
   /**
-   * Create a new category
+   * Get available workout types (from static data)
    */
-  async create(name: string, workoutTypeId: string): Promise<string> {
-    const id = generateUUID()
-
-    await withDB((db) =>
-      db.exerciseCategories.add({
-        id,
-        name,
-        workoutTypeId,
-        createdAt: new Date(),
-        synced: false,
-      })
-    )
-
-    // Mark for sync
-    await this.markForSync(id, 'insert', { id, name, workoutTypeId })
-
-    return id
-  }
-
-  /**
-   * Mark category for sync
-   */
-  private async markForSync(
-    id: string,
-    operation: 'insert' | 'update' | 'delete',
-    data?: object
-  ): Promise<void> {
-    await withDB((db) =>
-      db.syncQueue.add({
-        id: generateUUID(),
-        table: 'exercise_categories',
-        recordId: id,
-        operation,
-        data: data ? JSON.stringify(data) : '',
-        synced: false,
-        createdAt: new Date(),
-      })
-    )
-  }
-
-  /**
-   * Mark category as synced
-   */
-  async markAsSynced(id: string): Promise<void> {
-    await withDB((db) => db.exerciseCategories.update(id, { synced: true }))
-
-    const syncRecords = (await withDB((db) =>
-      db.syncQueue
-        .where('[table+recordId]')
-        .equals(['exercise_categories', id])
-        .and((record) => !record.synced)
-        .primaryKeys()
-    )) ?? []
-
-    for (const key of syncRecords) {
-      await withDB((db) => db.syncQueue.update(key, { synced: true }))
-    }
+  getWorkoutTypes() {
+    return WORKOUT_TYPES
   }
 }
 

@@ -10,6 +10,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,6 +32,7 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { exercisesRepository, exerciseCategoriesRepository } from '@/lib/repositories/exercises-repository'
+import { WORKOUT_TYPES, type WorkoutTypeId, type ExerciseCategoryId } from '@/lib/static-exercise-data'
 import type { Exercise } from '@/lib/db'
 
 interface ExerciseFormProps {
@@ -30,24 +41,17 @@ interface ExerciseFormProps {
   editExercise?: Exercise | null
 }
 
-type WorkoutType = 'strength' | 'cardio' | 'yoga'
-
-const WORKOUT_TYPES: { value: WorkoutType; label: string }[] = [
-  { value: 'strength', label: 'Strength' },
-  { value: 'cardio', label: 'Cardio' },
-  { value: 'yoga', label: 'Yoga' },
-]
-
 export function ExerciseForm({ open, onOpenChange, editExercise }: ExerciseFormProps) {
   const t = useTranslations('Exercises')
   const tCommon = useTranslations('Common')
-  
+
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
-  const [selectedWorkoutType, setSelectedWorkoutType] = React.useState<WorkoutType>('strength')
+  const [selectedWorkoutType, setSelectedWorkoutType] = React.useState<WorkoutTypeId>('strength')
   const [selectedCategory, setSelectedCategory] = React.useState('')
-  const [categories, setCategories] = React.useState<Array<{ id: string; name: string; workoutTypeId: string }>>([])
+  const [categories, setCategories] = React.useState<Array<{ id: ExerciseCategoryId; name: string; workoutTypeId: WorkoutTypeId }>>([])
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
 
   // Load categories when workout type changes or form opens
   React.useEffect(() => {
@@ -72,7 +76,7 @@ export function ExerciseForm({ open, onOpenChange, editExercise }: ExerciseFormP
       // Find workout type from category
       const category = categories.find(c => c.id === editExercise.categoryId)
       if (category) {
-        setSelectedWorkoutType(category.workoutTypeId as WorkoutType)
+        setSelectedWorkoutType(category.workoutTypeId)
       }
     }
   }, [editExercise, categories])
@@ -86,7 +90,7 @@ export function ExerciseForm({ open, onOpenChange, editExercise }: ExerciseFormP
     setName('')
     setDescription('')
     setSelectedWorkoutType('strength')
-    setSelectedCategory('')
+    setSelectedCategory('' as ExerciseCategoryId)
   }
 
   const filteredCategories = categories.filter(
@@ -95,7 +99,7 @@ export function ExerciseForm({ open, onOpenChange, editExercise }: ExerciseFormP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!name.trim() || !selectedCategory) {
       return
     }
@@ -107,26 +111,45 @@ export function ExerciseForm({ open, onOpenChange, editExercise }: ExerciseFormP
         await exercisesRepository.update(editExercise.id, {
           name: name.trim(),
           description: description.trim(),
-          categoryId: selectedCategory,
+          categoryId: selectedCategory as ExerciseCategoryId,
         })
       } else {
         // Create new exercise
         await exercisesRepository.create({
           name: name.trim(),
           description: description.trim(),
-          categoryId: selectedCategory,
+          categoryId: selectedCategory as ExerciseCategoryId,
           isDefault: false,
         })
       }
-      
+
       // Close form and reset
       resetForm()
       onOpenChange(false)
-      
+
       // Reload exercises page (custom event)
       window.dispatchEvent(new CustomEvent('exercises-changed'))
     } catch (error) {
       console.error('Failed to save exercise:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!editExercise) return
+
+    setIsSubmitting(true)
+    try {
+      await exercisesRepository.delete(editExercise.id)
+      setShowDeleteDialog(false)
+      onOpenChange(false)
+      resetForm()
+
+      // Reload exercises page
+      window.dispatchEvent(new CustomEvent('exercises-changed'))
+    } catch (error) {
+      console.error('Failed to delete exercise:', error)
     } finally {
       setIsSubmitting(false)
     }
@@ -161,10 +184,10 @@ export function ExerciseForm({ open, onOpenChange, editExercise }: ExerciseFormP
             {/* Workout Type */}
             <div className="grid gap-2">
               <Label>{t('workoutType')}</Label>
-              <Select 
-                value={selectedWorkoutType} 
+              <Select
+                value={selectedWorkoutType}
                 onValueChange={(value) => {
-                  setSelectedWorkoutType(value as WorkoutType)
+                  setSelectedWorkoutType(value as WorkoutTypeId)
                   setSelectedCategory('')
                 }}
                 disabled={isSubmitting || !!editExercise}
@@ -174,8 +197,8 @@ export function ExerciseForm({ open, onOpenChange, editExercise }: ExerciseFormP
                 </SelectTrigger>
                 <SelectContent>
                   {WORKOUT_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {t(type.value)}
+                    <SelectItem key={type.id} value={type.id}>
+                      {t(type.id)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -217,24 +240,58 @@ export function ExerciseForm({ open, onOpenChange, editExercise }: ExerciseFormP
             </div>
           </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                resetForm()
-                onOpenChange(false)
-              }}
-              disabled={isSubmitting}
-            >
-              {tCommon('cancel')}
-            </Button>
-            <Button type="submit" disabled={isSubmitting || !name.trim() || !selectedCategory}>
-              {isSubmitting ? tCommon('saving') : editExercise ? tCommon('save') : tCommon('add')}
-            </Button>
+          <DialogFooter className="flex items-center justify-between">
+            {editExercise && (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setShowDeleteDialog(true)}
+                disabled={isSubmitting}
+              >
+                {tCommon('delete')}
+              </Button>
+            )}
+            <div className="flex gap-2 ml-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  resetForm()
+                  onOpenChange(false)
+                }}
+                disabled={isSubmitting}
+              >
+                {tCommon('cancel')}
+              </Button>
+              <Button type="submit" disabled={isSubmitting || !name.trim() || !selectedCategory}>
+                {isSubmitting ? tCommon('saving') : editExercise ? tCommon('save') : tCommon('add')}
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('deleteExercise')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('deleteExerciseDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isSubmitting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isSubmitting ? tCommon('deleting') : tCommon('delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   )
 }

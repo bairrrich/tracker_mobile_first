@@ -9,6 +9,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Calendar, Clock, Dumbbell, Activity, Heart, Trash2 } from 'lucide-react'
@@ -40,6 +50,7 @@ export function WorkoutDetails({ workout, open, onOpenChange, onDelete }: Workou
   const tCommon = useTranslations('Common')
   const [workoutExercises, setWorkoutExercises] = React.useState<Array<any>>([])
   const [isLoading, setIsLoading] = React.useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
 
   React.useEffect(() => {
     if (open && workout) {
@@ -90,6 +101,7 @@ export function WorkoutDetails({ workout, open, onOpenChange, onDelete }: Workou
     if (!workout) return
     await workoutsRepository.delete(workout.id)
     onOpenChange(false)
+    setShowDeleteDialog(false)
     if (onDelete) {
       onDelete()
     }
@@ -199,12 +211,33 @@ export function WorkoutDetails({ workout, open, onOpenChange, onDelete }: Workou
 
         {/* Delete Button */}
         <DialogFooter className="border-t border-[var(--border)] pt-4">
-          <Button variant="destructive" onClick={handleDelete}>
+          <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
             <Trash2 className="w-4 h-4 mr-2" />
             {tCommon('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('deleteWorkout')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('deleteWorkoutDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {tCommon('delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   )
 }

@@ -1,16 +1,17 @@
 import { withDB, type Workout, type WorkoutExercise, type WorkoutSet } from '@/lib/db'
 import { generateUUID } from '@/lib/utils/uuid'
 import { createTombstone, filterActive } from '@/lib/utils/sync-utils'
+import type { WorkoutTypeId } from '@/lib/static-exercise-data'
 
 export interface CreateWorkoutData {
-  workoutTypeId: string  // UUID
+  workoutTypeId: WorkoutTypeId
   date?: Date
   durationSeconds?: number
   notes?: string
 }
 
 export interface UpdateWorkoutData {
-  workoutTypeId?: string
+  workoutTypeId?: WorkoutTypeId
   date?: Date
   durationSeconds?: number
   notes?: string
