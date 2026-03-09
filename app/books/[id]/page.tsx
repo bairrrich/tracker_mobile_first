@@ -68,14 +68,16 @@ export default function BookDetailPage() {
 
   React.useEffect(() => {
     fetchBooks()
-  }, [fetchBooks])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Fetch quotes when book is loaded
   React.useEffect(() => {
     if (bookId) {
       fetchQuotes(bookId)
     }
-  }, [bookId, fetchQuotes])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId])
 
   const handleAddQuote = async (text: string, page?: number) => {
     if (!bookId) return

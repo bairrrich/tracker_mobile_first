@@ -30,7 +30,8 @@ export default function BooksPage() {
 
   React.useEffect(() => {
     fetchBooks()
-  }, [fetchBooks])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Filter and search books
   const filteredBooks = React.useMemo(() => {

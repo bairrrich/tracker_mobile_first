@@ -107,17 +107,18 @@ export function useForm<T extends Record<string, any>>({
     return Object.keys(errors).length === 0
   }, [errors])
 
-  return {
+  // Memoize the return value to prevent unnecessary re-renders
+  return React.useMemo(() => ({
     values,
     errors,
     isSubmitting,
     isValid,
     touched,
-    
+
     setValue,
     setErrors,
     validate,
     handleSubmit,
     reset,
-  }
+  }), [values, errors, isSubmitting, isValid, touched, setValue, setErrors, validate, handleSubmit, reset])
 }

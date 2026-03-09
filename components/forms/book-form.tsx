@@ -125,7 +125,8 @@ export function BookForm({ open, onOpenChange, editBook }: BookFormProps) {
         }
       })
     }
-  }, [open, reset, editBook, setValue])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, editBook])
 
   const isEdit = !!editBook?.id
 
