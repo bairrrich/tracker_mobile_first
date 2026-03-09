@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/layout/theme-provider'
 import { InstallPrompt } from '@/components/ui/install-prompt'
 import { QuickAddFAB } from '@/components/shared/quick-add-fab'
 import { SupabaseProvider } from '@/components/auth/supabase-provider'
+import { useSeedData } from '@/hooks/use-seed-data'
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -88,6 +89,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <SupabaseProvider>
             <ThemeProvider>
+              <SeedDataInitializer />
               {children}
               <InstallPrompt />
               <QuickAddFAB />
@@ -97,4 +99,10 @@ export default async function RootLayout({
       </body>
     </html>
   )
+}
+
+// Client component for seed data initialization
+function SeedDataInitializer() {
+  useSeedData()
+  return null
 }
