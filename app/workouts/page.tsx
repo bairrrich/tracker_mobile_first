@@ -266,32 +266,44 @@ export default function WorkoutsPage() {
           </DialogHeader>
           <div className="grid gap-3 py-4">
             <Button
-              variant="outline"
+              variant={selectedWorkoutType === 'strength' ? 'default' : 'outline'}
               onClick={() => setSelectedWorkoutType('strength')}
-              className={selectedWorkoutType === 'strength' ? 'border-primary bg-primary/10' : ''}
+              className="w-full"
             >
               <Dumbbell className="w-5 h-5 mr-2" />
               {t('strength')}
             </Button>
             <Button
-              variant="outline"
+              variant={selectedWorkoutType === 'cardio' ? 'default' : 'outline'}
               onClick={() => setSelectedWorkoutType('cardio')}
-              className={selectedWorkoutType === 'cardio' ? 'border-primary bg-primary/10' : ''}
+              className="w-full"
             >
               <Activity className="w-5 h-5 mr-2" />
               {t('cardio')}
             </Button>
             <Button
-              variant="outline"
+              variant={selectedWorkoutType === 'yoga' ? 'default' : 'outline'}
               onClick={() => setSelectedWorkoutType('yoga')}
-              className={selectedWorkoutType === 'yoga' ? 'border-primary bg-primary/10' : ''}
+              className="w-full"
             >
               <Heart className="w-5 h-5 mr-2" />
               {t('yoga')}
             </Button>
           </div>
           <DialogFooter>
-            <Button onClick={() => setIsWorkoutLoggerOpen(true)}>
+            <Button
+              onClick={async () => {
+                // Create workout and start logger
+                const workoutId = await workoutsRepository.create({
+                  workoutTypeId: selectedWorkoutType,
+                  date: new Date(),
+                })
+                const newWorkout = await workoutsRepository.getById(workoutId)
+                if (newWorkout) {
+                  setWorkout(newWorkout)
+                }
+              }}
+            >
               {tCommon('continue')}
             </Button>
           </DialogFooter>
