@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { Home, Dumbbell, Plus, Folder, Settings } from 'lucide-react'
+import { Home, Activity, Plus, Folder, Settings } from 'lucide-react'
 
 export function BottomNav() {
   const t = useTranslations('Navigation')
@@ -10,7 +10,7 @@ export function BottomNav() {
 
   const navItems = [
     { id: 'home', icon: Home, label: t('home'), href: '/' },
-    { id: 'exercises', icon: Dumbbell, label: t('exercises'), href: '/exercises' },
+    { id: 'workouts', icon: Activity, label: t('workouts'), href: '/workouts' },
     { id: 'add', icon: Plus, label: t('add'), href: '/collections', isPrimary: true },
     { id: 'collections', icon: Folder, label: t('collections'), href: '/collections' },
     { id: 'settings', icon: Settings, label: t('settings'), href: '/settings' },

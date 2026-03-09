@@ -114,7 +114,8 @@
   "Navigation": {
     "dashboard": "Панель управления",
     "finances": "Финансы",
-    "exercises": "Тренировки",
+    "workouts": "Тренировки",
+    "exercises": "Упражнения",
     "books": "Книги",
     "supplements": "Добавки",
     "food": "Питание",
