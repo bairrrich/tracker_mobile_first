@@ -67,3 +67,40 @@ All_Tracker_mobile/
 4. OKLCH color system is defined in globals.css with theme variables
 5. All UI components must support light, dark, and AMOLED themes via CSS variables
 6. When creating new components, always reference theme variables instead of hardcoded colors
+
+## Coding Conventions
+
+### Database Table Naming (snake_case only)
+
+**ALL database table names MUST use snake_case format:**
+
+| Entity | Table Name | Notes |
+|--------|-----------|-------|
+| Collections | `collections` | |
+| Items | `items` | |
+| Books | `books` | |
+| Book Quotes | `book_quotes` | NOT `bookQuotes` |
+| Metrics | `metrics` | |
+| History | `history` | |
+| Tags | `tags` | |
+| Item Tags | `item_tags` | NOT `itemTags` |
+| Notes | `notes` | |
+| Sync Queue | `sync_queue` | |
+
+**Rules:**
+1. NEVER use camelCase for table names in sync operations (`table: 'book_quotes'` NOT `table: 'bookQuotes'`)
+2. ALWAYS use snake_case in TABLE_MAPPING, markForSync(), and sync queue operations
+3. Dexie property names can be camelCase (e.g., `db.bookQuotes`) but sync queue table names must be snake_case
+4. Supabase table names are always snake_case
+5. When adding new tables, follow the snake_case convention consistently
+
+**Example:**
+```typescript
+// ✅ CORRECT
+await markForSync('book_quotes', id, 'insert', data)
+TABLE_MAPPING: { book_quotes: 'book_quotes' }
+
+// ❌ WRONG
+await markForSync('bookQuotes', id, 'insert', data)
+TABLE_MAPPING: { bookQuotes: 'book_quotes' }
+```
