@@ -74,7 +74,7 @@ export const useBooksStore = create<BooksState>()(
     fetchBooks: async () => {
       set({ isLoading: true, error: null })
       try {
-        const books = await booksRepository.getAll()
+        const books = await booksRepository.getActive()
         set({ books, isLoading: false })
       } catch (error) {
         set({
@@ -94,7 +94,7 @@ export const useBooksStore = create<BooksState>()(
       set({ isLoading: true, error: null })
       try {
         const id = await booksRepository.create(data)
-        const books = await booksRepository.getAll()
+        const books = await booksRepository.getActive()
         set({ books, isLoading: false })
         return id
       } catch (error) {
@@ -111,7 +111,7 @@ export const useBooksStore = create<BooksState>()(
       set({ isLoading: true, error: null })
       try {
         await booksRepository.update(id, data)
-        const books = await booksRepository.getAll()
+        const books = await booksRepository.getActive()
         set({ books, isLoading: false })
 
         // Update selected book if it's the one being updated
@@ -136,7 +136,7 @@ export const useBooksStore = create<BooksState>()(
       set({ isLoading: true, error: null })
       try {
         await booksRepository.delete(id)
-        const books = await booksRepository.getAll()
+        const books = await booksRepository.getActive()
         set({ books, isLoading: false })
 
         // Clear selected book if it's the one being deleted
@@ -157,7 +157,7 @@ export const useBooksStore = create<BooksState>()(
     updateProgress: async (id: string, pagesRead: number) => {
       try {
         await booksRepository.updateProgress(id, pagesRead)
-        const books = await booksRepository.getAll()
+        const books = await booksRepository.getActive()
         set({ books })
 
         // Update selected book if it's the one being updated
