@@ -117,7 +117,7 @@ export class CollectionsRepository {
   async getAllWithCounts(): Promise<
     Array<Collection & { itemCount: number }>
   > {
-    const collections = await this.getAll()
+    const collections = await this.getActive()
     const collectionsWithCounts = await Promise.all(
       collections.map(async (collection) => ({
         ...collection,
