@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog'
 import { Search, Plus, Calendar, Clock, Dumbbell, Activity, Heart } from 'lucide-react'
 import { WorkoutLogger } from '@/components/workouts/workout-logger'
+import { WorkoutDetails } from '@/components/workouts/workout-details'
 import { workoutsRepository } from '@/lib/repositories/workouts-repository'
 import type { Workout } from '@/lib/db'
 
@@ -43,6 +44,7 @@ export default function WorkoutsPage() {
   const tCommon = useTranslations('Common')
   const [workouts, setWorkouts] = React.useState<Workout[]>([])
   const [workout, setWorkout] = React.useState<Workout | null>(null)
+  const [selectedWorkout, setSelectedWorkout] = React.useState<Workout | null>(null)
   const [selectedType, setSelectedType] = React.useState<string>('all')
   const [searchQuery, setSearchQuery] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(true)
@@ -202,8 +204,7 @@ export default function WorkoutsPage() {
                   key={workout.id}
                   className="group p-4 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--card)]/80 hover:border-primary/50 hover:shadow-md transition-all cursor-pointer"
                   onClick={() => {
-                    // TODO: View workout details
-                    console.log('View workout:', workout.id)
+                    setSelectedWorkout(workout)
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -324,6 +325,21 @@ export default function WorkoutsPage() {
           loadData() // Reload workouts list
           setIsWorkoutLoggerOpen(false)
           setWorkout(null)
+        }}
+      />
+
+      {/* Workout Details */}
+      <WorkoutDetails
+        workout={selectedWorkout}
+        open={!!selectedWorkout}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedWorkout(null)
+          }
+        }}
+        onDelete={() => {
+          loadData() // Reload workouts list
+          setSelectedWorkout(null)
         }}
       />
     </MainLayout>
