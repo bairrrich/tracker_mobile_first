@@ -104,7 +104,7 @@ export function QuickAddFAB() {
       </button>
 
       {/* Action Buttons - Above FAB */}
-      <div className="fixed bottom-52 right-4 z-50 flex flex-col gap-2 md:bottom-44 md:right-8">
+      <div className="fixed bottom-[12rem] right-4 z-50 flex flex-col gap-2 md:bottom-[11rem] md:right-8">
         {isOpen &&
           actions.map((action, index) => (
             <button
