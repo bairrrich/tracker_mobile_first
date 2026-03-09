@@ -1,25 +1,25 @@
-import { db, type Collection, type CollectionType } from '@/lib/db'
+import { withDB, type Collection, type CollectionType } from '@/lib/db'
 
 export class CollectionsRepository {
   /**
    * Get all collections
    */
   async getAll(): Promise<Collection[]> {
-    return await db.collections.orderBy('updatedAt').reverse().toArray()
+    return withDB((db) => db.collections.orderBy('updatedAt').reverse().toArray()) ?? []
   }
 
   /**
    * Get collection by ID
    */
   async getById(id: number): Promise<Collection | undefined> {
-    return await db.collections.get(id)
+    return withDB((db) => db.collections.get(id)) ?? undefined
   }
 
   /**
    * Get collections by type
    */
   async getByType(type: CollectionType): Promise<Collection[]> {
-    return await db.collections.where('type').equals(type).toArray()
+    return withDB((db) => db.collections.where('type').equals(type).toArray()) ?? []
   }
 
   /**
@@ -28,18 +28,24 @@ export class CollectionsRepository {
   async create(
     data: Omit<Collection, 'id' | 'createdAt' | 'updatedAt' | 'synced'>
   ): Promise<number> {
-    const now = new Date()
-    const id = await db.collections.add({
-      ...data,
-      createdAt: now,
-      updatedAt: now,
-      synced: false,
+    const result = withDB((db) => {
+      const now = new Date()
+      return db.collections.add({
+        ...data,
+        createdAt: now,
+        updatedAt: now,
+        synced: false,
+      })
     })
+    
+    if (result === null) return -1
+
+    const id = await result
 
     // Mark for sync
     await this.markForSync(id, 'insert', data)
 
-    return id as number
+    return id
   }
 
   /**
@@ -49,9 +55,11 @@ export class CollectionsRepository {
     id: number,
     data: Partial<Omit<Collection, 'id' | 'createdAt' | 'synced'>>
   ): Promise<void> {
-    await db.collections.update(id, {
-      ...data,
-      updatedAt: new Date(),
+    withDB((db) => {
+      db.collections.update(id, {
+        ...data,
+        updatedAt: new Date(),
+      })
     })
 
     // Mark for sync
@@ -62,17 +70,9 @@ export class CollectionsRepository {
    * Delete a collection
    */
   async delete(id: number): Promise<void> {
-    // Delete related items first
-    const itemIds = await db.items
-      .where('collectionId')
-      .equals(id)
-      .primaryKeys()
-
-    for (const itemId of itemIds) {
-      await db.items.delete(itemId)
-    }
-
-    await db.collections.delete(id)
+    withDB((db) => {
+      db.collections.delete(id)
+    })
 
     // Mark for sync
     await this.markForSync(id, 'delete')
@@ -82,7 +82,7 @@ export class CollectionsRepository {
    * Get item count for a collection
    */
   async getItemCount(collectionId: number): Promise<number> {
-    return await db.items.where('collectionId').equals(collectionId).count()
+    return withDB((db) => db.items.where('collectionId').equals(collectionId).count()) ?? 0
   }
 
   /**
@@ -109,53 +109,26 @@ export class CollectionsRepository {
     operation: 'insert' | 'update' | 'delete',
     data?: object
   ): Promise<void> {
-    await db.syncQueue.add({
-      id: Date.now() + Math.floor(Math.random() * 1000),
-      table: 'collections',
-      recordId: id,
-      operation,
-      data: data ? JSON.stringify(data) : '',
-      synced: false,
-      createdAt: new Date(),
+    withDB((db) => {
+      db.syncQueue.add({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        table: 'collections',
+        recordId: id,
+        operation,
+        data: data ? JSON.stringify(data) : '',
+        synced: false,
+        createdAt: new Date(),
+      })
     })
-  }
-
-  /**
-   * Get unsynced collections
-   */
-  async getUnsynced(): Promise<Collection[]> {
-    const syncRecords = await db.syncQueue
-      .where('table')
-      .equals('collections')
-      .and((record) => !record.synced)
-      .toArray()
-
-    const collections: Collection[] = []
-    for (const record of syncRecords) {
-      const collection = await db.collections.get(record.recordId)
-      if (collection) {
-        collections.push(collection)
-      }
-    }
-
-    return collections
   }
 
   /**
    * Mark collection as synced
    */
   async markAsSynced(id: number): Promise<void> {
-    await db.collections.update(id, { synced: true })
-
-    const syncRecords = await db.syncQueue
-      .where('[table+recordId]')
-      .equals(['collections', id])
-      .and((record) => !record.synced)
-      .primaryKeys()
-
-    for (const key of syncRecords) {
-      await db.syncQueue.update(key, { synced: true })
-    }
+    withDB((db) => {
+      db.collections.update(id, { synced: true })
+    })
   }
 }
 

@@ -147,7 +147,24 @@ export class TrackerDatabase extends Dexie {
 // Export database instance
 // ============================================
 
-export const db = new TrackerDatabase()
+// Проверка доступности IndexedDB перед созданием базы данных
+function isIndexedDBAvailable(): boolean {
+  return typeof indexedDB !== 'undefined'
+}
+
+export const db = isIndexedDBAvailable() ? new TrackerDatabase() : null
+
+/**
+ * Helper function для проверки доступности DB
+ * Возвращает null если DB недоступна
+ */
+export function withDB<T>(fn: (db: TrackerDatabase) => T): T | null {
+  if (!db) {
+    console.warn('[DB] IndexedDB is not available')
+    return null
+  }
+  return fn(db)
+}
 
 // ============================================
 // Helper functions
@@ -169,6 +186,11 @@ export async function markForSync(
   operation: 'insert' | 'update' | 'delete',
   data?: object
 ): Promise<void> {
+  if (!db) {
+    console.warn('IndexedDB is not available')
+    return
+  }
+  
   await db.syncQueue.add({
     id: generateId(),
     table,
@@ -184,6 +206,11 @@ export async function markForSync(
  * Get unsynced records
  */
 export async function getUnsyncedRecords() {
+  if (!db) {
+    console.warn('IndexedDB is not available')
+    return []
+  }
+  
   return await db.syncQueue.where('synced').equals(0).toArray()
 }
 
@@ -191,6 +218,11 @@ export async function getUnsyncedRecords() {
  * Mark records as synced
  */
 export async function markAsSynced(ids: number[]): Promise<void> {
+  if (!db) {
+    console.warn('IndexedDB is not available')
+    return
+  }
+  
   await db.syncQueue.bulkUpdate(
     ids.map((id) => ({
       key: id,

@@ -1,4 +1,4 @@
-import { db, type Metric, type History } from '@/lib/db'
+import { withDB, type Metric, type History } from '@/lib/db'
 
 export interface CreateMetricData {
   itemId: number
@@ -20,7 +20,7 @@ export class MetricsRepository {
    * Get metrics by item ID
    */
   async getByItem(itemId: number): Promise<Metric[]> {
-    return await db.metrics.where('itemId').equals(itemId).toArray()
+    return withDB((db) => db.metrics.where('itemId').equals(itemId).toArray()) ?? []
   }
 
   /**
@@ -30,10 +30,12 @@ export class MetricsRepository {
     itemId: number,
     type: string
   ): Promise<Metric[]> {
-    return await db.metrics
-      .where('[itemId+type]')
-      .equals([itemId, type])
-      .toArray()
+    return withDB((db) =>
+      db.metrics
+        .where('[itemId+type]')
+        .equals([itemId, type])
+        .toArray()
+    ) ?? []
   }
 
   /**
@@ -44,40 +46,46 @@ export class MetricsRepository {
     startDate: Date,
     endDate: Date
   ): Promise<Metric[]> {
-    return await db.metrics
-      .filter(
-        (metric) =>
-          metric.itemId === itemId &&
-          metric.date >= startDate &&
-          metric.date <= endDate
-      )
-      .toArray()
+    return withDB((db) =>
+      db.metrics
+        .filter(
+          (metric) =>
+            metric.itemId === itemId &&
+            metric.date >= startDate &&
+            metric.date <= endDate
+        )
+        .toArray()
+    ) ?? []
   }
 
   /**
    * Get latest metric by type
    */
   async getLatestByType(itemId: number, type: string): Promise<Metric | undefined> {
-    return await db.metrics
-      .where('[itemId+type]')
-      .equals([itemId, type])
-      .reverse()
-      .first()
+    return withDB((db) =>
+      db.metrics
+        .where('[itemId+type]')
+        .equals([itemId, type])
+        .reverse()
+        .first()
+    ) ?? undefined
   }
 
   /**
    * Create a metric
    */
   async create(data: CreateMetricData): Promise<number> {
-    const id = await db.metrics.add({
-      id: Date.now() + Math.floor(Math.random() * 1000),
-      itemId: data.itemId,
-      type: data.type,
-      value: data.value,
-      unit: data.unit,
-      date: data.date || new Date(),
-      createdAt: new Date(),
-    })
+    const id = await withDB((db) =>
+      db.metrics.add({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        itemId: data.itemId,
+        type: data.type,
+        value: data.value,
+        unit: data.unit,
+        date: data.date || new Date(),
+        createdAt: new Date(),
+      })
+    ) ?? 0
 
     return id as number
   }
@@ -86,7 +94,7 @@ export class MetricsRepository {
    * Delete a metric
    */
   async delete(id: number): Promise<void> {
-    await db.metrics.delete(id)
+    await withDB((db) => db.metrics.delete(id))
   }
 
   /**
@@ -123,7 +131,7 @@ export class HistoryRepository {
    * Get history by item ID
    */
   async getByItem(itemId: number): Promise<History[]> {
-    return await db.history.where('itemId').equals(itemId).reverse().toArray()
+    return withDB((db) => db.history.where('itemId').equals(itemId).reverse().toArray()) ?? []
   }
 
   /**
@@ -133,18 +141,20 @@ export class HistoryRepository {
     itemId: number,
     action: string
   ): Promise<History[]> {
-    return await db.history
-      .where('[itemId+action]')
-      .equals([itemId, action])
-      .reverse()
-      .toArray()
+    return withDB((db) =>
+      db.history
+        .where('[itemId+action]')
+        .equals([itemId, action])
+        .reverse()
+        .toArray()
+    ) ?? []
   }
 
   /**
    * Get recent history
    */
   async getRecent(limit: number = 20): Promise<History[]> {
-    return await db.history.orderBy('createdAt').reverse().limit(limit).toArray()
+    return withDB((db) => db.history.orderBy('createdAt').reverse().limit(limit).toArray()) ?? []
   }
 
   /**
@@ -155,28 +165,32 @@ export class HistoryRepository {
     startDate: Date,
     endDate: Date
   ): Promise<History[]> {
-    return await db.history
-      .filter(
-        (history) =>
-          history.itemId === itemId &&
-          history.createdAt >= startDate &&
-          history.createdAt <= endDate
-      )
-      .toArray()
+    return withDB((db) =>
+      db.history
+        .filter(
+          (history) =>
+            history.itemId === itemId &&
+            history.createdAt >= startDate &&
+            history.createdAt <= endDate
+        )
+        .toArray()
+    ) ?? []
   }
 
   /**
    * Create a history entry
    */
   async create(data: CreateHistoryData): Promise<number> {
-    const id = await db.history.add({
-      id: Date.now() + Math.floor(Math.random() * 1000),
-      itemId: data.itemId,
-      action: data.action,
-      value: data.value,
-      note: data.note,
-      createdAt: new Date(),
-    })
+    const id = await withDB((db) =>
+      db.history.add({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        itemId: data.itemId,
+        action: data.action,
+        value: data.value,
+        note: data.note,
+        createdAt: new Date(),
+      })
+    ) ?? 0
 
     return id as number
   }
@@ -185,17 +199,19 @@ export class HistoryRepository {
    * Delete a history entry
    */
   async delete(id: number): Promise<void> {
-    await db.history.delete(id)
+    await withDB((db) => db.history.delete(id))
   }
 
   /**
    * Get activity count by action
    */
   async getCountByAction(action: string): Promise<number> {
-    return await db.history
-      .where('action')
-      .equals(action)
-      .count()
+    return withDB((db) =>
+      db.history
+        .where('action')
+        .equals(action)
+        .count()
+    ) ?? 0
   }
 
   /**

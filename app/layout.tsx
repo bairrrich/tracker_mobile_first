@@ -14,6 +14,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://all-tracker-mobile.vercel.app'),
   title: {
     default: 'All Tracker Mobile',
     template: '%s | All Tracker Mobile',
@@ -82,7 +83,7 @@ export default async function RootLayout({
   setRequestLocale(locale)
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
           <SupabaseProvider>

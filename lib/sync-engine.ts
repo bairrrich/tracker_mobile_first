@@ -1,8 +1,8 @@
-import { db } from '@/lib/db'
+import { withDB } from '@/lib/db'
 
 /**
  * Sync Engine
- * 
+ *
  * Handles synchronization between local IndexedDB and remote server
  */
 
@@ -25,18 +25,14 @@ export async function pushChanges(): Promise<{
   const errors: string[] = []
   let count = 0
 
+  const unsynced = (await withDB((db) => db.syncQueue.where('synced').equals(0).toArray())) ?? []
+  
+  if (unsynced.length === 0) {
+    console.log('[Sync Engine] No changes to push')
+    return { success: true, count: 0, errors }
+  }
+
   try {
-    // Get unsynced records
-    const unsynced = await db.syncQueue
-      .where('synced')
-      .equals(0)
-      .toArray()
-
-    if (unsynced.length === 0) {
-      console.log('[Sync Engine] No changes to push')
-      return { success: true, count: 0, errors }
-    }
-
     console.log(`[Sync Engine] Pushing ${unsynced.length} changes...`)
 
     // Send to server
@@ -158,12 +154,12 @@ async function applyCollectionChange(
     case 'insert':
     case 'update':
       if (id) {
-        await db.collections.put({ ...data, id, synced: true })
+        await withDB((db) => db.collections.put({ ...data, id, synced: true }))
       }
       break
     case 'delete':
       if (id) {
-        await db.collections.delete(id)
+        await withDB((db) => db.collections.delete(id))
       }
       break
   }
@@ -181,12 +177,12 @@ async function applyItemChange(
     case 'insert':
     case 'update':
       if (id) {
-        await db.items.put({ ...data, id, synced: true })
+        await withDB((db) => db.items.put({ ...data, id, synced: true }))
       }
       break
     case 'delete':
       if (id) {
-        await db.items.delete(id)
+        await withDB((db) => db.items.delete(id))
       }
       break
   }
@@ -196,10 +192,12 @@ async function applyItemChange(
  * Mark sync queue records as synced
  */
 async function markAsSynced(ids: number[]): Promise<void> {
-  await db.transaction('rw', db.syncQueue, async () => {
-    for (const id of ids) {
-      await db.syncQueue.update(id, { synced: true })
-    }
+  await withDB((db) => {
+    db.transaction('rw', db.syncQueue, async () => {
+      for (const id of ids) {
+        await db.syncQueue.update(id, { synced: true })
+      }
+    })
   })
 }
 
@@ -259,17 +257,17 @@ export async function performSync(): Promise<SyncResult> {
  * Get unsynced count
  */
 export async function getUnsyncedCount(): Promise<number> {
-  return await db.syncQueue.where('synced').equals(0).count()
+  return (await withDB((db) => db.syncQueue.where('synced').equals(0).count())) ?? 0
 }
 
 /**
  * Clear all synced records from queue
  */
 export async function clearSyncedRecords(): Promise<void> {
-  const synced = await db.syncQueue.where('synced').equals(1).toArray()
+  const synced = (await withDB((db) => db.syncQueue.where('synced').equals(1).toArray())) ?? []
   const ids = synced.map((r) => r.id as number)
 
   if (ids.length > 0) {
-    await db.syncQueue.bulkDelete(ids)
+    await withDB((db) => db.syncQueue.bulkDelete(ids))
   }
 }
