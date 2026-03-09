@@ -86,6 +86,7 @@ export function BookForm({ open, onOpenChange, editBook }: BookFormProps) {
           rating: data.rating ? Number(data.rating) : undefined,
           startDate: data.startDate ? new Date(data.startDate) : undefined,
           endDate: data.endDate ? new Date(data.endDate) : undefined,
+          collectionId: undefined,  // Ensure collectionId is not sent
         }
 
         // Remove empty strings

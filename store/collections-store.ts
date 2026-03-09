@@ -19,9 +19,9 @@ interface CollectionsState {
     icon?: string
     color?: string
     description?: string
-  }) => Promise<number>
+  }) => Promise<string>  // Returns UUID string
   updateCollection: (
-    id: number,
+    id: string,  // UUID string
     data: {
       name?: string
       icon?: string
@@ -29,7 +29,7 @@ interface CollectionsState {
       description?: string
     }
   ) => Promise<void>
-  deleteCollection: (id: number) => Promise<void>
+  deleteCollection: (id: string) => Promise<void>  // UUID string
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
 }
@@ -81,7 +81,7 @@ export const useCollectionsStore = create<CollectionsState>()(
     },
 
     // Update a collection
-    updateCollection: async (id, data) => {
+    updateCollection: async (id: string, data) => {  // UUID string
       set({ isLoading: true, error: null })
       try {
         await collectionsRepository.update(id, data)
@@ -107,7 +107,7 @@ export const useCollectionsStore = create<CollectionsState>()(
     },
 
     // Delete a collection
-    deleteCollection: async (id) => {
+    deleteCollection: async (id: string) => {  // UUID string
       set({ isLoading: true, error: null })
       try {
         await collectionsRepository.delete(id)

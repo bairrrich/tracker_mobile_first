@@ -54,7 +54,7 @@ export default function BookDetailPage() {
   const [isQuoteFormOpen, setIsQuoteFormOpen] = React.useState(false)
   const [editData, setEditData] = React.useState<BookFormData & { id?: string } | null>(null)
   const [editQuoteData, setEditQuoteData] = React.useState<{ text: string; page?: number } | null>(null)
-  const [selectedQuoteId, setSelectedQuoteId] = React.useState<number | null>(null)
+  const [selectedQuoteId, setSelectedQuoteId] = React.useState<string | null>(null)
 
   const bookId = params.id as string  // UUID string
 
@@ -86,7 +86,7 @@ export default function BookDetailPage() {
     setSelectedQuoteId(null)
   }
 
-  const handleDeleteQuote = async (id: number) => {
+  const handleDeleteQuote = async (id: string) => {
     await deleteQuote(id)
   }
 

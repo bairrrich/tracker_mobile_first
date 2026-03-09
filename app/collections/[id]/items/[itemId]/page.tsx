@@ -48,7 +48,7 @@ export default function ItemDetailPage() {
 
     setIsDeleting(true)
     try {
-      await deleteItem(Number(selectedItem.id))
+      await deleteItem(selectedItem.id)  // Already UUID string
       router.push('/collections')
     } catch (error) {
       console.error('Failed to delete item:', error)

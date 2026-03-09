@@ -11,9 +11,9 @@ interface BookQuotesState {
 
   // Actions
   fetchQuotes: (bookId: string) => Promise<void>
-  addQuote: (bookId: string, text: string, page?: number) => Promise<number>
-  updateQuote: (id: number, text: string, page?: number) => Promise<void>
-  deleteQuote: (id: number) => Promise<void>
+  addQuote: (bookId: string, text: string, page?: number) => Promise<string>
+  updateQuote: (id: string, text: string, page?: number) => Promise<void>
+  deleteQuote: (id: string) => Promise<void>
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
 }

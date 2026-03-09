@@ -227,7 +227,7 @@ export class BooksRepository {
   /**
    * Get books by collection
    */
-  async getByCollection(collectionId: number): Promise<Book[]> {
+  async getByCollection(collectionId: string): Promise<Book[]> {  // UUID string
     return withDB((db) =>
       db.books.where('collectionId').equals(collectionId).reverse().toArray()
     ) ?? []
@@ -257,7 +257,7 @@ export class BooksRepository {
   ): Promise<void> {
     await withDB((db) =>
       db.syncQueue.add({
-        id: Date.now() + Math.floor(Math.random() * 1000),
+        id: generateUUID(),
         table: 'books',
         recordId: id,
         operation,

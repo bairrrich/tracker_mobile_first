@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient()
-    const processedIds: Array<{ localId: number; remoteId: string; recordId: string }> = []
+    const processedIds: Array<{ localId: string; remoteId: string; recordId: string }> = []
     const errors: string[] = []
 
     // Process incoming changes
@@ -102,17 +102,26 @@ export async function POST(request: NextRequest) {
             console.log(`[Sync API] Insert into ${tableName}:`, change.recordId)
             console.log(`[Sync API] Data from client:`, data)
             console.log(`[Sync API] ID from data:`, (data as any).id)
-            
+
+            // Ensure the ID in data matches recordId
+            if ((data as any).id !== change.recordId) {
+              console.warn(`[Sync API] ID mismatch! data.id: ${(data as any).id}, recordId: ${change.recordId}`)
+              // Use recordId as the authoritative ID
+              data.id = change.recordId
+            }
+
             const insertData = {
               ...data,
               user_id: userId || null,
               synced: true,
               updated_at: new Date().toISOString(),
             }
-            
+
+            console.log(`[Sync API] Final insertData.id:`, insertData.id)
+
             // Use client-generated UUID - DON'T delete it!
             // The id field is already in data from the client
-            
+
             const { data: insertResult, error: insertError } = await supabase
               .from(tableName)
               .insert(insertData)
@@ -140,12 +149,12 @@ export async function POST(request: NextRequest) {
                 })
                 break
               }
-              
+
               console.error(`[Sync API] Insert error:`, insertError)
               throw insertError
             }
             console.log(`[Sync API] Inserted with ID:`, insertResult.id)
-            
+
             // Return mapping of local ID to remote ID
             processedIds.push({
               localId: change.id,  // syncQueue record ID
@@ -174,7 +183,11 @@ export async function POST(request: NextRequest) {
               throw updateError
             }
             console.log(`[Sync API] Updated:`, updateResult)
-            processedIds.push(change.id)
+            processedIds.push({
+              localId: change.id,  // syncQueue record ID
+              remoteId: change.recordId,  // Same as recordId for updates
+              recordId: change.recordId,  // Book/Item record ID
+            })
             break
 
           case 'delete':
@@ -188,7 +201,11 @@ export async function POST(request: NextRequest) {
               throw deleteError
             }
             console.log(`[Sync API] Deleted`)
-            processedIds.push(change.id)
+            processedIds.push({
+              localId: change.id,  // syncQueue record ID
+              remoteId: change.recordId,  // Same as recordId for deletes
+              recordId: change.recordId,  // Book/Item record ID
+            })
             break
 
           default:
@@ -206,7 +223,7 @@ export async function POST(request: NextRequest) {
       table: string
       operation: string
       data: object
-      id?: number
+      id?: string  // UUID string
     }> = []
 
     // Fetch remote changes for each table
@@ -247,7 +264,7 @@ export async function POST(request: NextRequest) {
     const response = {
       success: errors.length === 0,
       changes: remoteChanges,
-      processed: processedIds.map(id => ({ id })),  // Return both id and recordId
+      processed: processedIds,  // Return the full objects with localId, remoteId, recordId
       lastSync: new Date().toISOString(),
       errors: errors.length > 0 ? errors : undefined,
     }

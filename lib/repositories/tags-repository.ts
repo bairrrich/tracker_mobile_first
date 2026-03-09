@@ -1,4 +1,5 @@
 import { withDB, type Tag, type Note } from '@/lib/db'
+import { generateUUID } from '@/lib/utils/uuid'
 
 export interface CreateTagData {
   name: string
@@ -6,7 +7,7 @@ export interface CreateTagData {
 }
 
 export interface CreateNoteData {
-  itemId: number
+  itemId: string  // UUID
   content: string
 }
 
@@ -21,14 +22,14 @@ export class TagsRepository {
   /**
    * Get tag by ID
    */
-  async getById(id: number): Promise<Tag | undefined> {
+  async getById(id: string): Promise<Tag | undefined> {
     return withDB((db) => db.tags.get(id)) ?? undefined
   }
 
   /**
    * Get tags by item ID
    */
-  async getByItem(itemId: number): Promise<Tag[]> {
+  async getByItem(itemId: string): Promise<Tag[]> {
     const itemTags = (await withDB((db) => db.itemTags.where('itemId').equals(itemId).toArray())) ?? []
     const tagIds = itemTags.map((it) => it.tagId)
     return (await withDB((db) => db.tags.where('id').anyOf(tagIds).toArray())) ?? []
@@ -37,30 +38,32 @@ export class TagsRepository {
   /**
    * Create a tag
    */
-  async create(data: CreateTagData): Promise<number> {
-    const id = await withDB((db) =>
+  async create(data: CreateTagData): Promise<string> {
+    const id = generateUUID()
+    
+    await withDB((db) =>
       db.tags.add({
-        id: Date.now() + Math.floor(Math.random() * 1000),
+        id,
         name: data.name,
         color: data.color,
         createdAt: new Date(),
       })
-    ) ?? 0
+    )
 
-    return id as number
+    return id
   }
 
   /**
    * Update a tag
    */
-  async update(id: number, data: Partial<CreateTagData>): Promise<void> {
+  async update(id: string, data: Partial<CreateTagData>): Promise<void> {
     await withDB((db) => db.tags.update(id, data))
   }
 
   /**
    * Delete a tag
    */
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     await withDB((db) => db.itemTags.where('tagId').equals(id).delete())
     await withDB((db) => db.tags.delete(id))
   }
@@ -68,9 +71,10 @@ export class TagsRepository {
   /**
    * Add tag to item
    */
-  async addToItem(itemId: number, tagId: number): Promise<void> {
+  async addToItem(itemId: string, tagId: string): Promise<void> {
     await withDB((db) =>
       db.itemTags.add({
+        id: generateUUID(),
         itemId,
         tagId,
       })
@@ -80,10 +84,10 @@ export class TagsRepository {
   /**
    * Remove tag from item
    */
-  async removeFromItem(itemId: number, tagId: number): Promise<void> {
+  async removeFromItem(itemId: string, tagId: string): Promise<void> {
     const itemTags = (await withDB((db) => db.itemTags.toArray())) ?? []
     const itemTag = itemTags.find((it) => it.itemId === itemId && it.tagId === tagId)
-    if (itemTag && itemTag.id) {
+    if (itemTag) {
       await withDB((db) => db.itemTags.delete(itemTag.id))
     }
   }
@@ -91,7 +95,7 @@ export class TagsRepository {
   /**
    * Set item tags (replaces all existing tags)
    */
-  async setItemTags(itemId: number, tagIds: number[]): Promise<void> {
+  async setItemTags(itemId: string, tagIds: string[]): Promise<void> {
     // Remove existing tags
     await withDB((db) => db.itemTags.where('itemId').equals(itemId).delete())
 
@@ -118,39 +122,41 @@ export class NotesRepository {
   /**
    * Get notes by item ID
    */
-  async getByItem(itemId: number): Promise<Note[]> {
+  async getByItem(itemId: string): Promise<Note[]> {
     return withDB((db) => db.notes.where('itemId').equals(itemId).toArray()) ?? []
   }
 
   /**
    * Get note by ID
    */
-  async getById(id: number): Promise<Note | undefined> {
+  async getById(id: string): Promise<Note | undefined> {
     return withDB((db) => db.notes.get(id)) ?? undefined
   }
 
   /**
    * Create a note
    */
-  async create(data: CreateNoteData): Promise<number> {
+  async create(data: CreateNoteData): Promise<string> {
     const now = new Date()
-    const id = await withDB((db) =>
+    const id = generateUUID()
+    
+    await withDB((db) =>
       db.notes.add({
-        id: Date.now() + Math.floor(Math.random() * 1000),
+        id,
         itemId: data.itemId,
         content: data.content,
         createdAt: now,
         updatedAt: now,
       })
-    ) ?? 0
+    )
 
-    return id as number
+    return id
   }
 
   /**
    * Update a note
    */
-  async update(id: number, content: string): Promise<void> {
+  async update(id: string, content: string): Promise<void> {
     await withDB((db) =>
       db.notes.update(id, {
         content,
@@ -162,7 +168,7 @@ export class NotesRepository {
   /**
    * Delete a note
    */
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     await withDB((db) => db.notes.delete(id))
   }
 

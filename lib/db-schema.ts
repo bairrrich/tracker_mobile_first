@@ -1,12 +1,13 @@
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, real } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
 
 // ============================================
 // Tables
 // ============================================
+// All IDs are UUID strings for consistency across Supabase, IndexedDB, and client code
 
 export const collections = sqliteTable('collections', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+  id: text('id').primaryKey(), // UUID
   name: text('name').notNull(),
   type: text('type').notNull(),
   description: text('description'),
@@ -14,12 +15,12 @@ export const collections = sqliteTable('collections', {
   icon: text('icon'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
-  synced: integer('synced', { mode: 'boolean' }).default(false).notNull(),
+  synced: text('synced').default('false').notNull(),
 })
 
 export const items = sqliteTable('items', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  collectionId: integer('collection_id').references(() => collections.id),
+  id: text('id').primaryKey(), // UUID
+  collectionId: text('collection_id').references(() => collections.id),
   name: text('name').notNull(),
   description: text('description'),
   image: text('image'),
@@ -27,12 +28,12 @@ export const items = sqliteTable('items', {
   rating: real('rating'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
-  synced: integer('synced', { mode: 'boolean' }).default(false).notNull(),
+  synced: text('synced').default('false').notNull(),
 })
 
 export const metrics = sqliteTable('metrics', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  itemId: integer('item_id').references(() => items.id),
+  id: text('id').primaryKey(), // UUID
+  itemId: text('item_id').references(() => items.id),
   type: text('type').notNull(),
   value: real('value').notNull(),
   unit: text('unit'),
@@ -41,8 +42,8 @@ export const metrics = sqliteTable('metrics', {
 })
 
 export const history = sqliteTable('history', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  itemId: integer('item_id').references(() => items.id),
+  id: text('id').primaryKey(), // UUID
+  itemId: text('item_id').references(() => items.id),
   action: text('action').notNull(),
   value: real('value'),
   note: text('note'),
@@ -50,20 +51,21 @@ export const history = sqliteTable('history', {
 })
 
 export const tags = sqliteTable('tags', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+  id: text('id').primaryKey(), // UUID
   name: text('name').notNull(),
   color: text('color'),
   createdAt: text('created_at').notNull(),
 })
 
 export const itemTags = sqliteTable('item_tags', {
-  itemId: integer('item_id').references(() => items.id),
-  tagId: integer('tag_id').references(() => tags.id),
+  id: text('id').primaryKey(), // UUID
+  itemId: text('item_id').references(() => items.id),
+  tagId: text('tag_id').references(() => tags.id),
 })
 
 export const notes = sqliteTable('notes', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  itemId: integer('item_id').references(() => items.id),
+  id: text('id').primaryKey(), // UUID
+  itemId: text('item_id').references(() => items.id),
   content: text('content').notNull(),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

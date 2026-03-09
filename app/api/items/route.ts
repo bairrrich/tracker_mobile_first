@@ -18,11 +18,10 @@ export async function GET(request: NextRequest) {
     let items
 
     if (collectionId) {
-      const cid = parseInt(collectionId)
       if (status) {
-        items = await itemsRepository.getByCollectionAndStatus(cid, status as any)
+        items = await itemsRepository.getByCollectionAndStatus(collectionId, status as any)
       } else {
-        items = await itemsRepository.getByCollection(cid)
+        items = await itemsRepository.getByCollection(collectionId)
       }
     } else if (search) {
       items = await itemsRepository.search(search)
@@ -65,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     // Create item
     const id = await itemsRepository.create({
-      collectionId: parseInt(collectionId),
+      collectionId,  // Already UUID string
       name,
       description: description || undefined,
       image: image || undefined,

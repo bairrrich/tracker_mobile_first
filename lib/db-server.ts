@@ -20,11 +20,12 @@ export async function closeDatabase() {
 }
 
 // Helper function to initialize database
+// All IDs are UUID strings for consistency across Supabase, IndexedDB, and client code
 export async function initializeDatabase() {
   // Create tables if they don't exist
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS collections (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       type TEXT NOT NULL,
       description TEXT,
@@ -38,8 +39,8 @@ export async function initializeDatabase() {
 
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      collection_id INTEGER,
+      id TEXT PRIMARY KEY,
+      collection_id TEXT,
       name TEXT NOT NULL,
       description TEXT,
       image TEXT,
@@ -54,8 +55,8 @@ export async function initializeDatabase() {
 
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS metrics (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      item_id INTEGER,
+      id TEXT PRIMARY KEY,
+      item_id TEXT,
       type TEXT NOT NULL,
       value REAL NOT NULL,
       unit TEXT,
@@ -67,8 +68,8 @@ export async function initializeDatabase() {
 
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS history (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      item_id INTEGER,
+      id TEXT PRIMARY KEY,
+      item_id TEXT,
       action TEXT NOT NULL,
       value REAL,
       note TEXT,
@@ -79,7 +80,7 @@ export async function initializeDatabase() {
 
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS tags (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       color TEXT,
       created_at TEXT NOT NULL
@@ -88,8 +89,9 @@ export async function initializeDatabase() {
 
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS item_tags (
-      item_id INTEGER,
-      tag_id INTEGER,
+      id TEXT PRIMARY KEY,
+      item_id TEXT,
+      tag_id TEXT,
       FOREIGN KEY (item_id) REFERENCES items(id),
       FOREIGN KEY (tag_id) REFERENCES tags(id)
     )
@@ -97,8 +99,8 @@ export async function initializeDatabase() {
 
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS notes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      item_id INTEGER,
+      id TEXT PRIMARY KEY,
+      item_id TEXT,
       content TEXT NOT NULL,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
@@ -106,5 +108,5 @@ export async function initializeDatabase() {
     )
   `)
 
-  console.log('[Database] Tables initialized')
+  console.log('[Database] Tables initialized with UUID support')
 }

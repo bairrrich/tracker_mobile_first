@@ -1,4 +1,5 @@
 import { withDB, type Collection, type CollectionType } from '@/lib/db'
+import { generateUUID } from '@/lib/utils/uuid'
 
 export class CollectionsRepository {
   /**
@@ -11,7 +12,7 @@ export class CollectionsRepository {
   /**
    * Get collection by ID
    */
-  async getById(id: number): Promise<Collection | undefined> {
+  async getById(id: string): Promise<Collection | undefined> {
     return withDB((db) => db.collections.get(id)) ?? undefined
   }
 
@@ -27,20 +28,19 @@ export class CollectionsRepository {
    */
   async create(
     data: Omit<Collection, 'id' | 'createdAt' | 'updatedAt' | 'synced'>
-  ): Promise<number> {
-    const result = withDB((db) => {
-      const now = new Date()
-      return db.collections.add({
+  ): Promise<string> {
+    const now = new Date()
+    const id = generateUUID()
+
+    await withDB((db) =>
+      db.collections.add({
         ...data,
+        id,
         createdAt: now,
         updatedAt: now,
         synced: false,
       })
-    })
-    
-    if (result === null) return -1
-
-    const id = await result
+    )
 
     // Mark for sync
     await this.markForSync(id, 'insert', data)
@@ -52,7 +52,7 @@ export class CollectionsRepository {
    * Update a collection
    */
   async update(
-    id: number,
+    id: string,
     data: Partial<Omit<Collection, 'id' | 'createdAt' | 'synced'>>
   ): Promise<void> {
     withDB((db) => {
@@ -69,7 +69,7 @@ export class CollectionsRepository {
   /**
    * Delete a collection
    */
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     withDB((db) => {
       db.collections.delete(id)
     })
@@ -81,7 +81,7 @@ export class CollectionsRepository {
   /**
    * Get item count for a collection
    */
-  async getItemCount(collectionId: number): Promise<number> {
+  async getItemCount(collectionId: string): Promise<number> {
     return withDB((db) => db.items.where('collectionId').equals(collectionId).count()) ?? 0
   }
 
@@ -105,15 +105,15 @@ export class CollectionsRepository {
    * Mark collection for sync
    */
   private async markForSync(
-    id: number,
+    id: string,
     operation: 'insert' | 'update' | 'delete',
     data?: object
   ): Promise<void> {
     withDB((db) => {
       db.syncQueue.add({
-        id: Date.now() + Math.floor(Math.random() * 1000),
+        id: generateUUID(),
         table: 'collections',
-        recordId: String(id),  // Convert to string
+        recordId: id,
         operation,
         data: data ? JSON.stringify(data) : '',
         synced: false,
@@ -125,7 +125,7 @@ export class CollectionsRepository {
   /**
    * Mark collection as synced
    */
-  async markAsSynced(id: number): Promise<void> {
+  async markAsSynced(id: string): Promise<void> {
     withDB((db) => {
       db.collections.update(id, { synced: true })
     })

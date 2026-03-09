@@ -10,7 +10,7 @@ type ViewMode = 'grid' | 'list'
 
 interface Filters {
   status?: ItemStatus
-  tags?: number[]
+  tags?: string[]  // UUID strings
   minRating?: number
   search?: string
 }
@@ -30,18 +30,18 @@ interface ItemsState {
   error: string | null
 
   // Actions
-  fetchItems: (collectionId: number) => Promise<void>
+  fetchItems: (collectionId: string) => Promise<void>  // UUID string
   selectItem: (item: Item | null) => Promise<void>
   addItem: (data: {
-    collectionId: number
+    collectionId: string  // UUID string
     name: string
     description?: string
     image?: string
     status?: ItemStatus
     rating?: number
-  }) => Promise<number>
+  }) => Promise<string>  // Returns UUID string
   updateItem: (
-    id: number,
+    id: string,  // UUID string
     data: {
       name?: string
       description?: string
@@ -50,15 +50,15 @@ interface ItemsState {
       rating?: number
     }
   ) => Promise<void>
-  deleteItem: (id: number) => Promise<void>
+  deleteItem: (id: string) => Promise<void>  // UUID string
   addMetric: (data: {
-    itemId: number
+    itemId: string  // UUID string
     type: string
     value: number
     unit?: string
   }) => Promise<void>
   addHistory: (data: {
-    itemId: number
+    itemId: string  // UUID string
     action: string
     value?: number
     note?: string
@@ -86,7 +86,7 @@ export const useItemsStore = create<ItemsState>()(
     error: null,
 
     // Fetch items by collection
-    fetchItems: async (collectionId: number) => {
+    fetchItems: async (collectionId: string) => {  // UUID string
       set({ isLoading: true, error: null })
       try {
         const items = await itemsRepository.getByCollection(collectionId)

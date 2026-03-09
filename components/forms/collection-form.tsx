@@ -28,7 +28,7 @@ import type { CollectionType } from '@/lib/db'
 interface CollectionFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  editId?: number | null
+  editId?: string | null  // UUID string
 }
 
 const collectionTypes: { value: CollectionType; label: string; icon: string }[] =
@@ -65,7 +65,7 @@ export function CollectionForm({
       setIsSubmitting(true)
       try {
         if (editId) {
-          await updateCollection(editId, {
+          await updateCollection(editId as string, {
             name: data.name,
             description: data.description || undefined,
             color: data.color || undefined,

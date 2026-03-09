@@ -1,4 +1,5 @@
 import { withDB, type BookQuote } from '@/lib/db'
+import { generateUUID } from '@/lib/utils/uuid'
 
 export interface CreateQuoteData {
   bookId: string  // UUID
@@ -24,18 +25,20 @@ export class BookQuotesRepository {
   /**
    * Get quote by ID
    */
-  async getById(id: number): Promise<BookQuote | undefined> {
+  async getById(id: string): Promise<BookQuote | undefined> {
     return withDB((db) => db.bookQuotes.get(id)) ?? undefined
   }
 
   /**
    * Create a new quote
    */
-  async create(data: CreateQuoteData): Promise<number> {
+  async create(data: CreateQuoteData): Promise<string> {
     const now = new Date()
-    const id = await withDB((db) =>
+    const id = generateUUID()  // Generate UUID client-side
+    
+    const result = await withDB((db) =>
       db.bookQuotes.add({
-        id: Date.now() + Math.floor(Math.random() * 1000),
+        id,  // Use generated UUID
         bookId: data.bookId,
         text: data.text,
         page: data.page,
@@ -44,10 +47,10 @@ export class BookQuotesRepository {
       })
     )
 
-    if (id === null) return -1
+    if (result === null) return ''
 
     // Mark for sync
-    await this.markForSync(id, 'insert', data)
+    await this.markForSync(id, 'insert', { ...data, id })
 
     return id
   }
@@ -55,7 +58,7 @@ export class BookQuotesRepository {
   /**
    * Update a quote
    */
-  async update(id: number, data: UpdateQuoteData): Promise<void> {
+  async update(id: string, data: UpdateQuoteData): Promise<void> {
     await withDB((db) =>
       db.bookQuotes.update(id, {
         ...data,
@@ -69,7 +72,7 @@ export class BookQuotesRepository {
   /**
    * Delete a quote
    */
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     await withDB((db) => db.bookQuotes.delete(id))
 
     // Mark for sync
@@ -80,15 +83,15 @@ export class BookQuotesRepository {
    * Mark quote for sync
    */
   private async markForSync(
-    id: number,
+    id: string,
     operation: 'insert' | 'update' | 'delete',
     data?: object
   ): Promise<void> {
     await withDB((db) =>
       db.syncQueue.add({
-        id: Date.now() + Math.floor(Math.random() * 1000),
+        id: generateUUID(),  // Use UUID for sync queue id
         table: 'bookQuotes',
-        recordId: String(id),  // Convert number to string for UUID compatibility
+        recordId: id,  // Now string UUID
         operation,
         data: data ? JSON.stringify(data) : '',
         synced: false,
@@ -100,19 +103,19 @@ export class BookQuotesRepository {
   /**
    * Mark quote as synced
    */
-  async markAsSynced(id: number): Promise<void> {
+  async markAsSynced(id: string): Promise<void> {
     await withDB((db) => db.bookQuotes.update(id, { synced: true }))
 
     const syncRecords = (await withDB((db) =>
       db.syncQueue
-        .where('[table+recordId]')
-        .equals(['bookQuotes', id])
-        .and((record) => !record.synced)
-        .primaryKeys()
+        .where('table')
+        .equals('bookQuotes')
+        .and((record) => record.recordId === id && !record.synced)
+        .toArray()
     )) ?? []
 
-    for (const key of syncRecords) {
-      await withDB((db) => db.syncQueue.update(key, { synced: true }))
+    for (const record of syncRecords) {
+      await withDB((db) => db.syncQueue.update(record.id, { synced: true }))
     }
   }
 }

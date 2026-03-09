@@ -1,9 +1,10 @@
 import { withDB, type Item } from '@/lib/db'
+import { generateUUID } from '@/lib/utils/uuid'
 
 export type ItemStatus = 'active' | 'archived' | 'completed'
 
 export interface CreateItemData {
-  collectionId: number
+  collectionId: string  // UUID
   name: string
   description?: string
   image?: string
@@ -30,7 +31,7 @@ export class ItemsRepository {
   /**
    * Get items by collection ID
    */
-  async getByCollection(collectionId: number): Promise<Item[]> {
+  async getByCollection(collectionId: string): Promise<Item[]> {
     return withDB((db) =>
       db.items
         .where('collectionId')
@@ -44,22 +45,22 @@ export class ItemsRepository {
    * Get items by collection ID with status filter
    */
   async getByCollectionAndStatus(
-    collectionId: number,
+    collectionId: string,
     status: ItemStatus
   ): Promise<Item[]> {
     return withDB((db) =>
       db.items
-        .where('[collectionId+status]')
-        .equals([collectionId, status])
-        .reverse()
+        .where('collectionId')
+        .equals(collectionId)
         .toArray()
+        .then(items => items.filter(item => item.status === status))
     ) ?? []
   }
 
   /**
    * Get item by ID
    */
-  async getById(id: number): Promise<Item | undefined> {
+  async getById(id: string): Promise<Item | undefined> {
     return withDB((db) => db.items.get(id)) ?? undefined
   }
 
@@ -78,11 +79,13 @@ export class ItemsRepository {
   /**
    * Create a new item
    */
-  async create(data: CreateItemData): Promise<number> {
+  async create(data: CreateItemData): Promise<string> {
     const now = new Date()
-    const id = await withDB((db) =>
+    const id = generateUUID()
+
+    await withDB((db) =>
       db.items.add({
-        id: Date.now() + Math.floor(Math.random() * 1000),
+        id,
         collectionId: data.collectionId,
         name: data.name,
         description: data.description,
@@ -93,18 +96,18 @@ export class ItemsRepository {
         updatedAt: now,
         synced: false,
       })
-    ) ?? 0
+    )
 
     // Mark for sync
-    await this.markForSync(id as number, 'insert', data)
+    await this.markForSync(id, 'insert', data)
 
-    return id as number
+    return id
   }
 
   /**
    * Update an item
    */
-  async update(id: number, data: UpdateItemData): Promise<void> {
+  async update(id: string, data: UpdateItemData): Promise<void> {
     await withDB((db) =>
       db.items.update(id, {
         ...data,
@@ -119,7 +122,7 @@ export class ItemsRepository {
   /**
    * Delete an item
    */
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     // Delete related metrics, history, notes, and tags
     await withDB((db) => db.metrics.where('itemId').equals(id).delete())
     await withDB((db) => db.history.where('itemId').equals(id).delete())
@@ -161,15 +164,15 @@ export class ItemsRepository {
    * Mark item for sync
    */
   private async markForSync(
-    id: number,
+    id: string,
     operation: 'insert' | 'update' | 'delete',
     data?: object
   ): Promise<void> {
     await withDB((db) =>
       db.syncQueue.add({
-        id: Date.now() + Math.floor(Math.random() * 1000),
+        id: generateUUID(),
         table: 'items',
-        recordId: String(id),
+        recordId: id,
         operation,
         data: data ? JSON.stringify(data) : '',
         synced: false,
@@ -192,7 +195,7 @@ export class ItemsRepository {
 
     const items: Item[] = []
     for (const record of await syncRecords) {
-      const item = await withDB((db) => db.items.get(Number(record.recordId)))
+      const item = await withDB((db) => db.items.get(record.recordId))
       if (item) {
         items.push(item)
       }
@@ -204,19 +207,19 @@ export class ItemsRepository {
   /**
    * Mark item as synced
    */
-  async markAsSynced(id: number): Promise<void> {
+  async markAsSynced(id: string): Promise<void> {
     await withDB((db) => db.items.update(id, { synced: true }))
 
     const syncRecords = (await withDB((db) =>
       db.syncQueue
-        .where('[table+recordId]')
-        .equals(['items', id])
-        .and((record) => !record.synced)
-        .primaryKeys()
+        .where('table')
+        .equals('items')
+        .and((record) => record.recordId === id && !record.synced)
+        .toArray()
     )) ?? []
 
-    for (const key of syncRecords) {
-      await withDB((db) => db.syncQueue.update(key, { synced: true }))
+    for (const record of syncRecords) {
+      await withDB((db) => db.syncQueue.update(record.id, { synced: true }))
     }
   }
 }

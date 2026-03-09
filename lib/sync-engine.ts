@@ -156,7 +156,7 @@ async function applyRemoteChange(change: {
   table: string
   operation: string
   data: object
-  id?: number
+  id?: string  // UUID string
   recordId?: string  // Local ID from syncQueue (UUID string)
 }): Promise<void> {
   const { table, operation, data, id, recordId } = change
@@ -169,7 +169,7 @@ async function applyRemoteChange(change: {
       await applyItemChange(operation as any, data, id)
       break
     case 'books':
-      await applyBookChange(operation as any, data, recordId, String(id))
+      await applyBookChange(operation as any, data, recordId, id)
       break
     case 'book_quotes':
       await applyBookQuoteChange(operation as any, data, recordId, id)
@@ -186,7 +186,7 @@ async function applyRemoteChange(change: {
 async function applyCollectionChange(
   operation: 'insert' | 'update' | 'delete',
   data: any,
-  id?: number
+  id?: string  // UUID string
 ): Promise<void> {
   switch (operation) {
     case 'insert':
@@ -209,7 +209,7 @@ async function applyCollectionChange(
 async function applyItemChange(
   operation: 'insert' | 'update' | 'delete',
   data: any,
-  id?: number
+  id?: string  // UUID string
 ): Promise<void> {
   switch (operation) {
     case 'insert':
@@ -233,10 +233,10 @@ async function applyBookChange(
   operation: 'insert' | 'update' | 'delete',
   data: any,
   localId?: string,  // UUID string
-  remoteId?: string
+  remoteId?: string  // UUID string
 ): Promise<void> {
   const id = remoteId || localId
-  
+
   switch (operation) {
     case 'insert':
     case 'update':
@@ -260,20 +260,20 @@ async function applyBookQuoteChange(
   operation: 'insert' | 'update' | 'delete',
   data: any,
   _recordId?: string,  // UUID string from syncQueue (unused for quotes)
-  id?: number  // Quote ID (number, auto-increment)
+  quoteId?: string  // Quote ID (UUID string)
 ): Promise<void> {
-  const quoteId = id  // Keep as number for auto-increment
+  const id = quoteId  // Keep as string for UUID
   
   switch (operation) {
     case 'insert':
     case 'update':
-      if (quoteId) {
-        await withDB((db) => db.bookQuotes.put({ ...data, id: quoteId, synced: true }))
+      if (id) {
+        await withDB((db) => db.bookQuotes.put({ ...data, id, synced: true }))
       }
       break
     case 'delete':
-      if (quoteId) {
-        await withDB((db) => db.bookQuotes.delete(quoteId))
+      if (id) {
+        await withDB((db) => db.bookQuotes.delete(id))
       }
       break
   }
@@ -281,51 +281,55 @@ async function applyBookQuoteChange(
 
 /**
  * Mark sync queue records as synced
+ * Uses UUID string ids
  */
-async function markAsSynced(processedIds: Array<{ 
+async function markAsSynced(processedIds: Array<{
   id?: {
-    localId: number
-    remoteId: number | string
-    recordId: number
+    localId: string  // UUID string
+    remoteId: string  // UUID string
+    recordId: string  // UUID string
   }
-  localId?: number
-  remoteId?: number | string
-  recordId?: number
-} | number>): Promise<void> {
+  localId?: string  // UUID string
+  remoteId?: string  // UUID string
+  recordId?: string  // UUID string
+} | string>): Promise<void> {  // string = UUID string
   console.log('[Sync Engine] markAsSynced: Marking IDs as synced:', processedIds)
-  
+
   const db = await ensureDB()
   if (!db) {
     console.error('[Sync Engine] markAsSynced: DB not available')
     return
   }
-  
+
   await db.transaction('rw', db.syncQueue, async () => {
     for (const item of processedIds) {
       // Extract localId from nested structure or direct property
-      let localId: number | undefined
-      
+      let localId: string | undefined
+
       if (typeof item === 'object' && item !== null) {
         // Check for nested structure { id: { localId, ... } }
         if ('id' in item && typeof item.id === 'object' && item.id !== null && 'localId' in item.id) {
           localId = (item.id as any).localId
-        } 
+          console.log('[Sync Engine] markAsSynced: Found nested localId:', localId)
+        }
         // Check for flat structure { localId, ... }
         else if ('localId' in item) {
           localId = (item as any).localId
+          console.log('[Sync Engine] markAsSynced: Found flat localId:', localId)
         }
       }
-      
+
       if (localId !== undefined) {
         console.log('[Sync Engine] markAsSynced: Marking localId', localId, 'as synced')
         await db.syncQueue.update(localId, { synced: true })
       } else {
-        // Simple case - item is the ID
-        await db.syncQueue.update(item as number, { synced: true })
+        // Simple case - item is the ID (UUID string)
+        console.log('[Sync Engine] markAsSynced: Marking direct ID:', item)
+        await db.syncQueue.update(item as string, { synced: true })
       }
     }
   })
-  
+
   console.log('[Sync Engine] markAsSynced: Complete')
 }
 
@@ -392,10 +396,10 @@ export async function getUnsyncedCount(): Promise<number> {
  * Clear all synced records from queue
  */
 export async function clearSyncedRecords(): Promise<void> {
-  const synced = (await withDB((db) => db.syncQueue.where('synced').equals(1).toArray())) ?? []
-  const ids = synced.map((r) => r.id as number)
+  const synced = (await withDB((db) => db.syncQueue.filter(r => r.synced).toArray())) ?? []
 
-  if (ids.length > 0) {
-    await withDB((db) => db.syncQueue.bulkDelete(ids))
+  // Delete each synced record individually (UUID strings)
+  for (const record of synced) {
+    await withDB((db) => db.syncQueue.delete(record.id))
   }
 }

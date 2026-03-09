@@ -15,9 +15,8 @@ export async function GET(
 ) {
   try {
     const { id: idParam } = await params
-    const id = parseInt(idParam)
 
-    if (isNaN(id)) {
+    if (!idParam) {
       return NextResponse.json(
         {
           success: false,
@@ -27,7 +26,7 @@ export async function GET(
       )
     }
 
-    const collection = await collectionsRepository.getById(id)
+    const collection = await collectionsRepository.getById(idParam)
 
     if (!collection) {
       return NextResponse.json(
@@ -62,9 +61,8 @@ export async function PUT(
 ) {
   try {
     const { id: idParam } = await params
-    const id = parseInt(idParam)
 
-    if (isNaN(id)) {
+    if (!idParam) {
       return NextResponse.json(
         {
           success: false,
@@ -77,14 +75,14 @@ export async function PUT(
     const body = await request.json()
     const { name, description, color, icon } = body
 
-    await collectionsRepository.update(id, {
+    await collectionsRepository.update(idParam, {
       name: name || undefined,
       description: description || undefined,
       color: color || undefined,
       icon: icon || undefined,
     })
 
-    const collection = await collectionsRepository.getById(id)
+    const collection = await collectionsRepository.getById(idParam)
 
     return NextResponse.json({
       success: true,
@@ -109,9 +107,8 @@ export async function DELETE(
 ) {
   try {
     const { id: idParam } = await params
-    const id = parseInt(idParam)
 
-    if (isNaN(id)) {
+    if (!idParam) {
       return NextResponse.json(
         {
           success: false,
@@ -121,7 +118,7 @@ export async function DELETE(
       )
     }
 
-    await collectionsRepository.delete(id)
+    await collectionsRepository.delete(idParam)
 
     return NextResponse.json({
       success: true,

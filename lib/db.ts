@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie'
+import { generateUUID } from './utils/uuid'
 
 // ============================================
 // Type Definitions
@@ -43,7 +44,7 @@ export interface Book {
 }
 
 export interface BookQuote {
-  id: number
+  id: string  // UUID
   bookId: string  // UUID
   text: string
   page?: number
@@ -52,7 +53,7 @@ export interface BookQuote {
 }
 
 export interface Collection {
-  id: number
+  id: string  // UUID
   name: string
   type: CollectionType
   icon?: string
@@ -64,8 +65,8 @@ export interface Collection {
 }
 
 export interface Item {
-  id: number
-  collectionId: number
+  id: string  // UUID
+  collectionId: string  // UUID
   name: string
   description?: string
   image?: string
@@ -77,8 +78,8 @@ export interface Item {
 }
 
 export interface Metric {
-  id: number
-  itemId: number
+  id: string  // UUID
+  itemId: string  // UUID
   type: string
   value: number
   unit?: string
@@ -87,8 +88,8 @@ export interface Metric {
 }
 
 export interface History {
-  id: number
-  itemId: number
+  id: string  // UUID
+  itemId: string  // UUID
   action: string
   value?: number
   note?: string
@@ -96,28 +97,28 @@ export interface History {
 }
 
 export interface Tag {
-  id: number
+  id: string  // UUID
   name: string
   color?: string
   createdAt: Date
 }
 
 export interface ItemTag {
-  id?: number
-  itemId: number
-  tagId: number
+  id: string  // UUID
+  itemId: string  // UUID
+  tagId: string  // UUID
 }
 
 export interface Note {
-  id: number
-  itemId: number
+  id: string  // UUID
+  itemId: string  // UUID
   content: string
   createdAt: Date
   updatedAt: Date
 }
 
 export interface SyncQueue {
-  id: number
+  id: string  // UUID
   table: string
   recordId: string  // UUID
   operation: 'insert' | 'update' | 'delete'
@@ -145,55 +146,18 @@ export class TrackerDatabase extends Dexie {
   constructor() {
     super('tracker_db')
 
-    this.version(1).stores({
-      // Collections
-      collections: '++id, name, type, createdAt, updatedAt, synced',
-
-      // Items
-      items: '++id, collectionId, name, status, createdAt, updatedAt, synced',
-
-      // Metrics
-      metrics: '++id, itemId, type, date, createdAt',
-
-      // History
-      history: '++id, itemId, action, createdAt',
-
-      // Tags
-      tags: '++id, name, createdAt',
-
-      // Item-Tags junction table
-      itemTags: '[itemId+tagId]',
-
-      // Notes
-      notes: '++id, itemId, createdAt, updatedAt',
-
-      // Sync queue
-      syncQueue: '++id, table, recordId, synced, createdAt',
-    })
-
-    // Indexes for better query performance
-    this.version(2).stores({
-      // Add compound indexes
-      items: '++id, [collectionId+status], [collectionId+updatedAt], synced',
-      metrics: '++id, [itemId+type], [itemId+date], createdAt',
-      history: '++id, [itemId+action], createdAt',
-      itemTags: '[itemId+tagId]',
-    })
-
-    // Add books table in version 3
-    this.version(3).stores({
-      books: '++id, title, author, status, genre, createdAt, updatedAt, synced',
-    })
-
-    // Add book quotes table in version 4
-    this.version(4).stores({
-      bookQuotes: '++id, bookId, createdAt, synced',
-    })
-
-    // Upgrade to version 5 to ensure all tables exist
-    this.version(5).stores({
-      syncQueue: '++id, table, recordId, synced, createdAt',
-      books: '++id, title, author, status, genre, createdAt, updatedAt, synced',
+    this.version(6).stores({
+      // All tables now use UUID string ids
+      collections: 'id, name, type, createdAt, updatedAt, synced',
+      items: 'id, collectionId, name, status, createdAt, updatedAt, synced',
+      metrics: 'id, itemId, type, date, createdAt',
+      history: 'id, itemId, action, createdAt',
+      tags: 'id, name, createdAt',
+      itemTags: 'id, itemId, tagId',
+      notes: 'id, itemId, createdAt, updatedAt',
+      syncQueue: 'id, table, recordId, synced, createdAt',
+      books: 'id, title, author, status, genre, createdAt, updatedAt, synced',
+      bookQuotes: 'id, bookId, createdAt, synced',
     })
   }
 }
@@ -252,18 +216,12 @@ export async function ensureDB(): Promise<TrackerDatabase | null> {
 // ============================================
 
 /**
- * Generate a unique ID for offline-first sync
- */
-export function generateId(): number {
-  return Date.now() + Math.floor(Math.random() * 1000)
-}
-
-/**
  * Mark a record for sync
+ * Uses UUID for recordId
  */
 export async function markForSync(
   table: string,
-  recordId: string,
+  recordId: string,  // UUID string
   operation: 'insert' | 'update' | 'delete',
   data?: object
 ): Promise<void> {
@@ -273,7 +231,7 @@ export async function markForSync(
   }
 
   await db.syncQueue.add({
-    id: generateId(),
+    id: generateUUID(),  // Use UUID for sync queue id
     table,
     recordId,
     operation,
@@ -297,17 +255,19 @@ export async function getUnsyncedRecords() {
 
 /**
  * Mark records as synced
+ * Uses UUID string ids
  */
-export async function markAsSynced(ids: number[]): Promise<void> {
+export async function markAsSynced(ids: string[]): Promise<void> {
   if (!db) {
     console.warn('IndexedDB is not available')
     return
   }
-  
-  await db.syncQueue.bulkUpdate(
-    ids.map((id) => ({
-      key: id,
-      changes: { synced: true },
-    }))
-  )
+
+  // Update each sync record individually
+  for (const id of ids) {
+    const record = await db.syncQueue.get(id)
+    if (record) {
+      await db.syncQueue.update(id, { synced: true })
+    }
+  }
 }
