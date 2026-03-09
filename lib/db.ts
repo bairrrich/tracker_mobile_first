@@ -189,6 +189,12 @@ export class TrackerDatabase extends Dexie {
     this.version(4).stores({
       bookQuotes: '++id, bookId, createdAt, synced',
     })
+
+    // Upgrade to version 5 to ensure all tables exist
+    this.version(5).stores({
+      syncQueue: '++id, table, recordId, synced, createdAt',
+      books: '++id, title, author, status, genre, createdAt, updatedAt, synced',
+    })
   }
 }
 
@@ -213,6 +219,32 @@ export function withDB<T>(fn: (db: TrackerDatabase) => T): T | null {
     return null
   }
   return fn(db)
+}
+
+/**
+ * Ensure database is opened
+ */
+export async function ensureDB(): Promise<TrackerDatabase | null> {
+  if (!db) {
+    console.warn('[DB] IndexedDB is not available')
+    return null
+  }
+  
+  // Wait for database to be ready
+  if (!db.isOpen()) {
+    console.log('[DB] Opening database...')
+    await db.open()
+  }
+  
+  // Verify syncQueue exists and has data
+  try {
+    const count = await db.syncQueue.count()
+    console.log('[DB] syncQueue count:', count)
+  } catch (e) {
+    console.error('[DB] Error accessing syncQueue:', e)
+  }
+  
+  return db
 }
 
 // ============================================

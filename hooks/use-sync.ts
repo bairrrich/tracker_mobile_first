@@ -47,6 +47,19 @@ export function useSync() {
     }
   }, [syncStatus, startSync])
 
+  // Auto-sync on mount (only on client side)
+  React.useEffect(() => {
+    // Wait a bit for IndexedDB to initialize
+    const timer = setTimeout(() => {
+      if (isOnline && syncStatus === 'idle') {
+        console.log('[useSync] Auto-sync on mount')
+        startSync()
+      }
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   React.useEffect(() => {
     // Periodically check unsynced count
     const interval = setInterval(() => {

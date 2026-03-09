@@ -1,4 +1,4 @@
-import { withDB } from '@/lib/db'
+import { withDB, ensureDB } from '@/lib/db'
 
 /**
  * Sync Engine
@@ -25,8 +25,27 @@ export async function pushChanges(): Promise<{
   const errors: string[] = []
   let count = 0
 
-  const unsynced = (await withDB((db) => db.syncQueue.where('synced').equals(0).toArray())) ?? []
+  console.log('[Sync Engine] pushChanges: Checking IndexedDB...')
   
+  // Ensure database is opened
+  const db = await ensureDB()
+  if (!db) {
+    console.error('[Sync Engine] pushChanges: IndexedDB not available')
+    return { success: false, count: 0, errors: ['IndexedDB not available'] }
+  }
+  
+  console.log('[Sync Engine] withDB: DB available, checking syncQueue...')
+  
+  // Use filter instead of where().equals() for boolean comparison
+  const unsynced = await db.syncQueue
+    .filter(record => record.synced === false)
+    .toArray()
+
+  console.log('[Sync Engine] Unsynced records:', unsynced.length)
+  if (unsynced.length > 0) {
+    console.log('[Sync Engine] Unsynced data:', unsynced)
+  }
+
   if (unsynced.length === 0) {
     console.log('[Sync Engine] No changes to push')
     return { success: true, count: 0, errors }
@@ -51,11 +70,18 @@ export async function pushChanges(): Promise<{
 
     const result = await response.json()
 
+    console.log('[Sync Engine] API response:', result)
+
     // Mark as synced
     if (result.processed && result.processed.length > 0) {
+      console.log('[Sync Engine] Marking as synced:', result.processed)
       await markAsSynced(result.processed)
       count = result.processed.length
+    } else {
+      console.log('[Sync Engine] No processed IDs in response')
     }
+
+    console.log('[Sync Engine] Pushed count:', count)
 
     console.log(`[Sync Engine] Pushed ${count} changes successfully`)
 
@@ -192,13 +218,22 @@ async function applyItemChange(
  * Mark sync queue records as synced
  */
 async function markAsSynced(ids: number[]): Promise<void> {
-  await withDB((db) => {
-    db.transaction('rw', db.syncQueue, async () => {
-      for (const id of ids) {
-        await db.syncQueue.update(id, { synced: true })
-      }
-    })
+  console.log('[Sync Engine] markAsSynced: Marking IDs as synced:', ids)
+  
+  const db = await ensureDB()
+  if (!db) {
+    console.error('[Sync Engine] markAsSynced: DB not available')
+    return
+  }
+  
+  await db.transaction('rw', db.syncQueue, async () => {
+    for (const id of ids) {
+      console.log('[Sync Engine] markAsSynced: Updating record', id)
+      await db.syncQueue.update(id, { synced: true })
+    }
   })
+  
+  console.log('[Sync Engine] markAsSynced: Complete')
 }
 
 /**
