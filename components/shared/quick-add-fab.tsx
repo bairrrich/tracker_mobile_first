@@ -82,8 +82,29 @@ export function QuickAddFAB() {
         />
       )}
 
-      {/* Action Buttons */}
-      <div className="fixed bottom-40 right-4 z-50 flex flex-col gap-2 md:bottom-32 md:right-8">
+      {/* Main FAB - Fixed position */}
+      <button
+        onClick={toggleOpen}
+        className={cn(
+          'fixed bottom-28 right-4 z-50 w-14 h-14 rounded-full shadow-lg',
+          'flex items-center justify-center',
+          'transition-all duration-300',
+          'bg-[var(--primary)] hover:scale-105',
+          'md:bottom-24 md:right-8',
+          isOpen && 'rotate-45 bg-[var(--error)]'
+        )}
+        aria-label={isOpen ? 'Close quick add' : 'Quick add'}
+        aria-expanded={isOpen}
+      >
+        {isOpen ? (
+          <X className="w-6 h-6 text-[var(--primary-foreground)]" />
+        ) : (
+          <Plus className="w-6 h-6 text-[var(--primary-foreground)]" />
+        )}
+      </button>
+
+      {/* Action Buttons - Above FAB */}
+      <div className="fixed bottom-44 right-4 z-50 flex flex-col gap-2 md:bottom-36 md:right-8">
         {isOpen &&
           actions.map((action, index) => (
             <button
@@ -108,27 +129,6 @@ export function QuickAddFAB() {
           ))
         }
       </div>
-
-      {/* Main FAB - Fixed position */}
-      <button
-        onClick={toggleOpen}
-        className={cn(
-          'fixed bottom-28 right-4 z-50 w-14 h-14 rounded-full shadow-lg',
-          'flex items-center justify-center',
-          'transition-all duration-300',
-          'bg-[var(--primary)] hover:scale-105',
-          'md:bottom-24 md:right-8',
-          isOpen && 'rotate-45 bg-[var(--error)]'
-        )}
-        aria-label={isOpen ? 'Close quick add' : 'Quick add'}
-        aria-expanded={isOpen}
-      >
-        {isOpen ? (
-          <X className="w-6 h-6 text-[var(--primary-foreground)]" />
-        ) : (
-          <Plus className="w-6 h-6 text-[var(--primary-foreground)]" />
-        )}
-      </button>
     </>
   )
 }
