@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -111,12 +110,10 @@ export function WorkoutDetails({ workout, open, onOpenChange, onDelete }: Workou
                 <DialogTitle className="capitalize">
                   {t(workout.workoutTypeId)}
                 </DialogTitle>
-                <DialogDescription>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {formatDate(workout.date)}
-                  </div>
-                </DialogDescription>
+                <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {formatDate(workout.date)}
+                </div>
               </div>
             </div>
             <Badge variant="outline" className={WORKOUT_TYPE_COLORS[workout.workoutTypeId]}>
