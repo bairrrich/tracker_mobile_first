@@ -106,8 +106,8 @@ async function debugSync() {
         books.forEach((book, index) => {
           const addRequest = booksStore.add(book)
           addRequest.onsuccess = () => {
-            addedBooks.push({ id: addRequest.result, ...book })
-            
+            addedBooks.push({ ...book, id: addRequest.result })
+
             // Add to sync queue
             syncQueueStore.add({
               id: Date.now() + index * 100,
