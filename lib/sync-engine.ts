@@ -196,7 +196,21 @@ async function applyRemoteChange(change: {
     case 'book_quotes':
       await applyBookQuoteChange(operation as any, data, recordId, id)
       break
-    // Add more tables as needed
+    case 'metrics':
+      await applyMetricChange(operation as any, data, id)
+      break
+    case 'history':
+      await applyHistoryChange(operation as any, data, id)
+      break
+    case 'tags':
+      await applyTagChange(operation as any, data, id)
+      break
+    case 'item_tags':
+      await applyItemTagChange(operation as any, data, id)
+      break
+    case 'notes':
+      await applyNoteChange(operation as any, data, id)
+      break
     default:
       console.warn(`[Sync Engine] Unknown table: ${table}`)
   }
@@ -367,6 +381,161 @@ async function applyBookQuoteChange(
           })
         )
         console.log(`[Sync Engine] Applied tombstone for quote ${id}`)
+      }
+      break
+  }
+}
+
+/**
+ * Apply metric change
+ */
+async function applyMetricChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  id?: string
+): Promise<void> {
+  const camelCaseData = convertToCamelCase(data)
+
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (id) {
+        await withDB((db) => db.metrics.put({ ...camelCaseData, id }))
+      }
+      break
+    case 'delete':
+      if (id) {
+        await withDB((db) => db.metrics.put({
+          id,
+          deleted: true,
+          deletedAt: new Date(),
+          ...(camelCaseData as any),
+        }))
+        console.log(`[Sync Engine] Applied tombstone for metric ${id}`)
+      }
+      break
+  }
+}
+
+/**
+ * Apply history change
+ */
+async function applyHistoryChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  id?: string
+): Promise<void> {
+  const camelCaseData = convertToCamelCase(data)
+
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (id) {
+        await withDB((db) => db.history.put({ ...camelCaseData, id }))
+      }
+      break
+    case 'delete':
+      if (id) {
+        await withDB((db) => db.history.put({
+          id,
+          deleted: true,
+          deletedAt: new Date(),
+          ...(camelCaseData as any),
+        }))
+        console.log(`[Sync Engine] Applied tombstone for history ${id}`)
+      }
+      break
+  }
+}
+
+/**
+ * Apply tag change
+ */
+async function applyTagChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  id?: string
+): Promise<void> {
+  const camelCaseData = convertToCamelCase(data)
+
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (id) {
+        await withDB((db) => db.tags.put({ ...camelCaseData, id }))
+      }
+      break
+    case 'delete':
+      if (id) {
+        await withDB((db) => db.tags.put({
+          id,
+          deleted: true,
+          deletedAt: new Date(),
+          ...(camelCaseData as any),
+        }))
+        console.log(`[Sync Engine] Applied tombstone for tag ${id}`)
+      }
+      break
+  }
+}
+
+/**
+ * Apply item tag change
+ */
+async function applyItemTagChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  id?: string
+): Promise<void> {
+  const camelCaseData = convertToCamelCase(data)
+
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (id) {
+        await withDB((db) => db.itemTags.put({ ...camelCaseData, id }))
+      }
+      break
+    case 'delete':
+      if (id) {
+        await withDB((db) => db.itemTags.put({
+          id,
+          deleted: true,
+          deletedAt: new Date(),
+          ...(camelCaseData as any),
+        }))
+        console.log(`[Sync Engine] Applied tombstone for item tag ${id}`)
+      }
+      break
+  }
+}
+
+/**
+ * Apply note change
+ */
+async function applyNoteChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  id?: string
+): Promise<void> {
+  const camelCaseData = convertToCamelCase(data)
+
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (id) {
+        await withDB((db) => db.notes.put({ ...camelCaseData, id }))
+      }
+      break
+    case 'delete':
+      if (id) {
+        await withDB((db) => db.notes.put({
+          id,
+          deleted: true,
+          deletedAt: new Date(),
+          ...(camelCaseData as any),
+        }))
+        console.log(`[Sync Engine] Applied tombstone for note ${id}`)
       }
       break
   }
