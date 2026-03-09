@@ -174,6 +174,10 @@ export class TrackerDatabase extends Dexie {
       itemTags: 'id, itemId, tagId',
       notes: 'id, itemId, createdAt, updatedAt',
       syncQueue: 'id, table, recordId, synced, createdAt',
+    })
+
+    // Version 7: Add books and bookQuotes tables
+    this.version(7).stores({
       books: 'id, title, author, status, genre, createdAt, updatedAt, synced',
       bookQuotes: 'id, bookId, createdAt, synced',
     })
@@ -211,13 +215,30 @@ export async function ensureDB(): Promise<TrackerDatabase | null> {
     console.warn('[DB] IndexedDB is not available')
     return null
   }
-  
+
   // Wait for database to be ready
   if (!db.isOpen()) {
     console.log('[DB] Opening database...')
-    await db.open()
+    try {
+      await db.open()
+      console.log('[DB] Database opened successfully, version:', db.verno)
+    } catch (error) {
+      // Handle version upgrade errors
+      if (error instanceof Error && error.message.includes('UpgradeError')) {
+        console.error('[DB] Version upgrade error, clearing old database...')
+        // Close and delete the old database
+        await db.close()
+        await Dexie.delete('tracker_db')
+        console.log('[DB] Old database deleted, reopening...')
+        // Reopen will create new database with correct version
+        await db.open()
+      } else {
+        console.error('[DB] Error opening database:', error)
+        return null
+      }
+    }
   }
-  
+
   // Verify syncQueue exists and has data
   try {
     const count = await db.syncQueue.count()
@@ -225,7 +246,7 @@ export async function ensureDB(): Promise<TrackerDatabase | null> {
   } catch (e) {
     console.error('[DB] Error accessing syncQueue:', e)
   }
-  
+
   return db
 }
 
