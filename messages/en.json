@@ -307,6 +307,7 @@
     "title": "Workouts",
     "description": "Your workout history",
     "startWorkout": "Start Workout",
+    "selectWorkoutType": "Select workout type to begin",
     "searchWorkouts": "Search workouts...",
     "filterByType": "Workout type",
     "allTypes": "All types",

@@ -307,6 +307,7 @@
     "title": "Тренировки",
     "description": "История ваших тренировок",
     "startWorkout": "Начать тренировку",
+    "selectWorkoutType": "Выберите тип тренировки",
     "searchWorkouts": "Поиск тренировок...",
     "filterByType": "Тип тренировки",
     "allTypes": "Все типы",
