@@ -146,6 +146,82 @@ export interface SyncQueue {
 }
 
 // ============================================
+// Exercise & Workout Types
+// ============================================
+
+export type WorkoutType = 'strength' | 'cardio' | 'yoga'
+
+export interface WorkoutTypeEntity {
+  id: string  // UUID
+  name: string
+  createdAt: Date
+  synced: boolean
+  deleted?: boolean
+  deletedAt?: Date
+}
+
+export interface ExerciseCategory {
+  id: string  // UUID
+  name: string
+  workoutTypeId: string  // UUID
+  createdAt: Date
+  synced: boolean
+  deleted?: boolean
+  deletedAt?: Date
+}
+
+export interface Exercise {
+  id: string  // UUID
+  name: string
+  description?: string
+  categoryId: string  // UUID
+  isDefault: boolean
+  createdAt: Date
+  updatedAt: Date
+  synced: boolean
+  deleted?: boolean
+  deletedAt?: Date
+}
+
+export interface Workout {
+  id: string  // UUID
+  workoutTypeId: string  // UUID
+  date: Date
+  durationSeconds?: number
+  notes?: string
+  createdAt: Date
+  updatedAt: Date
+  synced: boolean
+  deleted?: boolean
+  deletedAt?: Date
+}
+
+export interface WorkoutExercise {
+  id: string  // UUID
+  workoutId: string  // UUID
+  exerciseId: string  // UUID
+  orderIndex: number
+  createdAt: Date
+  synced: boolean
+  deleted?: boolean
+  deletedAt?: Date
+}
+
+export interface WorkoutSet {
+  id: string  // UUID
+  workoutExerciseId: string  // UUID
+  setNumber: number
+  reps?: number
+  weight?: number
+  durationSeconds?: number
+  completed: boolean
+  createdAt: Date
+  synced: boolean
+  deleted?: boolean
+  deletedAt?: Date
+}
+
+// ============================================
 // Dexie Database
 // ============================================
 
@@ -160,6 +236,13 @@ export class TrackerDatabase extends Dexie {
   syncQueue!: EntityTable<SyncQueue, 'id'>
   books!: EntityTable<Book, 'id'>
   bookQuotes!: EntityTable<BookQuote, 'id'>
+  // Exercise & Workout tables
+  workoutTypes!: EntityTable<WorkoutTypeEntity, 'id'>
+  exerciseCategories!: EntityTable<ExerciseCategory, 'id'>
+  exercises!: EntityTable<Exercise, 'id'>
+  workouts!: EntityTable<Workout, 'id'>
+  workoutExercises!: EntityTable<WorkoutExercise, 'id'>
+  workoutSets!: EntityTable<WorkoutSet, 'id'>
 
   constructor() {
     super('tracker_db')
@@ -185,6 +268,16 @@ export class TrackerDatabase extends Dexie {
     // Version 8: Add composite index [table+recordId] to syncQueue
     this.version(8).stores({
       syncQueue: 'id, table, recordId, synced, createdAt, [table+recordId]',
+    })
+
+    // Version 9: Add exercise and workout tables
+    this.version(9).stores({
+      workoutTypes: 'id, name, createdAt, synced, deleted',
+      exerciseCategories: 'id, name, workoutTypeId, createdAt, synced, deleted',
+      exercises: 'id, name, categoryId, isDefault, createdAt, updatedAt, synced, deleted',
+      workouts: 'id, workoutTypeId, date, createdAt, updatedAt, synced, deleted',
+      workoutExercises: 'id, workoutId, exerciseId, orderIndex, synced, deleted',
+      workoutSets: 'id, workoutExerciseId, setNumber, completed, synced, deleted',
     })
   }
 }

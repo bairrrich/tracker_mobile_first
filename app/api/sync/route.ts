@@ -51,6 +51,13 @@ const TABLE_MAPPING: Record<string, string> = {
   tags: 'tags',
   item_tags: 'item_tags',
   notes: 'notes',
+  // Exercise & Workout tables
+  workout_types: 'workout_types',
+  exercise_categories: 'exercise_categories',
+  exercises: 'exercises',
+  workouts: 'workouts',
+  workout_exercises: 'workout_exercises',
+  workout_sets: 'workout_sets',
 }
 
 export async function POST(request: NextRequest) {

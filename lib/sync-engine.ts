@@ -211,6 +211,25 @@ async function applyRemoteChange(change: {
     case 'notes':
       await applyNoteChange(operation as any, data, id)
       break
+    // Exercise & Workout tables
+    case 'workout_types':
+      await applyWorkoutTypeChange(operation as any, data, id)
+      break
+    case 'exercise_categories':
+      await applyExerciseCategoryChange(operation as any, data, id)
+      break
+    case 'exercises':
+      await applyExerciseChange(operation as any, data, id)
+      break
+    case 'workouts':
+      await applyWorkoutChange(operation as any, data, id)
+      break
+    case 'workout_exercises':
+      await applyWorkoutExerciseChange(operation as any, data, id)
+      break
+    case 'workout_sets':
+      await applyWorkoutSetChange(operation as any, data, id)
+      break
     default:
       console.warn(`[Sync Engine] Unknown table: ${table}`)
   }
@@ -536,6 +555,192 @@ async function applyNoteChange(
           ...(camelCaseData as any),
         }))
         console.log(`[Sync Engine] Applied tombstone for note ${id}`)
+      }
+      break
+  }
+}
+
+/**
+ * Apply workout type change
+ */
+async function applyWorkoutTypeChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  id?: string
+): Promise<void> {
+  const camelCaseData = convertToCamelCase(data)
+
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (id) {
+        await withDB((db) => db.workoutTypes.put({ ...camelCaseData, id }))
+      }
+      break
+    case 'delete':
+      if (id) {
+        await withDB((db) => db.workoutTypes.put({
+          id,
+          deleted: true,
+          deletedAt: new Date(),
+          ...(camelCaseData as any),
+        }))
+        console.log(`[Sync Engine] Applied tombstone for workout type ${id}`)
+      }
+      break
+  }
+}
+
+/**
+ * Apply exercise category change
+ */
+async function applyExerciseCategoryChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  id?: string
+): Promise<void> {
+  const camelCaseData = convertToCamelCase(data)
+
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (id) {
+        await withDB((db) => db.exerciseCategories.put({ ...camelCaseData, id }))
+      }
+      break
+    case 'delete':
+      if (id) {
+        await withDB((db) => db.exerciseCategories.put({
+          id,
+          deleted: true,
+          deletedAt: new Date(),
+          ...(camelCaseData as any),
+        }))
+        console.log(`[Sync Engine] Applied tombstone for exercise category ${id}`)
+      }
+      break
+  }
+}
+
+/**
+ * Apply exercise change
+ */
+async function applyExerciseChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  id?: string
+): Promise<void> {
+  const camelCaseData = convertToCamelCase(data)
+
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (id) {
+        await withDB((db) => db.exercises.put({ ...camelCaseData, id }))
+      }
+      break
+    case 'delete':
+      if (id) {
+        await withDB((db) => db.exercises.put({
+          id,
+          deleted: true,
+          deletedAt: new Date(),
+          ...(camelCaseData as any),
+        }))
+        console.log(`[Sync Engine] Applied tombstone for exercise ${id}`)
+      }
+      break
+  }
+}
+
+/**
+ * Apply workout change
+ */
+async function applyWorkoutChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  id?: string
+): Promise<void> {
+  const camelCaseData = convertToCamelCase(data)
+
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (id) {
+        await withDB((db) => db.workouts.put({ ...camelCaseData, id }))
+      }
+      break
+    case 'delete':
+      if (id) {
+        await withDB((db) => db.workouts.put({
+          id,
+          deleted: true,
+          deletedAt: new Date(),
+          ...(camelCaseData as any),
+        }))
+        console.log(`[Sync Engine] Applied tombstone for workout ${id}`)
+      }
+      break
+  }
+}
+
+/**
+ * Apply workout exercise change
+ */
+async function applyWorkoutExerciseChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  id?: string
+): Promise<void> {
+  const camelCaseData = convertToCamelCase(data)
+
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (id) {
+        await withDB((db) => db.workoutExercises.put({ ...camelCaseData, id }))
+      }
+      break
+    case 'delete':
+      if (id) {
+        await withDB((db) => db.workoutExercises.put({
+          id,
+          deleted: true,
+          deletedAt: new Date(),
+          ...(camelCaseData as any),
+        }))
+        console.log(`[Sync Engine] Applied tombstone for workout exercise ${id}`)
+      }
+      break
+  }
+}
+
+/**
+ * Apply workout set change
+ */
+async function applyWorkoutSetChange(
+  operation: 'insert' | 'update' | 'delete',
+  data: any,
+  id?: string
+): Promise<void> {
+  const camelCaseData = convertToCamelCase(data)
+
+  switch (operation) {
+    case 'insert':
+    case 'update':
+      if (id) {
+        await withDB((db) => db.workoutSets.put({ ...camelCaseData, id }))
+      }
+      break
+    case 'delete':
+      if (id) {
+        await withDB((db) => db.workoutSets.put({
+          id,
+          deleted: true,
+          deletedAt: new Date(),
+          ...(camelCaseData as any),
+        }))
+        console.log(`[Sync Engine] Applied tombstone for workout set ${id}`)
       }
       break
   }
