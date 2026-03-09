@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Search, Plus, Dumbbell, Activity, Heart } from 'lucide-react'
+import { ExerciseForm } from '@/components/forms/exercise-form'
 import { exercisesRepository, exerciseCategoriesRepository } from '@/lib/repositories/exercises-repository'
 import type { Exercise, ExerciseCategory, WorkoutTypeEntity } from '@/lib/db'
 
@@ -34,6 +35,15 @@ export default function ExercisesPage() {
   const [selectedCategory, setSelectedCategory] = React.useState<string>('all')
   const [searchQuery, setSearchQuery] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(true)
+  const [isFormOpen, setIsFormOpen] = React.useState(false)
+  const [editExercise, setEditExercise] = React.useState<Exercise | null>(null)
+
+  // Listen for exercises changes
+  React.useEffect(() => {
+    const handleExercisesChanged = () => loadData()
+    window.addEventListener('exercises-changed', handleExercisesChanged)
+    return () => window.removeEventListener('exercises-changed', handleExercisesChanged)
+  }, [])
 
   // Load data on mount
   React.useEffect(() => {
@@ -113,8 +123,8 @@ export default function ExercisesPage() {
           </div>
 
           <Button onClick={() => {
-            // TODO: Open exercise form
-            console.log('Add exercise')
+            setEditExercise(null)
+            setIsFormOpen(true)
           }}>
             <Plus className="w-4 h-4 mr-2" />
             {t('addExercise')}
@@ -187,7 +197,8 @@ export default function ExercisesPage() {
             </p>
             {!searchQuery && selectedCategory === 'all' && selectedType === 'all' && (
               <Button onClick={() => {
-                // TODO: Open exercise form
+                setEditExercise(null)
+                setIsFormOpen(true)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 {t('addExercise')}
@@ -205,8 +216,8 @@ export default function ExercisesPage() {
                   key={exercise.id}
                   className="group p-4 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--card)]/80 hover:border-primary/50 hover:shadow-md transition-all cursor-pointer"
                   onClick={() => {
-                    // TODO: Open exercise details
-                    console.log('View exercise:', exercise.name)
+                    setEditExercise(exercise)
+                    setIsFormOpen(true)
                   }}
                 >
                   {/* Header with icon and name */}
@@ -253,6 +264,13 @@ export default function ExercisesPage() {
           </div>
         )}
       </div>
+
+      {/* Exercise Form */}
+      <ExerciseForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        editExercise={editExercise}
+      />
     </MainLayout>
   )
 }
