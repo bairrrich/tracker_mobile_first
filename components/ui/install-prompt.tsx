@@ -89,11 +89,11 @@ export function InstallPrompt({ className }: InstallPromptProps) {
         className
       )}
     >
-      <div className="relative overflow-hidden rounded-xl border border-theme-border bg-theme-card shadow-2xl">
+      <div className="relative overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-2xl">
         {/* Close button */}
         <button
           onClick={handleDismiss}
-          className="absolute right-2 top-2 p-1 rounded-md hover:bg-theme-bg transition-colors"
+          className="absolute right-2 top-2 p-1 rounded-md hover:bg-[var(--card)] transition-colors"
           aria-label="Dismiss"
         >
           <X className="h-4 w-4 text-muted-foreground" />

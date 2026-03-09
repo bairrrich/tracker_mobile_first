@@ -117,13 +117,13 @@ export default function CollectionsPage() {
             </Select>
 
             {/* View Mode Toggle */}
-            <div className="flex rounded-md border border-theme-border overflow-hidden">
+            <div className="flex rounded-md border border-[var(--border)] overflow-hidden">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`p-2 transition-colors ${
                   viewMode === 'grid'
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-theme-card hover:bg-theme-card/80'
+                    : 'bg-[var(--card)] hover:bg-[var(--card)]/80'
                 }`}
                 aria-label={t('gridView')}
               >
@@ -134,7 +134,7 @@ export default function CollectionsPage() {
                 className={`p-2 transition-colors ${
                   viewMode === 'list'
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-theme-card hover:bg-theme-card/80'
+                    : 'bg-[var(--card)] hover:bg-[var(--card)]/80'
                 }`}
                 aria-label={t('listView')}
               >

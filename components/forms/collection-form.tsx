@@ -135,13 +135,12 @@ export function CollectionForm({
               <FormField
                 label="Type"
                 error={errors.type}
-                id="type"
               >
                 <Select
                   value={values.type}
                   onValueChange={(v) => setValue('type', v as CollectionType)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="type">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>

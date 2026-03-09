@@ -77,7 +77,7 @@ export function QuickAddFAB() {
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-[var(--text)]/20 backdrop-blur-sm md:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -92,8 +92,8 @@ export function QuickAddFAB() {
                 onClick={action.onClick}
                 className={cn(
                   'flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-lg',
-                  'bg-theme-card border border-theme-border',
-                  'text-theme-text hover:bg-theme-card/80',
+                  'bg-[var(--card)] border border-[var(--border)]',
+                  'text-[var(--text)] hover:bg-[var(--card)]/80',
                   'transition-all animate-in slide-in-from-bottom-2',
                   'max-w-[200px] self-end'
                 )}
@@ -101,7 +101,7 @@ export function QuickAddFAB() {
                   animationDelay: `${index * 50}ms`,
                 }}
               >
-                <div className={cn('w-8 h-8 rounded-full flex items-center justify-center text-white', action.color)}>
+                <div className={cn('w-8 h-8 rounded-full flex items-center justify-center text-[var(--primary-foreground)]', action.color)}>
                   {action.icon}
                 </div>
                 <span className="text-sm font-medium">{action.label}</span>
@@ -123,9 +123,9 @@ export function QuickAddFAB() {
           aria-expanded={isOpen}
         >
           {isOpen ? (
-            <X className="w-6 h-6 text-white" />
+            <X className="w-6 h-6 text-[var(--primary-foreground)]" />
           ) : (
-            <Plus className="w-6 h-6 text-white" />
+            <Plus className="w-6 h-6 text-[var(--primary-foreground)]" />
           )}
         </button>
       </div>

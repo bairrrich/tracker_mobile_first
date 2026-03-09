@@ -58,3 +58,12 @@ All_Tracker_mobile/
 7. **English only for code** — variable names, comments, commits (no Russian in code)
 8. **Follow Vercel Agent Skills** — automatically apply relevant skills (React, UI, RN)
 9. **Use MCP servers** — Context7, Sequential Thinking, Playwright, Chrome DevTools
+
+## Qwen Added Memories
+- Theme System Rules for this project:
+1. NEVER use fixed colors like bg-neutral-100, bg-white, bg-black, text-white, text-black, etc.
+2. ALWAYS use CSS variables: var(--card), var(--border), var(--text), var(--text-muted), var(--bg), var(--primary), var(--primary-foreground)
+3. For component styles use: bg-[var(--card)], text-[var(--text)], border-[var(--border)], etc.
+4. OKLCH color system is defined in globals.css with theme variables
+5. All UI components must support light, dark, and AMOLED themes via CSS variables
+6. When creating new components, always reference theme variables instead of hardcoded colors

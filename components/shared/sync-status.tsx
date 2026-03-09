@@ -90,7 +90,7 @@ export function SyncStatus() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-64">
-        <div className="p-2 border-b border-theme-border">
+        <div className="p-2 border-b border-[var(--border)]">
           <div className="flex items-center justify-between">
             <span className="font-medium">Sync Status</span>
             {getStatusIcon()}
@@ -115,7 +115,7 @@ export function SyncStatus() {
           </div>
         </div>
 
-        <div className="p-2 border-t border-theme-border">
+        <div className="p-2 border-t border-[var(--border)]">
           <Button
             onClick={triggerSync}
             disabled={!isOnline || syncStatus === 'syncing'}

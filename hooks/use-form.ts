@@ -28,17 +28,18 @@ export function useForm<T extends Record<string, any>>({
   onSubmit,
   onError,
 }: UseFormOptions<T>): UseFormReturn<T> {
+  const defaultValuesRef = React.useRef(defaultValues)
   const [values, setValues] = React.useState<T>({
     ...(defaultValues || {}),
   } as T)
-  
+
   const [errors, setErrorsState] = React.useState<Partial<Record<keyof T, string>>>({})
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [touched, setTouched] = React.useState<Partial<Record<keyof T, boolean>>>({})
 
   const setValue = React.useCallback(<K extends keyof T>(key: K, value: T[K]) => {
     setValues((prev) => ({ ...prev, [key]: value }))
-    
+
     // Clear error when value changes
     setErrorsState((prev) => ({ ...prev, [key]: undefined }))
   }, [])
@@ -55,14 +56,14 @@ export function useForm<T extends Record<string, any>>({
     } catch (error) {
       if (error instanceof ZodError) {
         const fieldErrors: Partial<Record<keyof T, string>> = {}
-        
+
         error.issues.forEach((issue) => {
           const field = issue.path[0] as keyof T
           if (field && !fieldErrors[field]) {
             fieldErrors[field] = issue.message
           }
         })
-        
+
         setErrorsState(fieldErrors)
         onError?.(error as unknown as ZodError)
         return false
@@ -73,18 +74,18 @@ export function useForm<T extends Record<string, any>>({
 
   const handleSubmit = React.useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault()
-    
+
     // Mark all fields as touched
     const allTouched: Partial<Record<keyof T, boolean>> = {}
     Object.keys(values).forEach((key) => {
       allTouched[key as keyof T] = true
     })
     setTouched(allTouched)
-    
+
     // Validate
     const isValid = await validate()
     if (!isValid) return
-    
+
     // Submit
     setIsSubmitting(true)
     try {
@@ -95,11 +96,11 @@ export function useForm<T extends Record<string, any>>({
   }, [values, validate, onSubmit])
 
   const reset = React.useCallback(() => {
-    setValues({ ...(defaultValues || {}) } as T)
+    setValues({ ...(defaultValuesRef.current || {}) } as T)
     setErrorsState({})
     setTouched({})
     setIsSubmitting(false)
-  }, [defaultValues])
+  }, [])
 
   // Check if form is valid
   const isValid = React.useMemo(() => {

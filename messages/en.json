@@ -156,7 +156,10 @@
     "submit": "Submit",
     "success": "Success",
     "failed": "Failed",
-    "comingSoon": "Coming soon!"
+    "comingSoon": "Coming soon!",
+    "saving": "Saving...",
+    "selectStatus": "Select status",
+    "selectFormat": "Select format"
   },
   "Placeholders": {
     "finances": {
@@ -169,7 +172,7 @@
     },
     "books": {
       "title": "Books",
-      "description": "Keep track of books you've read, want to read, and your reading progress. Coming soon!"
+      "description": "Keep track of books you've read, want to read, and your reading progress."
     },
     "supplements": {
       "title": "Supplements",
@@ -183,5 +186,61 @@
       "title": "Analytics",
       "description": "View insights, charts, and statistics about your activities. Coming soon!"
     }
+  },
+  "Books": {
+    "title": "Books",
+    "description": "Keep track of books you've read, want to read, and your reading progress",
+    "addBook": "Add Book",
+    "searchBooks": "Search books...",
+    "filterByStatus": "Filter by status",
+    "allStatuses": "All Statuses",
+    "noBooksFound": "No books found",
+    "adjustFilters": "Try adjusting your search or filters",
+    "createFirstBook": "Add your first book to get started",
+    "gridView": "Grid view",
+    "listView": "List view",
+    "reading": "Reading",
+    "completed": "Completed",
+    "planned": "Planned",
+    "abandoned": "Abandoned",
+    "author": "Author",
+    "authors": "Authors",
+    "genre": "Genre",
+    "genres": "Genres",
+    "pages": "Pages",
+    "pagesRead": "Pages read",
+    "totalPages": "Total pages",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "rating": "Rating",
+    "review": "Review",
+    "coverImage": "Cover image",
+    "isbn": "ISBN",
+    "publisher": "Publisher",
+    "publishYear": "Publish year",
+    "language": "Language",
+    "format": "Format",
+    "notes": "Notes",
+    "progress": "Progress",
+    "deleteBook": "Delete Book",
+    "deleteConfirmation": "Are you sure you want to delete this book? This action cannot be undone.",
+    "editBook": "Edit Book",
+    "bookDetails": "Book Details",
+    "startReading": "Start Reading",
+    "finishReading": "Finish Reading",
+    "updateProgress": "Update Progress",
+    "currentlyReading": "Currently Reading",
+    "notStarted": "Not Started",
+    "hardcover": "Hardcover",
+    "paperback": "Paperback",
+    "ebook": "E-book",
+    "audiobook": "Audiobook",
+    "status": "Status",
+    "selectStatus": "Select status",
+    "selectFormat": "Select format",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "add": "Add",
+    "edit": "Edit"
   }
 }

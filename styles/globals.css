@@ -7,10 +7,10 @@
 :root {
   /* Light theme (default) */
   --bg: oklch(98% 0.01 260);
-  --card: oklch(100% 0 0);
-  --border: oklch(90% 0.01 260);
-  --text: oklch(20% 0.02 260);
-  --text-muted: oklch(44% 0.02 260);
+  --card: oklch(100% 0 0 / 0.98);
+  --border: oklch(85% 0.02 260);
+  --text: oklch(15% 0.02 260);
+  --text-muted: oklch(40% 0.02 260);
   --primary: oklch(62% 0.19 260);
   --primary-foreground: oklch(99% 0.01 260);
   --success: oklch(65% 0.18 150);
@@ -102,7 +102,7 @@
     justify-content: center;
     border-radius: 0.375rem;
     font-weight: 500;
-    transition: colors;
+    transition: background-color, color;
   }
   
   .btn:focus-visible {
@@ -113,42 +113,6 @@
   .btn:disabled {
     pointer-events: none;
     opacity: 0.5;
-  }
-
-  .btn-primary {
-    background-color: var(--primary);
-    color: var(--primary-foreground);
-  }
-  
-  .btn-primary:hover {
-    background-color: color-mix(in oklch, var(--primary) 90%, black);
-  }
-
-  .btn-outline {
-    border: 1px solid var(--border);
-    background-color: var(--card);
-  }
-  
-  .btn-outline:hover {
-    background-color: color-mix(in oklch, var(--card) 80%, white);
-  }
-
-  .btn-ghost {
-    background: transparent;
-  }
-  
-  .btn-ghost:hover {
-    background-color: var(--card);
-    color: var(--text);
-  }
-
-  .btn-destructive {
-    background-color: var(--error);
-    color: white;
-  }
-  
-  .btn-destructive:hover {
-    background-color: color-mix(in oklch, var(--error) 90%, black);
   }
 
   /* Input base style */
@@ -337,14 +301,10 @@
 
   /* Loading skeleton */
   .skeleton {
-    background-color: var(--neutral-200);
+    background-color: var(--border);
     border-radius: 0.25rem;
   }
-  
-  [data-theme='dark'] .skeleton {
-    background-color: var(--neutral-700);
-  }
-  
+
   .skeleton.animate-pulse {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }

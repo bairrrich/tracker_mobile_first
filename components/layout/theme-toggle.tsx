@@ -16,16 +16,16 @@ export function ThemeToggle() {
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm text-muted-foreground hidden sm:inline">Theme:</span>
-      <div className="flex rounded-md border border-theme-border overflow-hidden">
+      <div className="flex rounded-md border border-[var(--border)] overflow-hidden">
         {themes.map((t) => (
           <button
             key={t.value}
             onClick={() => setTheme(t.value)}
             className={`
               flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors
-              ${theme === t.value 
-                ? 'bg-primary text-primary-foreground' 
-                : 'bg-theme-card hover:bg-theme-card/80'
+              ${theme === t.value
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-[var(--card)] hover:bg-[var(--card)]/80'
               }
             `}
             aria-label={`Switch to ${t.label} theme`}

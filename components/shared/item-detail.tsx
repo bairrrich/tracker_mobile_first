@@ -37,7 +37,7 @@ export const ItemDetail = React.forwardRef<HTMLDivElement, ItemDetailProps>(
     return (
       <Card ref={ref} className={cn('overflow-hidden', className)}>
         {/* Header with image/icon */}
-        <div className="relative aspect-video w-full overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+        <div className="relative aspect-video w-full overflow-hidden bg-[var(--card)]">
           {image ? (
             <img
               src={image}
@@ -76,7 +76,7 @@ export const ItemDetail = React.forwardRef<HTMLDivElement, ItemDetailProps>(
           {metrics && metrics.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
               {metrics.map((metric, index) => (
-                <div key={index} className="rounded-lg bg-neutral-100 dark:bg-neutral-800 p-4">
+                <div key={index} className="rounded-lg bg-[var(--card)] p-4">
                   <div className="text-2xl font-bold">{metric.value}</div>
                   <div className="text-sm text-muted-foreground">{metric.label}</div>
                 </div>

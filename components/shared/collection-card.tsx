@@ -28,7 +28,7 @@ export const CollectionCard = React.forwardRef<HTMLDivElement, CollectionCardPro
       >
         <CardHeader className="p-0">
           {/* Image or Icon */}
-          <div className="relative aspect-square overflow-hidden rounded-t-lg bg-neutral-100 dark:bg-neutral-800">
+          <div className="relative aspect-square overflow-hidden rounded-t-lg bg-[var(--card)]">
             {image ? (
               <img
                 src={image}
@@ -41,7 +41,7 @@ export const CollectionCard = React.forwardRef<HTMLDivElement, CollectionCardPro
                 {icon || <span className="text-4xl">📦</span>}
               </div>
             )}
-            
+
             {/* Count badge */}
             {count !== undefined && (
               <div className="absolute right-2 top-2">
@@ -66,7 +66,7 @@ export const CollectionCard = React.forwardRef<HTMLDivElement, CollectionCardPro
                 <span className="text-muted-foreground">Progress</span>
                 <span className="font-medium">{progress}%</span>
               </div>
-              <div className="h-2 w-full rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-[var(--border)] overflow-hidden">
                 <div
                   className="h-full bg-primary transition-all"
                   style={{ width: `${progress}%` }}

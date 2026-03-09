@@ -89,8 +89,8 @@ export default function SettingsPage() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center">
-                  <Moon className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 rounded-lg bg-[var(--card)] border border-[var(--border)] flex items-center justify-center">
+                  <Moon className="w-5 h-5 text-[var(--text)]" />
                 </div>
                 <div>
                   <p className="font-medium">{t('appearance.darkTheme.title')}</p>
@@ -112,8 +112,8 @@ export default function SettingsPage() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center">
-                  <Smartphone className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 rounded-lg bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center">
+                  <Smartphone className="w-5 h-5 text-[var(--text)]" />
                 </div>
                 <div>
                   <p className="font-medium">{t('appearance.amoledTheme.title')}</p>
@@ -209,7 +209,7 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             {user ? (
               <>
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-theme-bg border border-theme-border">
+                <div className="flex items-center gap-3 p-4 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
                   <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
                     <User className="w-6 h-6 text-primary-foreground" />
                   </div>
@@ -232,8 +232,8 @@ export default function SettingsPage() {
               </>
             ) : (
               <>
-                <div className="p-4 rounded-lg bg-theme-bg border border-theme-border">
-                  <p className="text-sm text-theme-text">
+                <div className="p-4 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
+                  <p className="text-sm text-[var(--text)]">
                     {t('authentication.notSignedIn')}
                   </p>
                 </div>

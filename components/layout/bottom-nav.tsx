@@ -36,7 +36,7 @@ export function BottomNav() {
                 ? 'text-primary -mt-8'
                 : isActive
                   ? 'text-primary'
-                  : 'text-muted-foreground hover:text-theme-text'
+                  : 'text-muted-foreground hover:text-[var(--text)]'
               }
             `}
             aria-label={item.label}

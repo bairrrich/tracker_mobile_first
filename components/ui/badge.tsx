@@ -10,10 +10,10 @@ const badgeVariants = cva(
         default:
           'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
         secondary:
-          'border-transparent bg-neutral-100 text-neutral-900 hover:bg-neutral-100/80 dark:bg-neutral-800 dark:text-neutral-100',
+          'border-transparent bg-[var(--border)] text-[var(--text)] hover:bg-[var(--border)]/80',
         destructive:
           'border-transparent bg-error text-white hover:bg-error/80',
-        outline: 'text-theme-text border-theme-border',
+        outline: 'text-[var(--text)] border-[var(--border)]',
         success:
           'border-transparent bg-success text-white hover:bg-success/80',
         warning:

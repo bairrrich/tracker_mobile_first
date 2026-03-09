@@ -14,6 +14,34 @@ export type CollectionType =
   | 'notes'
   | 'custom'
 
+export type BookStatus = 'reading' | 'completed' | 'planned' | 'abandoned'
+export type BookFormat = 'hardcover' | 'paperback' | 'ebook' | 'audiobook'
+
+export interface Book {
+  id: number
+  title: string
+  author: string
+  description?: string
+  coverImage?: string
+  status: BookStatus
+  rating?: number
+  pagesTotal?: number
+  pagesRead?: number
+  startDate?: Date
+  endDate?: Date
+  genre?: string
+  isbn?: string
+  publisher?: string
+  publishYear?: number
+  language?: string
+  format?: BookFormat
+  notes?: string
+  collectionId?: number
+  createdAt: Date
+  updatedAt: Date
+  synced: boolean
+}
+
 export interface Collection {
   id: number
   name: string
@@ -102,6 +130,7 @@ export class TrackerDatabase extends Dexie {
   itemTags!: EntityTable<ItemTag, 'id'>
   notes!: EntityTable<Note, 'id'>
   syncQueue!: EntityTable<SyncQueue, 'id'>
+  books!: EntityTable<Book, 'id'>
 
   constructor() {
     super('tracker_db')
@@ -139,6 +168,11 @@ export class TrackerDatabase extends Dexie {
       metrics: '++id, [itemId+type], [itemId+date], createdAt',
       history: '++id, [itemId+action], createdAt',
       itemTags: '[itemId+tagId]',
+    })
+
+    // Add books table in version 3
+    this.version(3).stores({
+      books: '++id, title, author, status, genre, createdAt, updatedAt, synced',
     })
   }
 }

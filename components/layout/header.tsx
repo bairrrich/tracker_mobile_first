@@ -18,7 +18,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-theme-border bg-theme-bg/80 backdrop-blur-sm md:ml-64">
+    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-sm md:ml-64">
       <div className="h-[55px] flex items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center gap-2">
