@@ -155,6 +155,33 @@
     "previous": "Previous",
     "submit": "Submit",
     "success": "Success",
-    "failed": "Failed"
+    "failed": "Failed",
+    "comingSoon": "Coming soon!"
+  },
+  "Placeholders": {
+    "finances": {
+      "title": "Finances",
+      "description": "Track your income, expenses, and financial goals. Coming soon!"
+    },
+    "exercises": {
+      "title": "Exercises",
+      "description": "Log your workouts, track progress, and achieve your fitness goals. Coming soon!"
+    },
+    "books": {
+      "title": "Books",
+      "description": "Keep track of books you've read, want to read, and your reading progress. Coming soon!"
+    },
+    "supplements": {
+      "title": "Supplements",
+      "description": "Track your vitamins, supplements, and daily intake. Coming soon!"
+    },
+    "food": {
+      "title": "Food",
+      "description": "Log your meals, track nutrition, and monitor your diet. Coming soon!"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "description": "View insights, charts, and statistics about your activities. Coming soon!"
+    }
   }
 }
