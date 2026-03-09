@@ -18,6 +18,28 @@ function getSupabaseClient() {
   return createClient(supabaseUrl, supabaseServiceKey)
 }
 
+/**
+ * Get user ID from auth header
+ */
+async function getUserIdFromHeader(authHeader: string | null): Promise<string | null> {
+  if (!authHeader) {
+    return null
+  }
+
+  const token = authHeader.replace('Bearer ', '')
+  
+  // Use service role client to get user from token
+  const supabase = createClient(supabaseUrl, supabaseServiceKey)
+  const { data: { user }, error } = await supabase.auth.getUser(token)
+  
+  if (error || !user) {
+    console.error('[Sync API] Failed to get user from token:', error)
+    return null
+  }
+  
+  return user.id
+}
+
 // Table name mapping
 const TABLE_MAPPING: Record<string, string> = {
   collections: 'collections',
@@ -93,9 +115,9 @@ export async function POST(request: NextRequest) {
           data,
         })
 
-        // Get user ID from auth header or use anon
+        // Get user ID from auth header
         const authHeader = request.headers.get('authorization')
-        const userId = authHeader?.replace('Bearer ', '')
+        const userId = await getUserIdFromHeader(authHeader)
 
         switch (change.operation) {
           case 'insert':
@@ -266,7 +288,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch remote changes for each table
     const authHeader = request.headers.get('authorization')
-    const userId = authHeader?.replace('Bearer ', '')
+    const userId = await getUserIdFromHeader(authHeader)
 
     if (userId) {
       for (const [localTable, remoteTable] of Object.entries(TABLE_MAPPING)) {

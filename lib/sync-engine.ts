@@ -1,4 +1,5 @@
 import { withDB, ensureDB } from '@/lib/db'
+import { getSession } from '@/lib/supabase'
 
 /**
  * Sync Engine
@@ -12,6 +13,20 @@ export interface SyncResult {
   pulled: number
   errors: string[]
   lastSync: Date | null
+}
+
+/**
+ * Get auth header with user session
+ */
+async function getAuthHeader(): Promise<HeadersInit> {
+  const session = await getSession()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`
+  }
+  
+  return headers
 }
 
 /**
@@ -54,10 +69,13 @@ export async function pushChanges(): Promise<{
   try {
     console.log(`[Sync Engine] Pushing ${unsynced.length} changes...`)
 
+    // Get auth header
+    const headers = await getAuthHeader()
+
     // Send to server
     const response = await fetch('/api/sync', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         changes: unsynced,
         lastSync: await getLastSyncTime(),
@@ -110,14 +128,17 @@ export async function pullChanges(): Promise<{
     console.log(`[Sync Engine] Pulling changes since ${lastSync}...`)
 
     // Get unsynced records to send to API
-    const unsyncedRecords = (await withDB((db) => 
+    const unsyncedRecords = (await withDB((db) =>
       db.syncQueue.where('synced').equals(0).toArray()
     )) ?? []
+
+    // Get auth header
+    const headers = await getAuthHeader()
 
     // Send to API to get remote changes
     const response = await fetch('/api/sync', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         changes: unsyncedRecords,
         lastSync: lastSync.toISOString(),
