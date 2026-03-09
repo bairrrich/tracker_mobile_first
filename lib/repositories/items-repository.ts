@@ -41,13 +41,13 @@ export class ItemsRepository {
    * Get items by collection ID
    */
   async getByCollection(collectionId: string): Promise<Item[]> {
-    const items = withDB((db) =>
+    const items = await withDB((db) =>
       db.items
         .where('collectionId')
         .equals(collectionId)
         .reverse()
         .toArray()
-    ) ?? []
+    ) || []
     // Filter out deleted items
     return items.filter(item => !item.deleted)
   }

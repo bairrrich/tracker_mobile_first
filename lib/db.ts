@@ -181,6 +181,11 @@ export class TrackerDatabase extends Dexie {
       books: 'id, title, author, status, genre, createdAt, updatedAt, synced',
       bookQuotes: 'id, bookId, createdAt, synced',
     })
+
+    // Version 8: Add composite index [table+recordId] to syncQueue
+    this.version(8).stores({
+      syncQueue: 'id, table, recordId, synced, createdAt, [table+recordId]',
+    })
   }
 }
 

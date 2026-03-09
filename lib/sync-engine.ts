@@ -210,11 +210,14 @@ async function applyCollectionChange(
   data: any,
   id?: string  // UUID string
 ): Promise<void> {
+  // Convert snake_case to camelCase for Supabase data
+  const camelCaseData = convertToCamelCase(data)
+
   switch (operation) {
     case 'insert':
     case 'update':
       if (id) {
-        await withDB((db) => db.collections.put({ ...data, id, synced: true }))
+        await withDB((db) => db.collections.put({ ...camelCaseData, id, synced: true }))
       }
       break
     case 'delete':
@@ -227,7 +230,7 @@ async function applyCollectionChange(
             deleted: true,
             deletedAt: new Date(),
             synced: true,
-            ...(data as any),
+            ...(camelCaseData as any),
           })
         )
         console.log(`[Sync Engine] Applied tombstone for collection ${id}`)
@@ -244,11 +247,14 @@ async function applyItemChange(
   data: any,
   id?: string  // UUID string
 ): Promise<void> {
+  // Convert snake_case to camelCase for Supabase data
+  const camelCaseData = convertToCamelCase(data)
+
   switch (operation) {
     case 'insert':
     case 'update':
       if (id) {
-        await withDB((db) => db.items.put({ ...data, id, synced: true }))
+        await withDB((db) => db.items.put({ ...camelCaseData, id, synced: true }))
       }
       break
     case 'delete':
@@ -260,7 +266,7 @@ async function applyItemChange(
             deleted: true,
             deletedAt: new Date(),
             synced: true,
-            ...(data as any),
+            ...(camelCaseData as any),
           })
         )
         console.log(`[Sync Engine] Applied tombstone for item ${id}`)
@@ -280,12 +286,15 @@ async function applyBookChange(
 ): Promise<void> {
   const id = remoteId || localId
 
+  // Convert snake_case to camelCase for Supabase data
+  const camelCaseData = convertToCamelCase(data)
+
   switch (operation) {
     case 'insert':
     case 'update':
       if (id) {
         // Update existing record or create new one
-        await withDB((db) => db.books.put({ ...data, id, synced: true }))
+        await withDB((db) => db.books.put({ ...camelCaseData, id, synced: true }))
       }
       break
     case 'delete':
@@ -297,13 +306,31 @@ async function applyBookChange(
             deleted: true,
             deletedAt: new Date(),
             synced: true,
-            ...(data as any),
+            ...(camelCaseData as any),
           })
         )
         console.log(`[Sync Engine] Applied tombstone for book ${id}`)
       }
       break
   }
+}
+
+/**
+ * Convert snake_case keys to camelCase
+ */
+function convertToCamelCase(obj: any): any {
+  if (!obj || typeof obj !== 'object') return obj
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => convertToCamelCase(item))
+  }
+  
+  const result: any = {}
+  for (const [key, value] of Object.entries(obj)) {
+    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+    result[camelKey] = typeof value === 'object' && value !== null ? convertToCamelCase(value) : value
+  }
+  return result
 }
 
 /**
@@ -317,11 +344,14 @@ async function applyBookQuoteChange(
 ): Promise<void> {
   const id = quoteId  // Keep as string for UUID
 
+  // Convert snake_case to camelCase for Supabase data
+  const camelCaseData = convertToCamelCase(data)
+
   switch (operation) {
     case 'insert':
     case 'update':
       if (id) {
-        await withDB((db) => db.bookQuotes.put({ ...data, id, synced: true }))
+        await withDB((db) => db.bookQuotes.put({ ...camelCaseData, id, synced: true }))
       }
       break
     case 'delete':
@@ -333,7 +363,7 @@ async function applyBookQuoteChange(
             deleted: true,
             deletedAt: new Date(),
             synced: true,
-            ...(data as any),
+            ...(camelCaseData as any),
           })
         )
         console.log(`[Sync Engine] Applied tombstone for quote ${id}`)

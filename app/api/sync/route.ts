@@ -284,6 +284,7 @@ export async function POST(request: NextRequest) {
       operation: string
       data: object
       id?: string  // UUID string
+      recordId?: string  // UUID string
     }> = []
 
     // Fetch remote changes for each table
@@ -311,14 +312,15 @@ export async function POST(request: NextRequest) {
             for (const record of records) {
               // Determine operation based on deleted flag
               const operation = record.deleted ? 'delete' : 'update'
-              
+
               remoteChanges.push({
                 table: localTable,
                 operation,
                 data: record,
                 id: record.id,
+                recordId: record.id,  // Use record.id as recordId for remote changes
               })
-              
+
               console.log(`[Sync API] Remote change: ${operation} ${localTable}/${record.id}`)
             }
           }
