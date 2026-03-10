@@ -222,6 +222,127 @@ export interface WorkoutSet {
 }
 
 // ============================================
+// Finance Types
+// ============================================
+
+export type AccountType = 'cash' | 'card' | 'deposit'
+export type Currency = 'RUB' | 'USD' | 'EUR' | 'GBP' | 'JPY' | 'CNY'
+export type TransactionType = 'income' | 'expense' | 'transfer'
+export type CategoryType = 'income' | 'expense'
+export type BudgetPeriod = 'monthly' | 'weekly' | 'yearly'
+export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
+export type GoalStatus = 'active' | 'completed' | 'paused'
+
+export interface FinanceAccount {
+  id: string  // UUID
+  userId?: string
+  name: string
+  type: AccountType
+  currency: Currency
+  initialBalance: number
+  currentBalance: number
+  icon?: string
+  color?: string
+  createdAt: Date
+  updatedAt: Date
+  synced: boolean
+  deleted?: boolean
+  deletedAt?: Date
+}
+
+export interface FinanceCategory {
+  id: string  // UUID
+  userId?: string
+  name: string
+  type: CategoryType
+  isPredefined: boolean
+  icon?: string
+  color?: string
+  createdAt: Date
+  updatedAt: Date
+  synced: boolean
+  deleted?: boolean
+  deletedAt?: Date
+}
+
+export interface FinanceTransaction {
+  id: string  // UUID
+  userId?: string
+  accountId: string  // UUID
+  toAccountId?: string  // UUID (for transfers)
+  categoryId?: string  // UUID (for income/expense)
+  amount: number
+  type: TransactionType
+  date: Date
+  description?: string
+  tags?: string[]  // Array of tag strings
+  fee?: number  // Commission for transfers
+  isRecurring: boolean
+  recurringTransactionId?: string  // UUID
+  createdAt: Date
+  updatedAt: Date
+  synced: boolean
+  deleted?: boolean
+  deletedAt?: Date
+}
+
+export interface FinanceBudget {
+  id: string  // UUID
+  userId?: string
+  categoryId: string  // UUID
+  period: BudgetPeriod
+  amount: number
+  spent: number
+  month?: number  // 1-12
+  year?: number  // e.g., 2026
+  createdAt: Date
+  updatedAt: Date
+  synced: boolean
+  deleted?: boolean
+  deletedAt?: Date
+}
+
+export interface FinanceRecurringTransaction {
+  id: string  // UUID
+  userId?: string
+  accountId: string  // UUID
+  toAccountId?: string  // UUID
+  categoryId?: string  // UUID
+  amount: number
+  type: TransactionType
+  frequency: RecurringFrequency
+  startDate: Date
+  endDate?: Date
+  lastProcessed?: Date
+  isActive: boolean
+  description?: string
+  createdAt: Date
+  updatedAt: Date
+  synced: boolean
+  deleted?: boolean
+  deletedAt?: Date
+}
+
+export interface FinanceSavingsGoal {
+  id: string  // UUID
+  userId?: string
+  name: string
+  targetAmount: number
+  currentAmount: number
+  accountId?: string  // UUID
+  deadline?: Date
+  status: GoalStatus
+  icon?: string
+  color?: string
+  description?: string
+  createdAt: Date
+  updatedAt: Date
+  synced: boolean
+  deleted?: boolean
+  deletedAt?: Date
+}
+
+// ============================================
 // Dexie Database
 // ============================================
 
@@ -241,6 +362,13 @@ export class TrackerDatabase extends Dexie {
   workouts!: EntityTable<Workout, 'id'>
   workoutExercises!: EntityTable<WorkoutExercise, 'id'>
   workoutSets!: EntityTable<WorkoutSet, 'id'>
+  // Finance tables
+  financeAccounts!: EntityTable<FinanceAccount, 'id'>
+  financeCategories!: EntityTable<FinanceCategory, 'id'>
+  financeTransactions!: EntityTable<FinanceTransaction, 'id'>
+  financeBudgets!: EntityTable<FinanceBudget, 'id'>
+  financeRecurringTransactions!: EntityTable<FinanceRecurringTransaction, 'id'>
+  financeSavingsGoals!: EntityTable<FinanceSavingsGoal, 'id'>
 
   constructor() {
     super('tracker_db')
@@ -274,6 +402,20 @@ export class TrackerDatabase extends Dexie {
       workouts: 'id, workoutTypeId, date, createdAt, updatedAt, synced, deleted',
       workoutExercises: 'id, workoutId, exerciseId, orderIndex, synced, deleted',
       workoutSets: 'id, workoutExerciseId, setNumber, completed, synced, deleted',
+    })
+
+    // Version 10: Add finance tables
+    this.version(10).stores({
+      financeAccounts: 'id, userId, type, currency, createdAt, updatedAt, synced, deleted',
+      financeCategories: 'id, userId, type, isPredefined, createdAt, updatedAt, synced, deleted',
+      financeTransactions: 'id, userId, accountId, toAccountId, categoryId, type, date, createdAt, updatedAt, synced, deleted',
+      financeBudgets: 'id, userId, categoryId, period, month, year, createdAt, updatedAt, synced, deleted',
+      financeRecurringTransactions: 'id, userId, accountId, type, frequency, isActive, startDate, endDate, createdAt, updatedAt, synced, deleted',
+    })
+
+    // Version 11: Add savings goals table
+    this.version(11).stores({
+      financeSavingsGoals: 'id, userId, status, deadline, createdAt, updatedAt, synced, deleted',
     })
   }
 }

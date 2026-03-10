@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server'
 import '@/styles/globals.css'
 import { ThemeProvider } from '@/components/layout/theme-provider'
+import { ToasterProvider } from '@/components/ui/toaster'
 import { InstallPrompt } from '@/components/ui/install-prompt'
 import { QuickAddFAB } from '@/components/shared/quick-add-fab'
 import { SupabaseProvider } from '@/components/auth/supabase-provider'
@@ -89,6 +90,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <SupabaseProvider>
             <ThemeProvider>
+              <ToasterProvider />
               <SeedDataInitializer />
               {children}
               <InstallPrompt />

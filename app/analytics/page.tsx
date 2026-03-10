@@ -3,31 +3,33 @@
 import { useTranslations } from 'next-intl'
 import { MainLayout } from '@/components/layout/main-layout'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, TrendingUp } from 'lucide-react'
+import Link from 'next/link'
 
 export default function AnalyticsPage() {
   const t = useTranslations('Placeholders')
-  const tCommon = useTranslations('Common')
+  const tNav = useTranslations('Navigation')
 
   return (
     <MainLayout>
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
-        {/* Icon */}
         <div className="text-6xl">📊</div>
-
-        {/* Title and Description */}
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold">{t('analytics.title')}</h1>
-          <p className="text-muted-foreground max-w-md">
-            {t('analytics.description')}
-          </p>
+          <p className="text-muted-foreground max-w-md">{t('analytics.description')}</p>
         </div>
-
-        {/* Action Button */}
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          {tCommon('add')}
-        </Button>
+        <div className="flex gap-4">
+          <Button asChild>
+            <Link href="/finances/reports">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              {tNav('finances')} {tNav('analytics')}
+            </Link>
+          </Button>
+          <Button variant="outline">
+            <Plus className="w-4 h-4 mr-2" />
+            Скоро
+          </Button>
+        </div>
       </div>
     </MainLayout>
   )
