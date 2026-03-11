@@ -31,6 +31,26 @@ import {
   type CreateSavingsGoalData,
   type UpdateSavingsGoalData,
 } from '@/lib/repositories/finance-savings-goals-repository'
+import {
+  supplementsRepository,
+  type CreateSupplementData,
+  type UpdateSupplementData,
+} from '@/lib/repositories/supplements-repository'
+import {
+  supplementInventoryRepository,
+  type CreateInventoryData,
+  type UpdateInventoryData,
+} from '@/lib/repositories/supplement-inventory-repository'
+import {
+  supplementSchedulesRepository,
+  type CreateScheduleData,
+  type UpdateScheduleData,
+} from '@/lib/repositories/supplement-schedules-repository'
+import {
+  supplementLogsRepository,
+  type CreateLogData,
+  type UpdateLogData,
+} from '@/lib/repositories/supplement-logs-repository'
 import type {
   FinanceAccount,
   FinanceCategory,
@@ -38,6 +58,10 @@ import type {
   FinanceBudget,
   FinanceRecurringTransaction,
   FinanceSavingsGoal,
+  Supplement,
+  SupplementInventory,
+  SupplementSchedule,
+  SupplementLog,
 } from '@/lib/db'
 
 interface FinancesState {
@@ -47,6 +71,10 @@ interface FinancesState {
   budgets: FinanceBudget[]
   recurringTransactions: FinanceRecurringTransaction[]
   savingsGoals: FinanceSavingsGoal[]
+  supplements: Supplement[]
+  supplementInventory: SupplementInventory[]
+  supplementSchedules: SupplementSchedule[]
+  supplementLogs: SupplementLog[]
   filters: TransactionFilters
   selectedAccount: FinanceAccount | null
   selectedTransaction: FinanceTransaction | null
@@ -87,6 +115,25 @@ interface FinancesState {
   addSavingsGoal: (data: CreateSavingsGoalData) => Promise<string>
   updateSavingsGoal: (id: string, data: UpdateSavingsGoalData) => Promise<void>
   deleteSavingsGoal: (id: string) => Promise<void>
+  fetchSupplements: () => Promise<void>
+  addSupplement: (data: CreateSupplementData) => Promise<string>
+  updateSupplement: (id: string, data: UpdateSupplementData) => Promise<void>
+  deleteSupplement: (id: string) => Promise<void>
+  toggleSupplement: (id: string) => Promise<void>
+  fetchInventory: () => Promise<void>
+  addInventory: (data: CreateInventoryData) => Promise<string>
+  updateInventory: (id: string, data: UpdateInventoryData) => Promise<void>
+  deleteInventory: (id: string) => Promise<void>
+  fetchSchedules: () => Promise<void>
+  addSchedule: (data: CreateScheduleData) => Promise<string>
+  updateSchedule: (id: string, data: UpdateScheduleData) => Promise<void>
+  deleteSchedule: (id: string) => Promise<void>
+  toggleSchedule: (id: string) => Promise<void>
+  fetchLogs: () => Promise<void>
+  addLog: (data: CreateLogData) => Promise<string>
+  updateLog: (id: string, data: UpdateLogData) => Promise<void>
+  deleteLog: (id: string) => Promise<void>
+  getLogStats: (supplementId: string, days?: number) => Promise<{ total: number, taken: number, skipped: number, missed: number, compliance: number }>
   calculateSummary: () => Promise<void>
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
@@ -103,6 +150,10 @@ export const useFinancesStore = create<FinancesState>()(
     budgets: [],
     recurringTransactions: [],
     savingsGoals: [],
+    supplements: [],
+    supplementInventory: [],
+    supplementSchedules: [],
+    supplementLogs: [],
     filters: INITIAL_FILTERS,
     selectedAccount: null,
     selectedTransaction: null,
@@ -417,6 +468,208 @@ export const useFinancesStore = create<FinancesState>()(
         set({ error: 'Failed to delete savings goal', isLoading: false })
         throw error
       }
+    },
+
+    fetchSupplements: async () => {
+      set({ isLoading: true, error: null })
+      try {
+        const supplements = await supplementsRepository.getActive()
+        set({ supplements, isLoading: false })
+      } catch (error) {
+        set({ error: 'Failed to fetch supplements', isLoading: false })
+      }
+    },
+
+    addSupplement: async (data) => {
+      set({ isLoading: true, error: null })
+      try {
+        const id = await supplementsRepository.create(data)
+        await get().fetchSupplements()
+        return id
+      } catch (error) {
+        set({ error: 'Failed to add supplement', isLoading: false })
+        throw error
+      }
+    },
+
+    updateSupplement: async (id, data) => {
+      set({ isLoading: true, error: null })
+      try {
+        await supplementsRepository.update(id, data)
+        await get().fetchSupplements()
+      } catch (error) {
+        set({ error: 'Failed to update supplement', isLoading: false })
+        throw error
+      }
+    },
+
+    deleteSupplement: async (id) => {
+      set({ isLoading: true, error: null })
+      try {
+        await supplementsRepository.delete(id)
+        await get().fetchSupplements()
+      } catch (error) {
+        set({ error: 'Failed to delete supplement', isLoading: false })
+        throw error
+      }
+    },
+
+    toggleSupplement: async (id) => {
+      set({ isLoading: true, error: null })
+      try {
+        await supplementsRepository.toggleActive(id)
+        await get().fetchSupplements()
+      } catch (error) {
+        set({ error: 'Failed to toggle supplement', isLoading: false })
+        throw error
+      }
+    },
+
+    fetchInventory: async () => {
+      set({ isLoading: true, error: null })
+      try {
+        const inventory = await supplementInventoryRepository.getActive()
+        set({ supplementInventory: inventory, isLoading: false })
+      } catch (error) {
+        set({ error: 'Failed to fetch inventory', isLoading: false })
+      }
+    },
+
+    addInventory: async (data) => {
+      set({ isLoading: true, error: null })
+      try {
+        const id = await supplementInventoryRepository.create(data)
+        await get().fetchInventory()
+        return id
+      } catch (error) {
+        set({ error: 'Failed to add inventory', isLoading: false })
+        throw error
+      }
+    },
+
+    updateInventory: async (id, data) => {
+      set({ isLoading: true, error: null })
+      try {
+        await supplementInventoryRepository.update(id, data)
+        await get().fetchInventory()
+      } catch (error) {
+        set({ error: 'Failed to update inventory', isLoading: false })
+        throw error
+      }
+    },
+
+    deleteInventory: async (id) => {
+      set({ isLoading: true, error: null })
+      try {
+        await supplementInventoryRepository.delete(id)
+        await get().fetchInventory()
+      } catch (error) {
+        set({ error: 'Failed to delete inventory', isLoading: false })
+        throw error
+      }
+    },
+
+    fetchSchedules: async () => {
+      set({ isLoading: true, error: null })
+      try {
+        const schedules = await supplementSchedulesRepository.getActive()
+        set({ supplementSchedules: schedules, isLoading: false })
+      } catch (error) {
+        set({ error: 'Failed to fetch schedules', isLoading: false })
+      }
+    },
+
+    addSchedule: async (data) => {
+      set({ isLoading: true, error: null })
+      try {
+        const id = await supplementSchedulesRepository.create(data)
+        await get().fetchSchedules()
+        return id
+      } catch (error) {
+        set({ error: 'Failed to add schedule', isLoading: false })
+        throw error
+      }
+    },
+
+    updateSchedule: async (id, data) => {
+      set({ isLoading: true, error: null })
+      try {
+        await supplementSchedulesRepository.update(id, data)
+        await get().fetchSchedules()
+      } catch (error) {
+        set({ error: 'Failed to update schedule', isLoading: false })
+        throw error
+      }
+    },
+
+    deleteSchedule: async (id) => {
+      set({ isLoading: true, error: null })
+      try {
+        await supplementSchedulesRepository.delete(id)
+        await get().fetchSchedules()
+      } catch (error) {
+        set({ error: 'Failed to delete schedule', isLoading: false })
+        throw error
+      }
+    },
+
+    toggleSchedule: async (id) => {
+      set({ isLoading: true, error: null })
+      try {
+        await supplementSchedulesRepository.toggleActive(id)
+        await get().fetchSchedules()
+      } catch (error) {
+        set({ error: 'Failed to toggle schedule', isLoading: false })
+        throw error
+      }
+    },
+
+    fetchLogs: async () => {
+      set({ isLoading: true, error: null })
+      try {
+        const logs = await supplementLogsRepository.getActive()
+        set({ supplementLogs: logs, isLoading: false })
+      } catch (error) {
+        set({ error: 'Failed to fetch logs', isLoading: false })
+      }
+    },
+
+    addLog: async (data) => {
+      set({ isLoading: true, error: null })
+      try {
+        const id = await supplementLogsRepository.create(data)
+        await get().fetchLogs()
+        return id
+      } catch (error) {
+        set({ error: 'Failed to add log', isLoading: false })
+        throw error
+      }
+    },
+
+    updateLog: async (id, data) => {
+      set({ isLoading: true, error: null })
+      try {
+        await supplementLogsRepository.update(id, data)
+        await get().fetchLogs()
+      } catch (error) {
+        set({ error: 'Failed to update log', isLoading: false })
+        throw error
+      }
+    },
+
+    deleteLog: async (id) => {
+      set({ isLoading: true, error: null })
+      try {
+        await supplementLogsRepository.delete(id)
+        await get().fetchLogs()
+      } catch (error) {
+        set({ error: 'Failed to delete log', isLoading: false })
+        throw error
+      }
+    },
+
+    getLogStats: async (supplementId, days = 30) => {
+      return await supplementLogsRepository.getStats(supplementId, days)
     },
 
     calculateSummary: async () => {

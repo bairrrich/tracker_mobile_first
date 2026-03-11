@@ -179,7 +179,7 @@ export class BooksRepository {
    */
   async hardDelete(id: string): Promise<void> {
     // Also delete related quotes
-    await withDB((db) => db.bookQuotes.where('bookId').equals(id).delete())
+    await withDB((db) => db.book_quotes.where('bookId').equals(id).delete())
     await withDB((db) => db.books.delete(id))
   }
 
@@ -284,7 +284,7 @@ export class BooksRepository {
     data?: object
   ): Promise<void> {
     await withDB((db) =>
-      db.syncQueue.add({
+      db.sync_queue.add({
         id: generateUUID(),
         table: 'books',
         recordId: id,
@@ -301,7 +301,7 @@ export class BooksRepository {
    */
   async getUnsynced(): Promise<Book[]> {
     const syncRecords = withDB((db) =>
-      db.syncQueue
+      db.sync_queue
         .where('table')
         .equals('books')
         .and((record) => !record.synced)
@@ -326,7 +326,7 @@ export class BooksRepository {
     await withDB((db) => db.books.update(id, { synced: true }))
 
     const syncRecords = (await withDB((db) =>
-      db.syncQueue
+      db.sync_queue
         .where('[table+recordId]')
         .equals(['books', id])
         .and((record) => !record.synced)
@@ -334,7 +334,7 @@ export class BooksRepository {
     )) ?? []
 
     for (const key of syncRecords) {
-      await withDB((db) => db.syncQueue.update(key, { synced: true }))
+      await withDB((db) => db.sync_queue.update(key, { synced: true }))
     }
   }
 

@@ -17,7 +17,8 @@ interface BudgetCardProps {
 
 export function BudgetCard({ budget, category, onEdit, onDelete }: BudgetCardProps) {
   const t = useTranslations('Finances')
-  
+  const tc = useTranslations('Common')
+
   const formatCurrency = (amount: number) => new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(amount)
   
   const percentage = budget.amount > 0 ? Math.min((budget.spent / budget.amount) * 100, 100) : 0
@@ -46,8 +47,8 @@ export function BudgetCard({ budget, category, onEdit, onDelete }: BudgetCardPro
             <Button variant="ghost" size="icon" className="h-8 w-8">⋮</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onEdit}>{t('edit', { ns: 'Common' })}</DropdownMenuItem>
-            <DropdownMenuItem onClick={onDelete} className="text-red-500">{t('delete', { ns: 'Common' })}</DropdownMenuItem>
+            <DropdownMenuItem onClick={onEdit}>{tc('edit')}</DropdownMenuItem>
+            <DropdownMenuItem onClick={onDelete} className="text-red-500">{tc('delete')}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>

@@ -138,6 +138,13 @@ export type BudgetPeriod = 'monthly' | 'weekly' | 'yearly'
 export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
 export type GoalStatus = 'active' | 'completed' | 'paused'
 
+// Supplement types
+export type SupplementType = 'vitamin' | 'mineral' | 'supplement' | 'protein' | 'herb' | 'other'
+export type SupplementForm = 'tablet' | 'capsule' | 'powder' | 'liquid' | 'gummy' | 'softgel'
+export type SupplementCategory = 'health' | 'sport' | 'beauty' | 'immunity' | 'energy' | 'sleep' | 'other'
+export type SupplementFrequency = 'daily' | 'weekly' | 'as_needed'
+export type SupplementTiming = 'morning' | 'afternoon' | 'evening' | 'before_workout' | 'after_workout' | 'with_meal' | 'before_meal' | 'after_meal'
+
 export const financeAccounts = sqliteTable('finance_accounts', {
   id: text('id').primaryKey(), // UUID
   userId: text('user_id'),
@@ -248,6 +255,85 @@ export const financeSavingsGoals = sqliteTable('finance_savings_goals', {
 })
 
 // ============================================
+// Supplement Tables
+// ============================================
+
+export const supplements = sqliteTable('supplements', {
+  id: text('id').primaryKey(), // UUID
+  userId: text('user_id'),
+  name: text('name').notNull(),
+  type: text('type', { enum: ['vitamin', 'mineral', 'supplement', 'protein', 'herb', 'other'] }).notNull(),
+  form: text('form', { enum: ['tablet', 'capsule', 'powder', 'liquid', 'gummy', 'softgel'] }).notNull(),
+  dosage: real('dosage'),
+  dosageUnit: text('dosage_unit'), // mg, mcg, IU, g, ml
+  category: text('category', { enum: ['health', 'sport', 'beauty', 'immunity', 'energy', 'sleep', 'other'] }),
+  brand: text('brand'),
+  description: text('description'),
+  imageUrl: text('image_url'),
+  isActive: text('is_active').default('true').notNull(),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  synced: text('synced').default('false').notNull(),
+  deleted: text('deleted').default('false').notNull(),
+  deletedAt: text('deleted_at'),
+})
+
+export const supplementInventory = sqliteTable('supplement_inventory', {
+  id: text('id').primaryKey(), // UUID
+  supplementId: text('supplement_id').references(() => supplements.id),
+  quantity: real('quantity').notNull(), // текущее количество
+  minQuantity: real('min_quantity'), // минимальный порог
+  unit: text('unit'), // штук, грамм, мл
+  purchaseDate: text('purchase_date'),
+  expirationDate: text('expiration_date'),
+  price: real('price'),
+  notes: text('notes'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  synced: text('synced').default('false').notNull(),
+  deleted: text('deleted').default('false').notNull(),
+  deletedAt: text('deleted_at'),
+})
+
+export const supplementSchedules = sqliteTable('supplement_schedules', {
+  id: text('id').primaryKey(), // UUID
+  supplementId: text('supplement_id').references(() => supplements.id),
+  frequency: text('frequency', { enum: ['daily', 'weekly', 'as_needed'] }).notNull(),
+  timing: text('timing', { enum: ['morning', 'afternoon', 'evening', 'before_workout', 'after_workout', 'with_meal', 'before_meal', 'after_meal'] }).notNull(),
+  daysOfWeek: text('days_of_week'), // JSON array [0,1,2,3,4,5,6] для дней недели
+  dosage: real('dosage'), // дозировка для этого приёма
+  quantity: integer('quantity'), // количество штук за приём
+  notes: text('notes'),
+  isActive: text('is_active').default('true').notNull(),
+  startDate: text('start_date'),
+  endDate: text('end_date'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  synced: text('synced').default('false').notNull(),
+  deleted: text('deleted').default('false').notNull(),
+  deletedAt: text('deleted_at'),
+})
+
+export const supplementLogs = sqliteTable('supplement_logs', {
+  id: text('id').primaryKey(), // UUID
+  supplementId: text('supplement_id').references(() => supplements.id),
+  scheduleId: text('schedule_id').references(() => supplementSchedules.id),
+  date: text('date').notNull(),
+  time: text('time'),
+  status: text('status', { enum: ['taken', 'skipped', 'missed'] }).notNull(),
+  dosage: real('dosage'), // фактическая дозировка
+  quantity: integer('quantity'), // фактическое количество
+  notes: text('notes'),
+  rating: integer('rating'), // оценка эффективности 1-5
+  sideEffects: text('side_effects'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  synced: text('synced').default('false').notNull(),
+  deleted: text('deleted').default('false').notNull(),
+  deletedAt: text('deleted_at'),
+})
+
+// ============================================
 // Finance Relations
 // ============================================
 
@@ -312,6 +398,42 @@ export const financeSavingsGoalsRelations = relations(financeSavingsGoals, ({ on
   }),
 }))
 
+// ============================================
+// Supplement Relations
+// ============================================
+
+export const supplementsRelations = relations(supplements, ({ many }) => ({
+  inventory: many(supplementInventory),
+  schedules: many(supplementSchedules),
+  logs: many(supplementLogs),
+}))
+
+export const supplementInventoryRelations = relations(supplementInventory, ({ one }) => ({
+  supplement: one(supplements, {
+    fields: [supplementInventory.supplementId],
+    references: [supplements.id],
+  }),
+}))
+
+export const supplementSchedulesRelations = relations(supplementSchedules, ({ one, many }) => ({
+  supplement: one(supplements, {
+    fields: [supplementSchedules.supplementId],
+    references: [supplements.id],
+  }),
+  logs: many(supplementLogs),
+}))
+
+export const supplementLogsRelations = relations(supplementLogs, ({ one }) => ({
+  supplement: one(supplements, {
+    fields: [supplementLogs.supplementId],
+    references: [supplements.id],
+  }),
+  schedule: one(supplementSchedules, {
+    fields: [supplementLogs.scheduleId],
+    references: [supplementSchedules.id],
+  }),
+}))
+
 // Export types
 export type FinanceAccount = typeof financeAccounts.$inferSelect
 export type NewFinanceAccount = typeof financeAccounts.$inferInsert
@@ -330,6 +452,16 @@ export type NewFinanceRecurringTransaction = typeof financeRecurringTransactions
 
 export type FinanceSavingsGoal = typeof financeSavingsGoals.$inferSelect
 export type NewFinanceSavingsGoal = typeof financeSavingsGoals.$inferInsert
+
+// Supplement types
+export type Supplement = typeof supplements.$inferSelect
+export type NewSupplement = typeof supplements.$inferInsert
+export type SupplementInventory = typeof supplementInventory.$inferSelect
+export type NewSupplementInventory = typeof supplementInventory.$inferInsert
+export type SupplementSchedule = typeof supplementSchedules.$inferSelect
+export type NewSupplementSchedule = typeof supplementSchedules.$inferInsert
+export type SupplementLog = typeof supplementLogs.$inferSelect
+export type NewSupplementLog = typeof supplementLogs.$inferInsert
 
 // Export types
 export type Collection = typeof collections.$inferSelect

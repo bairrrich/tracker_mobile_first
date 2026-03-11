@@ -86,9 +86,9 @@ export function TransactionCard({ transaction, category, account, onEdit, onDele
                   <Button variant="ghost" size="icon" className="h-8 w-8">⋮</Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={onEdit}>{t('edit', { ns: 'Common' })}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={onEdit}>{tc('edit')}</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-red-500">{t('delete', { ns: 'Common' })}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-red-500">{tc('delete')}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

@@ -20,7 +20,7 @@ const STATUS_LABELS: Record<string, string> = { active: 'Активна', paused
 const STATUS_COLORS: Record<string, string> = { active: 'bg-green-500/10 text-green-500 border-green-500/20', paused: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20', completed: 'bg-blue-500/10 text-blue-500 border-blue-500/20' }
 
 export function SavingsGoalCard({ goal, account, onEdit, onDelete, onAddFunds }: SavingsGoalCardProps) {
-  const t = useTranslations('Finances')
+  const tc = useTranslations('Common')
   const formatCurrency = (amount: number) => new Intl.NumberFormat('ru-RU', { style: 'currency', currency: account?.currency || 'RUB', minimumFractionDigits: 0 }).format(amount)
   const progress = goal.targetAmount > 0 ? Math.min((goal.currentAmount / goal.targetAmount) * 100, 100) : 0
   const remaining = goal.targetAmount - goal.currentAmount
@@ -59,10 +59,10 @@ export function SavingsGoalCard({ goal, account, onEdit, onDelete, onAddFunds }:
             <DropdownMenu>
               <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8">⋮</Button></DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={onEdit}>{t('edit', { ns: 'Common' })}</DropdownMenuItem>
+                <DropdownMenuItem onClick={onEdit}>{tc('edit')}</DropdownMenuItem>
                 {!isCompleted && <DropdownMenuItem onClick={onAddFunds}>Пополнить</DropdownMenuItem>}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onDelete} className="text-red-500">{t('delete', { ns: 'Common' })}</DropdownMenuItem>
+                <DropdownMenuItem onClick={onDelete} className="text-red-500">{tc('delete')}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

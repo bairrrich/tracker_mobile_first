@@ -159,7 +159,7 @@ export class ItemsRepository {
     await withDB((db) => db.metrics.where('itemId').equals(id).delete())
     await withDB((db) => db.history.where('itemId').equals(id).delete())
     await withDB((db) => db.notes.where('itemId').equals(id).delete())
-    await withDB((db) => db.itemTags.where('itemId').equals(id).delete())
+    await withDB((db) => db.item_tags.where('itemId').equals(id).delete())
 
     await withDB((db) => db.items.delete(id))
   }
@@ -198,7 +198,7 @@ export class ItemsRepository {
     data?: object
   ): Promise<void> {
     await withDB((db) =>
-      db.syncQueue.add({
+      db.sync_queue.add({
         id: generateUUID(),
         table: 'items',
         recordId: id,
@@ -215,7 +215,7 @@ export class ItemsRepository {
    */
   async getUnsynced(): Promise<Item[]> {
     const syncRecords = withDB((db) =>
-      db.syncQueue
+      db.sync_queue
         .where('table')
         .equals('items')
         .and((record) => !record.synced)
@@ -240,7 +240,7 @@ export class ItemsRepository {
     await withDB((db) => db.items.update(id, { synced: true }))
 
     const syncRecords = (await withDB((db) =>
-      db.syncQueue
+      db.sync_queue
         .where('table')
         .equals('items')
         .and((record) => record.recordId === id && !record.synced)
@@ -248,7 +248,7 @@ export class ItemsRepository {
     )) ?? []
 
     for (const record of syncRecords) {
-      await withDB((db) => db.syncQueue.update(record.id, { synced: true }))
+      await withDB((db) => db.sync_queue.update(record.id, { synced: true }))
     }
   }
 }

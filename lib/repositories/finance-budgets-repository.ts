@@ -7,11 +7,11 @@ export interface CreateBudgetData { categoryId: string; period: BudgetPeriod; am
 export interface UpdateBudgetData { categoryId?: string; period?: BudgetPeriod; amount?: number; month?: number; year?: number }
 
 export class FinanceBudgetsRepository {
-  async getById(id: string): Promise<FinanceBudget | undefined> { return withDB((db) => db.financeBudgets.get(id)) ?? undefined }
-  async getAll(): Promise<FinanceBudget[]> { return withDB((db) => db.financeBudgets.orderBy('createdAt').toArray()) ?? [] }
+  async getById(id: string): Promise<FinanceBudget | undefined> { return withDB((db) => db.finance_budgets.get(id)) ?? undefined }
+  async getAll(): Promise<FinanceBudget[]> { return withDB((db) => db.finance_budgets.orderBy('createdAt').toArray()) ?? [] }
   async getActive(): Promise<FinanceBudget[]> { return filterActive(await this.getAll()) }
   async getByCategory(categoryId: string): Promise<FinanceBudget[]> {
-    const budgets = await withDB((db) => db.financeBudgets.where('categoryId').equals(categoryId).toArray()) || []
+    const budgets = await withDB((db) => db.finance_budgets.where('categoryId').equals(categoryId).toArray()) || []
     return budgets.filter(b => !b.deleted)
   }
   async getBudgetForMonth(categoryId: string, month: number, year: number): Promise<FinanceBudget | undefined> {
@@ -22,7 +22,7 @@ export class FinanceBudgetsRepository {
     const now = new Date()
     return this.getBudgetForMonth(categoryId, now.getMonth() + 1, now.getFullYear())
   }
-  async updateSpent(id: string, spent: number): Promise<void> { await withDB((db) => db.financeBudgets.update(id, { spent })) }
+  async updateSpent(id: string, spent: number): Promise<void> { await withDB((db) => db.finance_budgets.update(id, { spent })) }
 
   async recalculateAllSpent(): Promise<void> {
     const budgets = await this.getActive()
@@ -39,7 +39,7 @@ export class FinanceBudgetsRepository {
     if (data.amount <= 0) throw new Error('Budget amount must be greater than 0')
     const now = new Date()
     const id = generateUUID()
-    await withDB((db) => db.financeBudgets.add({ id, categoryId: data.categoryId, period: data.period, amount: data.amount, spent: 0, month: data.month, year: data.year, createdAt: now, updatedAt: now, synced: false }))
+    await withDB((db) => db.finance_budgets.add({ id, categoryId: data.categoryId, period: data.period, amount: data.amount, spent: 0, month: data.month, year: data.year, createdAt: now, updatedAt: now, synced: false }))
     await this.markForSync(id, 'insert', { ...data, id, spent: 0 })
     return id
   }
@@ -47,7 +47,7 @@ export class FinanceBudgetsRepository {
   async update(id: string, data: UpdateBudgetData): Promise<void> {
     const budget = await this.getById(id)
     if (!budget) throw new Error('Budget not found')
-    await withDB((db) => db.financeBudgets.update(id, { ...data, updatedAt: new Date() }))
+    await withDB((db) => db.finance_budgets.update(id, { ...data, updatedAt: new Date() }))
     await this.markForSync(id, 'update', { ...data, updatedAt: new Date() })
   }
 
@@ -55,20 +55,20 @@ export class FinanceBudgetsRepository {
     const budget = await this.getById(id)
     if (!budget) throw new Error('Budget not found')
     const tombstone = createTombstone()
-    await withDB((db) => db.financeBudgets.update(id, { ...tombstone, synced: false }))
+    await withDB((db) => db.finance_budgets.update(id, { ...tombstone, synced: false }))
     await this.markForSync(id, 'delete', { id, deleted: true })
   }
 
-  async hardDelete(id: string): Promise<void> { await withDB((db) => db.financeBudgets.delete(id)) }
+  async hardDelete(id: string): Promise<void> { await withDB((db) => db.finance_budgets.delete(id)) }
 
   private async markForSync(id: string, operation: 'insert' | 'update' | 'delete', data?: object): Promise<void> {
-    await withDB((db) => db.syncQueue.add({ id: generateUUID(), table: 'finance_budgets', recordId: id, operation, data: data ? JSON.stringify(data) : '', synced: false, createdAt: new Date() }))
+    await withDB((db) => db.sync_queue.add({ id: generateUUID(), table: 'finance_budgets', recordId: id, operation, data: data ? JSON.stringify(data) : '', synced: false, createdAt: new Date() }))
   }
 
   async markAsSynced(id: string): Promise<void> {
-    await withDB((db) => db.financeBudgets.update(id, { synced: true }))
-    const syncRecords = (await withDB((db) => db.syncQueue.where('[table+recordId]').equals(['finance_budgets', id]).and((record) => !record.synced).primaryKeys())) ?? []
-    for (const key of syncRecords) await withDB((db) => db.syncQueue.update(key, { synced: true }))
+    await withDB((db) => db.finance_budgets.update(id, { synced: true }))
+    const syncRecords = (await withDB((db) => db.sync_queue.where('[table+recordId]').equals(['finance_budgets', id]).and((record) => !record.synced).primaryKeys())) ?? []
+    for (const key of syncRecords) await withDB((db) => db.sync_queue.update(key, { synced: true }))
   }
 }
 

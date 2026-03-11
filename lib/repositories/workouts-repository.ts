@@ -138,7 +138,7 @@ export class WorkoutsRepository {
     data?: object
   ): Promise<void> {
     await withDB((db) =>
-      db.syncQueue.add({
+      db.sync_queue.add({
         id: generateUUID(),
         table: 'workouts',
         recordId: id,
@@ -155,7 +155,7 @@ export class WorkoutsRepository {
    */
   async getUnsynced(): Promise<Workout[]> {
     const syncRecords = withDB((db) =>
-      db.syncQueue
+      db.sync_queue
         .where('table')
         .equals('workouts')
         .and((record) => !record.synced)
@@ -180,7 +180,7 @@ export class WorkoutsRepository {
     await withDB((db) => db.workouts.update(id, { synced: true }))
 
     const syncRecords = (await withDB((db) =>
-      db.syncQueue
+      db.sync_queue
         .where('[table+recordId]')
         .equals(['workouts', id])
         .and((record) => !record.synced)
@@ -188,7 +188,7 @@ export class WorkoutsRepository {
     )) ?? []
 
     for (const key of syncRecords) {
-      await withDB((db) => db.syncQueue.update(key, { synced: true }))
+      await withDB((db) => db.sync_queue.update(key, { synced: true }))
     }
   }
 }
@@ -202,7 +202,7 @@ export class WorkoutExercisesRepository {
    * Get workout exercise by ID
    */
   async getById(id: string): Promise<WorkoutExercise | undefined> {
-    return withDB((db) => db.workoutExercises.get(id)) ?? undefined
+    return withDB((db) => db.workout_exercises.get(id)) ?? undefined
   }
 
   /**
@@ -210,7 +210,7 @@ export class WorkoutExercisesRepository {
    */
   async getByWorkout(workoutId: string): Promise<WorkoutExercise[]> {
     const exercises = await withDB((db) =>
-      db.workoutExercises
+      db.workout_exercises
         .where('workoutId')
         .equals(workoutId)
         .sortBy('orderIndex')
@@ -228,13 +228,13 @@ export class WorkoutExercisesRepository {
     orderIndex?: number
   ): Promise<string> {
     const id = generateUUID()
-    
+
     // Get max order index if not provided
     const existingExercises = await this.getByWorkout(workoutId)
     const newIndex = orderIndex ?? existingExercises.length
 
     await withDB((db) =>
-      db.workoutExercises.add({
+      db.workout_exercises.add({
         id,
         workoutId,
         exerciseId,
@@ -257,7 +257,7 @@ export class WorkoutExercisesRepository {
     const tombstone = createTombstone()
 
     await withDB((db) =>
-      db.workoutExercises.update(id, {
+      db.workout_exercises.update(id, {
         ...tombstone,
         synced: false,
       })
@@ -276,7 +276,7 @@ export class WorkoutExercisesRepository {
     data?: object
   ): Promise<void> {
     await withDB((db) =>
-      db.syncQueue.add({
+      db.sync_queue.add({
         id: generateUUID(),
         table: 'workout_exercises',
         recordId: id,
@@ -292,10 +292,10 @@ export class WorkoutExercisesRepository {
    * Mark workout exercise as synced
    */
   async markAsSynced(id: string): Promise<void> {
-    await withDB((db) => db.workoutExercises.update(id, { synced: true }))
+    await withDB((db) => db.workout_exercises.update(id, { synced: true }))
 
     const syncRecords = (await withDB((db) =>
-      db.syncQueue
+      db.sync_queue
         .where('[table+recordId]')
         .equals(['workout_exercises', id])
         .and((record) => !record.synced)
@@ -303,7 +303,7 @@ export class WorkoutExercisesRepository {
     )) ?? []
 
     for (const key of syncRecords) {
-      await withDB((db) => db.syncQueue.update(key, { synced: true }))
+      await withDB((db) => db.sync_queue.update(key, { synced: true }))
     }
   }
 }
@@ -317,7 +317,7 @@ export class WorkoutSetsRepository {
    * Get set by ID
    */
   async getById(id: string): Promise<WorkoutSet | undefined> {
-    return withDB((db) => db.workoutSets.get(id)) ?? undefined
+    return withDB((db) => db.workout_sets.get(id)) ?? undefined
   }
 
   /**
@@ -325,7 +325,7 @@ export class WorkoutSetsRepository {
    */
   async getByWorkoutExercise(workoutExerciseId: string): Promise<WorkoutSet[]> {
     const sets = await withDB((db) =>
-      db.workoutSets
+      db.workout_sets
         .where('workoutExerciseId')
         .equals(workoutExerciseId)
         .sortBy('setNumber')
@@ -347,7 +347,7 @@ export class WorkoutSetsRepository {
     const id = generateUUID()
 
     await withDB((db) =>
-      db.workoutSets.add({
+      db.workout_sets.add({
         id,
         workoutExerciseId,
         setNumber,
@@ -373,7 +373,7 @@ export class WorkoutSetsRepository {
     id: string,
     data: { reps?: number; weight?: number; durationSeconds?: number; completed?: boolean }
   ): Promise<void> {
-    await withDB((db) => db.workoutSets.update(id, data))
+    await withDB((db) => db.workout_sets.update(id, data))
 
     // Mark for sync
     await this.markForSync(id, 'update', { id, ...data })
@@ -393,7 +393,7 @@ export class WorkoutSetsRepository {
     const tombstone = createTombstone()
 
     await withDB((db) =>
-      db.workoutSets.update(id, {
+      db.workout_sets.update(id, {
         ...tombstone,
         synced: false,
       })
@@ -412,7 +412,7 @@ export class WorkoutSetsRepository {
     data?: object
   ): Promise<void> {
     await withDB((db) =>
-      db.syncQueue.add({
+      db.sync_queue.add({
         id: generateUUID(),
         table: 'workout_sets',
         recordId: id,
@@ -428,10 +428,10 @@ export class WorkoutSetsRepository {
    * Mark set as synced
    */
   async markAsSynced(id: string): Promise<void> {
-    await withDB((db) => db.workoutSets.update(id, { synced: true }))
+    await withDB((db) => db.workout_sets.update(id, { synced: true }))
 
     const syncRecords = (await withDB((db) =>
-      db.syncQueue
+      db.sync_queue
         .where('[table+recordId]')
         .equals(['workout_sets', id])
         .and((record) => !record.synced)
@@ -439,7 +439,7 @@ export class WorkoutSetsRepository {
     )) ?? []
 
     for (const key of syncRecords) {
-      await withDB((db) => db.syncQueue.update(key, { synced: true }))
+      await withDB((db) => db.sync_queue.update(key, { synced: true }))
     }
   }
 }

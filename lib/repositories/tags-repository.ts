@@ -30,7 +30,7 @@ export class TagsRepository {
    * Get tags by item ID
    */
   async getByItem(itemId: string): Promise<Tag[]> {
-    const itemTags = (await withDB((db) => db.itemTags.where('itemId').equals(itemId).toArray())) ?? []
+    const itemTags = (await withDB((db) => db.item_tags.where('itemId').equals(itemId).toArray())) ?? []
     const tagIds = itemTags.map((it) => it.tagId)
     return (await withDB((db) => db.tags.where('id').anyOf(tagIds).toArray())) ?? []
   }
@@ -64,7 +64,7 @@ export class TagsRepository {
    * Delete a tag
    */
   async delete(id: string): Promise<void> {
-    await withDB((db) => db.itemTags.where('tagId').equals(id).delete())
+    await withDB((db) => db.item_tags.where('tagId').equals(id).delete())
     await withDB((db) => db.tags.delete(id))
   }
 
@@ -73,7 +73,7 @@ export class TagsRepository {
    */
   async addToItem(itemId: string, tagId: string): Promise<void> {
     await withDB((db) =>
-      db.itemTags.add({
+      db.item_tags.add({
         id: generateUUID(),
         itemId,
         tagId,
@@ -85,10 +85,10 @@ export class TagsRepository {
    * Remove tag from item
    */
   async removeFromItem(itemId: string, tagId: string): Promise<void> {
-    const itemTags = (await withDB((db) => db.itemTags.toArray())) ?? []
+    const itemTags = (await withDB((db) => db.item_tags.toArray())) ?? []
     const itemTag = itemTags.find((it) => it.itemId === itemId && it.tagId === tagId)
     if (itemTag) {
-      await withDB((db) => db.itemTags.delete(itemTag.id))
+      await withDB((db) => db.item_tags.delete(itemTag.id))
     }
   }
 
@@ -97,7 +97,7 @@ export class TagsRepository {
    */
   async setItemTags(itemId: string, tagIds: string[]): Promise<void> {
     // Remove existing tags
-    await withDB((db) => db.itemTags.where('itemId').equals(itemId).delete())
+    await withDB((db) => db.item_tags.where('itemId').equals(itemId).delete())
 
     // Add new tags
     for (const tagId of tagIds) {

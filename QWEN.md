@@ -90,7 +90,7 @@ All_Tracker_mobile/
 **Rules:**
 1. NEVER use camelCase for table names in sync operations (`table: 'book_quotes'` NOT `table: 'bookQuotes'`)
 2. ALWAYS use snake_case in TABLE_MAPPING, markForSync(), and sync queue operations
-3. Dexie property names can be camelCase (e.g., `db.bookQuotes`) but sync queue table names must be snake_case
+3. Dexie property names MUST be snake_case (e.g., `db.book_quotes` NOT `db.bookQuotes`)
 4. Supabase table names are always snake_case
 5. When adding new tables, follow the snake_case convention consistently
 
@@ -98,9 +98,9 @@ All_Tracker_mobile/
 ```typescript
 // ✅ CORRECT
 await markForSync('book_quotes', id, 'insert', data)
-TABLE_MAPPING: { book_quotes: 'book_quotes' }
+db.book_quotes.add({...})
 
 // ❌ WRONG
 await markForSync('bookQuotes', id, 'insert', data)
-TABLE_MAPPING: { bookQuotes: 'book_quotes' }
+db.bookQuotes.add({...})
 ```

@@ -36,8 +36,8 @@ export interface TransactionFilters {
 }
 
 export class FinanceTransactionsRepository {
-  async getById(id: string): Promise<FinanceTransaction | undefined> { return withDB((db) => db.financeTransactions.get(id)) ?? undefined }
-  async getAll(): Promise<FinanceTransaction[]> { return withDB((db) => db.financeTransactions.orderBy('date').reverse().toArray()) ?? [] }
+  async getById(id: string): Promise<FinanceTransaction | undefined> { return withDB((db) => db.finance_transactions.get(id)) ?? undefined }
+  async getAll(): Promise<FinanceTransaction[]> { return withDB((db) => db.finance_transactions.orderBy('date').reverse().toArray()) ?? [] }
   async getActive(): Promise<FinanceTransaction[]> { return filterActive(await this.getAll()) }
 
   async getFiltered(filters: TransactionFilters): Promise<FinanceTransaction[]> {
@@ -55,7 +55,7 @@ export class FinanceTransactionsRepository {
   }
 
   async getByAccount(accountId: string): Promise<FinanceTransaction[]> {
-    const transactions = await withDB((db) => db.financeTransactions.where('accountId').equals(accountId).reverse().toArray()) || []
+    const transactions = await withDB((db) => db.finance_transactions.where('accountId').equals(accountId).reverse().toArray()) || []
     return transactions.filter(t => !t.deleted)
   }
 
@@ -92,7 +92,7 @@ export class FinanceTransactionsRepository {
     const account = await financeAccountsRepository.getById(data.accountId)
     if (!account) throw new Error('Account not found')
 
-    await withDB((db) => db.financeTransactions.add({
+    await withDB((db) => db.finance_transactions.add({
       id, accountId: data.accountId, toAccountId: data.toAccountId, categoryId: data.categoryId,
       amount: data.amount, type: data.type, date: data.date, description: data.description,
       tags: data.tags, fee: data.fee, isRecurring: false, createdAt: now, updatedAt: now, synced: false,
@@ -106,7 +106,7 @@ export class FinanceTransactionsRepository {
   async update(id: string, data: UpdateTransactionData): Promise<void> {
     const transaction = await this.getById(id)
     if (!transaction) throw new Error('Transaction not found')
-    await withDB((db) => db.financeTransactions.update(id, { ...data, updatedAt: new Date() }))
+    await withDB((db) => db.finance_transactions.update(id, { ...data, updatedAt: new Date() }))
     await this.recalculateAccountBalance(transaction.accountId)
     if (transaction.toAccountId) await this.recalculateAccountBalance(transaction.toAccountId)
     await this.markForSync(id, 'update', { ...data, updatedAt: new Date() })
@@ -116,13 +116,13 @@ export class FinanceTransactionsRepository {
     const transaction = await this.getById(id)
     if (!transaction) throw new Error('Transaction not found')
     const tombstone = createTombstone()
-    await withDB((db) => db.financeTransactions.update(id, { ...tombstone, synced: false }))
+    await withDB((db) => db.finance_transactions.update(id, { ...tombstone, synced: false }))
     await this.recalculateAccountBalance(transaction.accountId)
     if (transaction.toAccountId) await this.recalculateAccountBalance(transaction.toAccountId)
     await this.markForSync(id, 'delete', { id, deleted: true })
   }
 
-  async hardDelete(id: string): Promise<void> { await withDB((db) => db.financeTransactions.delete(id)) }
+  async hardDelete(id: string): Promise<void> { await withDB((db) => db.finance_transactions.delete(id)) }
 
   private async updateAccountBalance(_transactionId: string, data: CreateTransactionData): Promise<void> {
     const account = await financeAccountsRepository.getById(data.accountId)
@@ -159,13 +159,13 @@ export class FinanceTransactionsRepository {
   }
 
   private async markForSync(id: string, operation: 'insert' | 'update' | 'delete', data?: object): Promise<void> {
-    await withDB((db) => db.syncQueue.add({ id: generateUUID(), table: 'finance_transactions', recordId: id, operation, data: data ? JSON.stringify(data) : '', synced: false, createdAt: new Date() }))
+    await withDB((db) => db.sync_queue.add({ id: generateUUID(), table: 'finance_transactions', recordId: id, operation, data: data ? JSON.stringify(data) : '', synced: false, createdAt: new Date() }))
   }
 
   async markAsSynced(id: string): Promise<void> {
-    await withDB((db) => db.financeTransactions.update(id, { synced: true }))
-    const syncRecords = (await withDB((db) => db.syncQueue.where('[table+recordId]').equals(['finance_transactions', id]).and((record) => !record.synced).primaryKeys())) ?? []
-    for (const key of syncRecords) await withDB((db) => db.syncQueue.update(key, { synced: true }))
+    await withDB((db) => db.finance_transactions.update(id, { synced: true }))
+    const syncRecords = (await withDB((db) => db.sync_queue.where('[table+recordId]').equals(['finance_transactions', id]).and((record) => !record.synced).primaryKeys())) ?? []
+    for (const key of syncRecords) await withDB((db) => db.sync_queue.update(key, { synced: true }))
   }
 }
 

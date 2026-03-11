@@ -12,12 +12,12 @@ const badgeVariants = cva(
         secondary:
           'border-transparent bg-[var(--border)] text-[var(--text)] hover:bg-[var(--border)]/80',
         destructive:
-          'border-transparent bg-[var(--error)] text-white hover:opacity-80',
+          'border-transparent bg-[var(--error)] text-[var(--text-inverse)] hover:opacity-80',
         outline: 'text-[var(--text)] border-[var(--border)]',
         success:
-          'border-transparent bg-[var(--success)] text-white hover:opacity-80',
+          'border-transparent bg-[var(--success)] text-[var(--text-inverse)] hover:opacity-80',
         warning:
-          'border-transparent bg-[var(--warning)] text-white hover:opacity-80',
+          'border-transparent bg-[var(--warning)] text-[var(--text-inverse)] hover:opacity-80',
       },
     },
     defaultVariants: {

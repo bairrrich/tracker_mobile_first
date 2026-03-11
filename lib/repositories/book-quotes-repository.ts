@@ -19,7 +19,7 @@ export class BookQuotesRepository {
    */
   async getByBook(bookId: string): Promise<BookQuote[]> {
     return withDB((db) =>
-      db.bookQuotes.where('bookId').equals(bookId).reverse().toArray()
+      db.book_quotes.where('bookId').equals(bookId).reverse().toArray()
     ) ?? []
   }
 
@@ -35,7 +35,7 @@ export class BookQuotesRepository {
    * Get quote by ID
    */
   async getById(id: string): Promise<BookQuote | undefined> {
-    return withDB((db) => db.bookQuotes.get(id)) ?? undefined
+    return withDB((db) => db.book_quotes.get(id)) ?? undefined
   }
 
   /**
@@ -44,9 +44,9 @@ export class BookQuotesRepository {
   async create(data: CreateQuoteData): Promise<string> {
     const now = new Date()
     const id = generateUUID()  // Generate UUID client-side
-    
+
     const result = await withDB((db) =>
-      db.bookQuotes.add({
+      db.book_quotes.add({
         id,  // Use generated UUID
         bookId: data.bookId,
         text: data.text,
@@ -69,7 +69,7 @@ export class BookQuotesRepository {
    */
   async update(id: string, data: UpdateQuoteData): Promise<void> {
     await withDB((db) =>
-      db.bookQuotes.update(id, {
+      db.book_quotes.update(id, {
         ...data,
       })
     )
@@ -86,7 +86,7 @@ export class BookQuotesRepository {
     if (!quote) return
 
     await withDB((db) =>
-      db.bookQuotes.update(id, {
+      db.book_quotes.update(id, {
         ...quote,
         ...createTombstone(),
         synced: false,
@@ -102,14 +102,14 @@ export class BookQuotesRepository {
    * Use only for cleaning up old tombstones or local-only records
    */
   async hardDelete(id: string): Promise<void> {
-    await withDB((db) => db.bookQuotes.delete(id))
+    await withDB((db) => db.book_quotes.delete(id))
   }
 
   /**
    * Get all quotes (including deleted)
    */
   async getAll(): Promise<BookQuote[]> {
-    return withDB((db) => db.bookQuotes.orderBy('createdAt').reverse().toArray()) ?? []
+    return withDB((db) => db.book_quotes.orderBy('createdAt').reverse().toArray()) ?? []
   }
 
   /**
@@ -129,7 +129,7 @@ export class BookQuotesRepository {
     data?: object
   ): Promise<void> {
     await withDB((db) =>
-      db.syncQueue.add({
+      db.sync_queue.add({
         id: generateUUID(),  // Use UUID for sync queue id
         table: 'book_quotes',
         recordId: id,  // Now string UUID
@@ -145,10 +145,10 @@ export class BookQuotesRepository {
    * Mark quote as synced
    */
   async markAsSynced(id: string): Promise<void> {
-    await withDB((db) => db.bookQuotes.update(id, { synced: true }))
+    await withDB((db) => db.book_quotes.update(id, { synced: true }))
 
     const syncRecords = (await withDB((db) =>
-      db.syncQueue
+      db.sync_queue
         .where('table')
         .equals('book_quotes')
         .and((record) => record.recordId === id && !record.synced)
@@ -156,7 +156,7 @@ export class BookQuotesRepository {
     )) ?? []
 
     for (const record of syncRecords) {
-      await withDB((db) => db.syncQueue.update(record.id, { synced: true }))
+      await withDB((db) => db.sync_queue.update(record.id, { synced: true }))
     }
   }
 }

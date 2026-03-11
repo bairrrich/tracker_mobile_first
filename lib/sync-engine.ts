@@ -50,9 +50,9 @@ export async function pushChanges(): Promise<{
   }
   
   console.log('[Sync Engine] withDB: DB available, checking syncQueue...')
-  
+
   // Use filter instead of where().equals() for boolean comparison
-  const unsynced = await db.syncQueue
+  const unsynced = await db.sync_queue
     .filter(record => record.synced === false)
     .toArray()
 
@@ -129,7 +129,7 @@ export async function pullChanges(): Promise<{
 
     // Get unsynced records to send to API
     const unsyncedRecords = (await withDB((db) =>
-      db.syncQueue.where('synced').equals(0).toArray()
+      db.sync_queue.where('synced').equals(0).toArray()
     )) ?? []
 
     // Get auth header
@@ -378,14 +378,14 @@ async function applyBookQuoteChange(
     case 'insert':
     case 'update':
       if (id) {
-        await withDB((db) => db.bookQuotes.put({ ...camelCaseData, id, synced: true }))
+        await withDB((db) => db.book_quotes.put({ ...camelCaseData, id, synced: true }))
       }
       break
     case 'delete':
       if (id) {
         // Apply tombstone (soft delete)
         await withDB((db) =>
-          db.bookQuotes.put({
+          db.book_quotes.put({
             id,
             deleted: true,
             deletedAt: new Date(),
@@ -506,12 +506,12 @@ async function applyItemTagChange(
     case 'insert':
     case 'update':
       if (id) {
-        await withDB((db) => db.itemTags.put({ ...camelCaseData, id }))
+        await withDB((db) => db.item_tags.put({ ...camelCaseData, id }))
       }
       break
     case 'delete':
       if (id) {
-        await withDB((db) => db.itemTags.put({
+        await withDB((db) => db.item_tags.put({
           id,
           deleted: true,
           deletedAt: new Date(),
@@ -630,12 +630,12 @@ async function applyWorkoutExerciseChange(
     case 'insert':
     case 'update':
       if (id) {
-        await withDB((db) => db.workoutExercises.put({ ...camelCaseData, id }))
+        await withDB((db) => db.workout_exercises.put({ ...camelCaseData, id }))
       }
       break
     case 'delete':
       if (id) {
-        await withDB((db) => db.workoutExercises.put({
+        await withDB((db) => db.workout_exercises.put({
           id,
           deleted: true,
           deletedAt: new Date(),
@@ -661,12 +661,12 @@ async function applyWorkoutSetChange(
     case 'insert':
     case 'update':
       if (id) {
-        await withDB((db) => db.workoutSets.put({ ...camelCaseData, id }))
+        await withDB((db) => db.workout_sets.put({ ...camelCaseData, id }))
       }
       break
     case 'delete':
       if (id) {
-        await withDB((db) => db.workoutSets.put({
+        await withDB((db) => db.workout_sets.put({
           id,
           deleted: true,
           deletedAt: new Date(),
@@ -700,7 +700,7 @@ async function markAsSynced(processedIds: Array<{
     return
   }
 
-  await db.transaction('rw', db.syncQueue, async () => {
+  await db.transaction('rw', db.sync_queue, async () => {
     for (const item of processedIds) {
       // Extract localId from nested structure or direct property
       let localId: string | undefined
@@ -720,11 +720,11 @@ async function markAsSynced(processedIds: Array<{
 
       if (localId !== undefined) {
         console.log('[Sync Engine] markAsSynced: Marking localId', localId, 'as synced')
-        await db.syncQueue.update(localId, { synced: true })
+        await db.sync_queue.update(localId, { synced: true })
       } else {
         // Simple case - item is the ID (UUID string)
         console.log('[Sync Engine] markAsSynced: Marking direct ID:', item)
-        await db.syncQueue.update(item as string, { synced: true })
+        await db.sync_queue.update(item as string, { synced: true })
       }
     }
   })
@@ -788,17 +788,17 @@ export async function performSync(): Promise<SyncResult> {
  * Get unsynced count
  */
 export async function getUnsyncedCount(): Promise<number> {
-  return (await withDB((db) => db.syncQueue.where('synced').equals(0).count())) ?? 0
+  return (await withDB((db) => db.sync_queue.where('synced').equals(0).count())) ?? 0
 }
 
 /**
  * Clear all synced records from queue
  */
 export async function clearSyncedRecords(): Promise<void> {
-  const synced = (await withDB((db) => db.syncQueue.filter(r => r.synced).toArray())) ?? []
+  const synced = (await withDB((db) => db.sync_queue.filter(r => r.synced).toArray())) ?? []
 
   // Delete each synced record individually (UUID strings)
   for (const record of synced) {
-    await withDB((db) => db.syncQueue.delete(record.id))
+    await withDB((db) => db.sync_queue.delete(record.id))
   }
 }

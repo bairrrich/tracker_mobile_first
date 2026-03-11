@@ -218,28 +218,29 @@ export default function FinancesPage() {
     <MainLayout>
       <div className="container py-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold">{t('title')}</h1>
             <p className="text-[var(--text-muted)]">{t('description')}</p>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="shrink-0">
               <Link href="/finances/reports">
                 <PieChart className="w-4 h-4 mr-2" />
-                {t('reports')}
+                <span className="hidden sm:inline">{t('reports')}</span>
               </Link>
             </Button>
-            <Button variant="outline" onClick={() => setShowImportDialog(true)}>
-              {t('importCSV')}
+            <Button variant="outline" onClick={() => setShowImportDialog(true)} className="shrink-0">
+              <span className="sm:hidden">📥</span>
+              <span className="hidden sm:inline">{t('importCSV')}</span>
             </Button>
-            <Button variant="outline" onClick={() => setAccountFormOpen(true)}>
-              <Wallet className="w-4 h-4 mr-2" />
-              {t('addAccount')}
+            <Button variant="outline" onClick={() => setAccountFormOpen(true)} className="shrink-0">
+              <Wallet className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t('addAccount')}</span>
             </Button>
-            <Button onClick={() => setTransactionFormOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              {t('addTransaction')}
+            <Button onClick={() => setTransactionFormOpen(true)} className="shrink-0">
+              <Plus className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t('addTransaction')}</span>
             </Button>
           </div>
         </div>
@@ -289,22 +290,23 @@ export default function FinancesPage() {
 
         {/* Tabs */}
         <Tabs defaultValue="transactions" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="transactions">{t('transactions')}</TabsTrigger>
-            <TabsTrigger value="accounts">{t('accounts')}</TabsTrigger>
-            <TabsTrigger value="categories">{t('categories')}</TabsTrigger>
-            <TabsTrigger value="budgets">{t('budgets')}</TabsTrigger>
-            <TabsTrigger value="recurring">{t('recurring.title')}</TabsTrigger>
-            <TabsTrigger value="goals">{t('goals.title')}</TabsTrigger>
+          <TabsList className="w-full overflow-x-auto justify-start">
+            <TabsTrigger value="transactions" className="shrink-0">{t('transactions')}</TabsTrigger>
+            <TabsTrigger value="accounts" className="shrink-0">{t('accounts')}</TabsTrigger>
+            <TabsTrigger value="categories" className="shrink-0">{t('categories')}</TabsTrigger>
+            <TabsTrigger value="budgets" className="shrink-0">{t('budgets')}</TabsTrigger>
+            <TabsTrigger value="recurring" className="shrink-0">{t('recurring.title')}</TabsTrigger>
+            <TabsTrigger value="goals" className="shrink-0">{t('goals.title')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="transactions" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex gap-2">
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-2 overflow-x-auto pb-2">
                 <Button
                   variant={transactionType === 'expense' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTransactionType('expense')}
+                  className="shrink-0"
                 >
                   {t('expense')}
                 </Button>
@@ -312,6 +314,7 @@ export default function FinancesPage() {
                   variant={transactionType === 'income' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTransactionType('income')}
+                  className="shrink-0"
                 >
                   {t('income')}
                 </Button>
@@ -319,15 +322,17 @@ export default function FinancesPage() {
                   variant={transactionType === 'transfer' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTransactionType('transfer')}
+                  className="shrink-0"
                 >
                   {t('transfer')}
                 </Button>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 overflow-x-auto pb-2">
                 <Button
                   variant={showSelectMode ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => { setShowSelectMode(!showSelectMode); setSelectedTransactions(new Set()) }}
+                  className="shrink-0"
                 >
                   {showSelectMode ? tc('cancel') : tc('select')}
                 </Button>
@@ -336,6 +341,7 @@ export default function FinancesPage() {
                     variant="destructive"
                     size="sm"
                     onClick={deleteSelectedTransactions}
+                    className="shrink-0"
                   >
                     {tc('delete')} ({selectedTransactions.size})
                   </Button>
@@ -463,9 +469,9 @@ export default function FinancesPage() {
           </TabsContent>
 
           <TabsContent value="categories">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
               <h3 className="text-lg font-semibold">{t('categories')}</h3>
-              <Button size="sm" onClick={() => setCategoryFormOpen(true)}>
+              <Button size="sm" onClick={() => setCategoryFormOpen(true)} className="shrink-0">
                 <Plus className="w-4 h-4 mr-2" />
                 {t('addCategory')}
               </Button>
@@ -489,10 +495,10 @@ export default function FinancesPage() {
                         >
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{category.icon}</span>
-                            <span>{category.name}</span>
+                            <span className="truncate">{category.name}</span>
                           </div>
                           {!category.isPredefined && (
-                            <div className="flex gap-1">
+                            <div className="flex gap-1 shrink-0">
                               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditCategory(category)}>✏️</Button>
                               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteCategory(category.id)}>🗑️</Button>
                             </div>
@@ -521,10 +527,10 @@ export default function FinancesPage() {
                         >
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{category.icon}</span>
-                            <span>{category.name}</span>
+                            <span className="truncate">{category.name}</span>
                           </div>
                           {!category.isPredefined && (
-                            <div className="flex gap-1">
+                            <div className="flex gap-1 shrink-0">
                               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditCategory(category)}>✏️</Button>
                               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteCategory(category.id)}>🗑️</Button>
                             </div>
@@ -538,9 +544,9 @@ export default function FinancesPage() {
           </TabsContent>
 
           <TabsContent value="budgets">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
               <h3 className="text-lg font-semibold">{t('budgets')}</h3>
-              <Button size="sm" onClick={() => setBudgetFormOpen(true)}>
+              <Button size="sm" onClick={() => setBudgetFormOpen(true)} className="shrink-0">
                 <Plus className="w-4 h-4 mr-2" />
                 {t('addBudget')}
               </Button>
@@ -571,9 +577,9 @@ export default function FinancesPage() {
           </TabsContent>
 
           <TabsContent value="recurring">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
               <h3 className="text-lg font-semibold">{t('recurring.title')}</h3>
-              <Button size="sm" onClick={() => setRecurringFormOpen(true)}>
+              <Button size="sm" onClick={() => setRecurringFormOpen(true)} className="shrink-0">
                 <Plus className="w-4 h-4 mr-2" />
                 {t('recurring.add')}
               </Button>
@@ -606,9 +612,9 @@ export default function FinancesPage() {
           </TabsContent>
 
           <TabsContent value="goals">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
               <h3 className="text-lg font-semibold">{t('goals.title')}</h3>
-              <Button size="sm" onClick={() => setGoalFormOpen(true)}>
+              <Button size="sm" onClick={() => setGoalFormOpen(true)} className="shrink-0">
                 <Plus className="w-4 h-4 mr-2" />
                 {t('goals.add')}
               </Button>
